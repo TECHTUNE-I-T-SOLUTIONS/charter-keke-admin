@@ -25,7 +25,6 @@ export const metadata: Metadata = {
     description: "The easiest way for students to share rides. Safe, affordable, and community-driven.",
     type: "website",
   },
-    generator: 'v0.app'
 }
 
 export const viewport: Viewport = {
@@ -45,6 +44,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#b8507b" />
+      </head>
       <body className={`${playfair.className} font-serif antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange={false}>
           <AuthProvider>
