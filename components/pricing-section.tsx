@@ -38,12 +38,12 @@ export function PricingSection() {
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Simple,{" "}
-            <span className="bg-gradient-to-r from-[#b8507b] to-[#4353a4] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#052659] to-[#4353a4] bg-clip-text dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#CCD0E7FF] text-transparent">
               Transparent
             </span>{" "}
             Pricing
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto dark:text-gray-100">
             No hidden fees. Pay only for your seat. The more you share, the more you save.
           </p>
         </div>
@@ -59,13 +59,13 @@ export function PricingSection() {
               }`}
             >
               {option.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-[#b8507b] to-[#4353a4] text-white text-sm font-medium">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-[#052659] to-[#4353a4] text-white text-sm font-medium">
                   Most Popular
                 </div>
               )}
 
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#b8507b] to-[#4353a4] flex items-center justify-center text-white">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#052659] to-[#4353a4] flex items-center justify-center text-white">
                   <option.icon className="h-7 w-7" />
                 </div>
                 <div>
@@ -93,7 +93,7 @@ export function PricingSection() {
               <Link href="/register">
                 <Button
                   className={`w-full ${
-                    option.popular ? "bg-gradient-to-r from-[#b8507b] to-[#4353a4] text-white hover:opacity-90" : ""
+                    option.popular ? "bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#9EA5B1FF] text-white dark:hover:text-white hover:opacity-90" : ""
                   }`}
                   variant={option.popular ? "default" : "outline"}
                   size="lg"
@@ -106,9 +106,9 @@ export function PricingSection() {
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground dark:text-gray-100">
             Have a referral code?{" "}
-            <Link href="/register" className="text-primary hover:underline">
+            <Link href="/register" className="text-primary hover:underline dark:text-secondary/light">
               Get 5% off your first ride!
             </Link>
           </p>

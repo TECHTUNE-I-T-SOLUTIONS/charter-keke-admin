@@ -45,7 +45,7 @@ export function Navbar() {
           <motion.div whileHover={{ rotate: 10 }} transition={{ type: "spring", stiffness: 300 }}>
             <Image src="/images/easely-06.png" alt="EASELY Logo" width={40} height={40} className="w-10 h-10" />
           </motion.div>
-          <span className="text-xl font-bold bg-gradient-to-r from-[#b8507b] to-[#4353a4] bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
+          <span className="text-xl font-bold bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#F5F9FFFF] bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
             EASELY
           </span>
         </Link>
@@ -61,7 +61,7 @@ export function Navbar() {
             >
               <Link
                 href={link.href}
-                className="text-muted-foreground hover:text-foreground transition-colors duration-300 text-sm font-medium relative group"
+                className="text-[#052659] dark:text-[#C1E8FF] hover:text-foreground transition-colors duration-300 text-sm font-medium relative group"
               >
                 {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full" />
@@ -89,7 +89,7 @@ export function Navbar() {
             </Button>
           </Link>
           <Link href="/auth/register">
-            <Button className="bg-gradient-to-r from-[#b8507b] to-[#4353a4] text-white hover:opacity-90 transition-opacity">
+            <Button className="bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#37455AFF] dark:to-[#646D79FF] text-white hover:opacity-90 transition-opacity">
               Get Started
             </Button>
           </Link>
@@ -141,14 +141,14 @@ export function Navbar() {
                 <div className="flex flex-col gap-4 mt-4">
                   <SheetClose asChild>
                     <Link href="/auth/login">
-                      <Button variant="outline" className="w-full bg-transparent">
+                      <Button variant="outline" className="w-full bg-[#C1E8FF] dark:bg-[#052659] text-black dark:text-white hover:opacity-90 transition-opacity">
                         Login
                       </Button>
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
                     <Link href="/auth/register">
-                      <Button className="w-full bg-gradient-to-r from-[#b8507b] to-[#4353a4] text-white">
+                      <Button className="w-full bg-gradient-to-r from-[#C1E8FF] to-[#919DAFFF] text-[#052659] dark:text-black hover:opacity-60 transition-opacity">
                         Get Started
                       </Button>
                     </Link>

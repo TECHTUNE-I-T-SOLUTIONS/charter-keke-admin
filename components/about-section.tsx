@@ -32,35 +32,35 @@ export function AboutSection() {
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             About{" "}
-            <span className="bg-gradient-to-r from-[#b8507b] to-[#4353a4] bg-clip-text text-transparent">EASELY</span>
+            <span className="bg-gradient-to-r from-[#052659] to-[#4353a4] bg-clip-text text-transparent dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#CCD0E7FF]">EASELY</span>
           </h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-lg dark:text-gray-100">
             We started EASELY with a simple idea: students shouldn&apos;t struggle with expensive transportation. Based
             in Ilorin, Nigeria, we&apos;re on a mission to transform how students commute - making it easier, cheaper,
             and more connected.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 text-center justify-center">
           {values.map((value) => (
             <div
               key={value.title}
-              className="p-6 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 group"
+              className="p-6 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 group flex flex-col items-center"
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#b8507b] to-[#4353a4] flex items-center justify-center mb-4 text-white group-hover:scale-110 transition-transform">
-                <value.icon className="h-6 w-6" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#052659] to-[#4353a4] flex items-center justify-center mb-4 text-white group-hover:scale-110 transition-transform mx-auto">
+          <value.icon className="h-6 w-6" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">{value.title}</h3>
-              <p className="text-muted-foreground">{value.description}</p>
+              <h3 className="text-xl font-semibold mb-2 text-center">{value.title}</h3>
+              <p className="text-muted-foreground dark:text-gray-100 text-center">{value.description}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-16 p-8 rounded-2xl bg-gradient-to-r from-[#b8507b]/10 to-[#4353a4]/10 border border-primary/20">
+        <div className="mt-16 p-8 rounded-2xl bg-gradient-to-r from-[#052659]/10 to-[#4353a4]/10 border border-primary/20">
           <div className="text-center">
             <h3 className="text-2xl font-bold mb-4">We&apos;re Just Getting Started</h3>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              As a new platform, we&apos;re growing every day. Join us on this journey to revolutionize student
+            <p className="text-muted-foreground dark:text-gray-100 max-w-2xl mx-auto">
+              We&apos;re growing every day. Join us on this journey to revolutionize student
               transportation in Nigeria. Your feedback shapes our future!
             </p>
           </div>

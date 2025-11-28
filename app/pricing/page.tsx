@@ -59,7 +59,7 @@ export default function PricingPage() {
               </span>{" "}
               Prices
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-muted-foreground dark:text-white ">
               We keep it simple. Pay per seat, share with others, save money.
             </p>
           </motion.div>
@@ -89,12 +89,12 @@ export default function PricingPage() {
                   className={`relative overflow-hidden ${route.popular ? "border-primary shadow-lg shadow-primary/20" : ""}`}
                 >
                   {route.popular && (
-                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-bl-lg">
+                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground dark:text-white text-xs px-3 py-1 rounded-bl-lg">
                       Popular
                     </div>
                   )}
                   <CardHeader className="text-center pb-2">
-                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground dark:text-white mb-2">
                       <MapPin className="h-4 w-4 text-primary" />
                       <span>{route.from}</span>
                       <ArrowRight className="h-4 w-4" />
@@ -102,7 +102,7 @@ export default function PricingPage() {
                     </div>
                     <CardTitle className="text-4xl font-bold">
                       ₦{route.price}
-                      <span className="text-lg font-normal text-muted-foreground">/seat</span>
+                      <span className="text-lg font-normal text-muted-foreground dark:text-white">/seat</span>
                     </CardTitle>
                     <CardDescription className="flex items-center justify-center gap-1">
                       <Clock className="h-4 w-4" />
@@ -128,7 +128,7 @@ export default function PricingPage() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center text-sm text-muted-foreground mt-6"
+            className="text-center text-sm text-muted-foreground dark:text-white mt-6"
           >
             * Prices may vary during peak hours. Return trips available at same rates.
           </motion.p>
@@ -140,7 +140,7 @@ export default function PricingPage() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="text-3xl font-bold mb-4">What You Get</h2>
-                <p className="text-muted-foreground mb-8">
+                <p className="text-muted-foreground dark:text-white mb-8">
                   EASELY offers the best value for UNILORIN students. Here's what's included with every ride.
                 </p>
                 <ul className="space-y-4">
@@ -172,7 +172,7 @@ export default function PricingPage() {
                   <Users className="h-6 w-6 text-primary" />
                   <span className="text-2xl font-bold">Share & Save</span>
                 </div>
-                <p className="text-muted-foreground mb-6">
+                <p className="text-muted-foreground dark:text-white mb-6">
                   When you share a ride with 8 other  students, you all pay just ₦600 each instead of ₦6300 for a private
                   ride!
                 </p>
@@ -193,7 +193,7 @@ export default function PricingPage() {
             className="text-center"
           >
             <h2 className="text-3xl font-bold mb-4">Ready to Save on Your Commute?</h2>
-            <p className="text-muted-foreground mb-8">
+            <p className="text-muted-foreground dark:text-white mb-8">
               Join EASELY today and start sharing rides with fellow students.
             </p>
             <Link href="/auth/register">

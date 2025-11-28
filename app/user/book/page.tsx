@@ -127,21 +127,21 @@ function BookRideContent() {
                   <div className="space-y-3">
                     <Label className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-primary" />
-                      Number of Seats
+                      Number of Seats (kindly note that your number of seats will determine the type of vehicle you will be matched with)
                     </Label>
-                    <RadioGroup value={passengers} onValueChange={setPassengers} className="flex gap-2">
-                      {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
-                        <div key={num}>
-                          <RadioGroupItem value={num} id={`passengers-${num}`} className="peer sr-only" />
-                          <Label
-                            htmlFor={`passengers-${num}`}
-                            className="flex items-center justify-center w-14 h-14 rounded-xl border-2 border-muted bg-background/50 cursor-pointer transition-all peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:border-primary/50"
-                          >
-                            <span className="font-bold text-lg text-foreground">{num}</span>
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
+                        <RadioGroup value={passengers} onValueChange={setPassengers} className="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-6 gap-2">
+                          {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
+                            <div key={num}>
+                              <RadioGroupItem value={num} id={`passengers-${num}`} className="peer sr-only" />
+                              <Label
+                                htmlFor={`passengers-${num}`}
+                                className="flex items-center justify-center w-14 h-14 rounded-xl border-2 border-muted bg-background/50 cursor-pointer transition-all peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 hover:border-primary/50"
+                              >
+                                <span className="font-bold text-lg text-foreground">{num}</span>
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
                   </div>
 
                   {/* Total Price */}

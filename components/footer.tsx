@@ -55,11 +55,11 @@ export function Footer() {
               <motion.div whileHover={{ rotate: 10 }} transition={{ type: "spring", stiffness: 300 }}>
                 <Image src="/images/easely-06.png" alt="EASELY Logo" width={48} height={48} />
               </motion.div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-[#b8507b] to-[#4353a4] bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#F5F9FFFF] bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
                 EASELY
               </span>
             </Link>
-            <p className="text-muted-foreground max-w-sm">
+            <p className="text-muted-foreground dark:text-white max-w-sm">
               The official ride-sharing platform for University of Ilorin students. Safe, affordable, and
               community-driven.
             </p>
@@ -73,24 +73,24 @@ export function Footer() {
             {/* Contact Info */}
             <div className="space-y-3">
               <a
-                href="mailto:easely@gmail.com"
-                className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors group"
+                href="mailto:ride.easely@gmail.com"
+                className="flex items-center gap-3 text-muted-foreground dark:text-white hover:text-foreground transition-colors group"
               >
                 <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                   <Mail className="h-4 w-4 text-primary" />
                 </div>
-                <span>easely@gmail.com</span>
+                <span>ride.easely@gmail.com</span>
               </a>
               <a
                 href="tel:+2348083191228"
-                className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors group"
+                className="flex items-center gap-3 text-muted-foreground dark:text-white hover:text-foreground transition-colors group"
               >
                 <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                   <Phone className="h-4 w-4 text-primary" />
                 </div>
                 <span>+234 808 319 1228</span>
               </a>
-              <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="flex items-center gap-3 text-muted-foreground dark:text-white">
                 <div className="p-2 rounded-lg bg-primary/10">
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
@@ -107,7 +107,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group dark:text-white"
                   >
                     <span className="w-0 h-0.5 bg-primary transition-all group-hover:w-3" />
                     {link.label}
@@ -125,7 +125,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group dark:text-white"
                   >
                     <span className="w-0 h-0.5 bg-primary transition-all group-hover:w-3" />
                     {link.label}
@@ -143,7 +143,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group"
+                    className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group dark:text-white"
                   >
                     <span className="w-0 h-0.5 bg-primary transition-all group-hover:w-3" />
                     {link.label}
@@ -155,8 +155,8 @@ export function Footer() {
 
           {/* Newsletter */}
           <div>
-            <h4 className="font-semibold mb-6 text-foreground">Stay Updated</h4>
-            <p className="text-sm text-muted-foreground mb-4">Get the latest updates and offers.</p>
+            <h4 className="font-semibold mb-6 text-foreground dark:text-white">Stay Updated</h4>
+            <p className="text-sm text-muted-foreground dark:text-white mb-4">Get the latest updates and offers.</p>
             <form onSubmit={handleSubscribe} className="space-y-3">
               <div className="relative">
                 <Input
@@ -164,7 +164,7 @@ export function Footer() {
                   placeholder="Your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-background/50 border-primary/20 pr-12"
+                  className="bg-background/50 border-primary/20 pr-12 dark:bg-background/90 dark:border-primary/80"
                 />
                 <Button
                   type="submit"
@@ -198,7 +198,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-sm dark:text-white">
             &copy; {new Date().getFullYear()} EASELY. All rights reserved.
           </p>
         </div>
