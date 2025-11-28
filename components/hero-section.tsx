@@ -9,59 +9,13 @@ import { ArrowRight, Shield, Users, Wallet, MapPin, GraduationCap } from "lucide
 
 export function HeroSection() {
   // Typing animation and mouse tracking state
-  const headlineRef = React.useRef<HTMLSpanElement>(null);
+  // const headlineRef = React.useRef<HTMLSpanElement>(null);
 
   // Typing animation and mouse tracking state
-  const words = ["Your Campus Ride,", "Made Easy"];
-  const [displayed, setDisplayed] = useState("");
-  const [wordIndex, setWordIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMouse({ x: e.clientX, y: e.clientY });
-      if (headlineRef.current) {
-        headlineRef.current.style.transform = `rotate(${(e.clientX - window.innerWidth / 2) / 100}deg) scale(${1 + (e.clientY - window.innerHeight / 2) / 2000})`;
-      }
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    const currentWord = words[wordIndex];
-    if (!isDeleting && charIndex <= currentWord.length) {
-      setDisplayed(currentWord.slice(0, charIndex));
-      timeout = setTimeout(() => setCharIndex(charIndex + 1), 80);
-    } else if (isDeleting && charIndex >= 0) {
-      setDisplayed(currentWord.slice(0, charIndex));
-      timeout = setTimeout(() => setCharIndex(charIndex - 1), 40);
-    } else if (!isDeleting && charIndex > currentWord.length) {
-      timeout = setTimeout(() => setIsDeleting(true), 1000);
-    } else if (isDeleting && charIndex < 0) {
-      setIsDeleting(false);
-      setWordIndex((wordIndex + 1) % words.length);
-      timeout = setTimeout(() => setCharIndex(0), 500);
-    }
-    return () => clearTimeout(timeout);
-  }, [charIndex, isDeleting, wordIndex]);
-
-  // Mouse tracking effect for headline
-  useEffect(() => {
-    const el = document.getElementById("headline-animated-text");
-    if (el) {
-      el.style.transform = `rotate(${(mouse.x - window.innerWidth / 2) / 100}deg) scale(${1 + (mouse.y - window.innerHeight / 2) / 2000})`;
-    }
-  }, [mouse]);
-
-  const showText = charIndex > 0 || isDeleting;
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#b8507b]/10 via-transparent to-[#4353a4]/10 dark:from-[#b8507b]/5 dark:to-[#4353a4]/5" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#052659]/10 via-transparent to-[#4353a4]/10 dark:from-[#C1E8FF]/5 dark:to-[#4353a4]/5" />
 
       <div className="container mx-auto px-4 py-12 md:py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -78,25 +32,9 @@ export function HeroSection() {
             </motion.div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-balance">
-              <span
-                className="headline-animated"
-                ref={headlineRef}
-                style={{ minHeight: "1em", display: "inline-block", width: `${Math.max(...["Your Campus Ride,", "Made Easy"].map(w => w.length))}ch` }}
-              >
-                {charIndex === 0 && !showText ? (
-                  <span style={{ visibility: "hidden" }}>{"W".repeat(Math.max(...["Your Campus Ride,", "Made Easy"].map(w => w.length)))}</span>
-                ) : (
-                  <>
-                    {displayed}
-                    <span className="bg-gradient-to-r from-[#b8507b] to-[#4353a4] bg-clip-text text-transparent">
-                      {wordIndex === 1 && !isDeleting ? "|" : ""}
-                    </span>
-                  </>
-                )}
-              </span>
+              Your Campus Ride, Made Easy
             </h1>
-
-            <p className="text-lg text-muted-foreground mb-4 max-w-lg text-pretty">
+            <p className="text-lg text-muted-foreground dark:text-[#C1E8FF] mb-4 max-w-lg text-pretty">
               EASELY connects UNILORIN students for safe, affordable rides between campus and town. From Oke-Odo
               the School Park and back!
             </p>
@@ -114,30 +52,32 @@ export function HeroSection() {
             >
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-primary" />
-                <span className="text-muted-foreground">Oke-Odo / Tanke / Ilorin</span>
+                <span className="text-muted-foreground dark:text-white">Oke-Odo / Tanke / Ilorin</span>
               </div>
               <ArrowRight className="h-4 w-4 text-primary mx-2" />
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-secondary" />
-                <span className="text-muted-foreground">School Park (UNILORIN)</span>
+                <span className="text-muted-foreground dark:text-white">School Park (UNILORIN)</span>
               </div>
             </motion.div>
 
             <div className="flex flex-wrap gap-4 mb-12">
-              <Link href="/auth/register">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-[#b8507b] to-[#4353a4] text-white hover:opacity-90 group animate-pulse-glow"
-                >
-                  Start Riding
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Link href="/auth/register?type=driver">
-                <Button size="lg" variant="outline" className="border-2 bg-transparent">
-                  Become a Driver
-                </Button>
-              </Link>
+              <Button
+                asChild
+                size="lg"
+                className="bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#919DAFFF] dark:text-black text-white hover:opacity-90 group animate-pulse-glow"
+              >
+                <Link href="/auth/register">
+                  <> 
+                    Start Riding
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </>
+                </Link>
+              </Button>
+
+              <Button asChild size="lg" variant="outline" className="border-2 bg-transparent">
+                <Link href="/auth/register?type=driver">Become a Driver</Link>
+              </Button>
             </div>
 
             {/* Trust Badges */}
@@ -151,7 +91,7 @@ export function HeroSection() {
                 </div>
                 <div>
                   <p className="font-semibold text-sm">Verified</p>
-                  <p className="text-xs text-muted-foreground">Students</p>
+                  <p className="text-xs text-muted-foreground dark:text-white">Students</p>
                 </div>
               </motion.div>
               <motion.div
@@ -163,7 +103,7 @@ export function HeroSection() {
                 </div>
                 <div>
                   <p className="font-semibold text-sm">UNILORIN</p>
-                  <p className="text-xs text-muted-foreground">Community</p>
+                  <p className="text-xs text-muted-foreground dark:text-white">Community</p>
                 </div>
               </motion.div>
               <motion.div
@@ -175,7 +115,7 @@ export function HeroSection() {
                 </div>
                 <div>
                   <p className="font-semibold text-sm">₦700</p>
-                  <p className="text-xs text-muted-foreground">Per Seat</p>
+                  <p className="text-xs text-muted-foreground dark:text-white">Per Seat</p>
                 </div>
               </motion.div>
             </div>
@@ -190,7 +130,7 @@ export function HeroSection() {
           >
             <div className="relative">
               {/* Decorative circles */}
-              <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-br from-[#b8507b]/30 to-transparent rounded-full blur-3xl" />
+              <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-br from-[#052659]/30 to-transparent rounded-full blur-3xl" />
               <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-gradient-to-br from-[#4353a4]/30 to-transparent rounded-full blur-3xl" />
 
               <motion.div
@@ -228,7 +168,7 @@ export function HeroSection() {
                     {[1, 2, 3].map((i) => (
                       <div
                         key={i}
-                        className="w-8 h-8 rounded-full bg-gradient-to-br from-[#b8507b] to-[#4353a4] border-2 border-card flex items-center justify-center text-white text-xs"
+                        className="w-8 h-8 rounded-full bg-gradient-to-br from-[#052659] to-[#4353a4] border-2 border-card flex items-center justify-center text-white text-xs"
                       >
                         {i}
                       </div>
