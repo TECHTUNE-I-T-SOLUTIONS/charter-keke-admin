@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Shield, Users, Wallet, MapPin, GraduationCap } from "lucide-react"
@@ -12,10 +12,12 @@ export function HeroSection() {
   // const headlineRef = React.useRef<HTMLSpanElement>(null);
 
   // Typing animation and mouse tracking state
+  const router = useRouter()
+
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#052659]/10 via-transparent to-[#4353a4]/10 dark:from-[#C1E8FF]/5 dark:to-[#4353a4]/5" />
+      {/* Background gradient (non-interactive) */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#052659]/10 via-transparent to-[#4353a4]/10 dark:from-[#C1E8FF]/5 dark:to-[#4353a4]/5 pointer-events-none" />
 
       <div className="container mx-auto px-4 py-12 md:py-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -63,20 +65,21 @@ export function HeroSection() {
 
             <div className="flex flex-wrap gap-4 mb-12">
               <Button
-                asChild
                 size="lg"
-                className="bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#919DAFFF] dark:text-black text-white hover:opacity-90 group animate-pulse-glow"
+                className="bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#919DAFFF] dark:text-black text-white hover:opacity-90 group animate-pulse-glow relative z-20 pointer-events-auto"
+                onClick={() => router.push('/auth/register')}
               >
-                <Link href="/auth/register">
-                  <> 
-                    Start Riding
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </>
-                </Link>
+                Start Riding
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
 
-              <Button asChild size="lg" variant="outline" className="border-2 bg-transparent">
-                <Link href="/auth/register?type=driver">Become a Driver</Link>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 bg-transparent relative z-20 pointer-events-auto"
+                onClick={() => router.push('/auth/register?type=driver')}
+              >
+                Become a Driver
               </Button>
             </div>
 
