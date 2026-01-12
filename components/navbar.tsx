@@ -43,10 +43,10 @@ export function Navbar() {
       <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           <motion.div whileHover={{ rotate: 10 }} transition={{ type: "spring", stiffness: 300 }}>
-            <Image src="/images/easely-06.png" alt="EASELY Logo" width={40} height={40} className="w-10 h-10" />
+            <Image src="/charter keke.png" alt="Charter Keke" width={40} height={40} className="rounded-lg" />
           </motion.div>
           <span className="text-xl font-bold bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#F5F9FFFF] bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-            EASELY
+            CHARTER KEKE
           </span>
         </Link>
 

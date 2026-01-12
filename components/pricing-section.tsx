@@ -6,13 +6,13 @@ import Link from "next/link"
 
 const pricingOptions = [
   {
-    title: "4-Seater Car",
+    title: "Standard Keke",
     price: "₦700",
     unit: "per seat",
     total: "₦3,500 total",
     features: [
       "Up to 5 passengers",
-      "Comfortable sedan ride",
+      "Comfortable keke ride",
       "Real-time tracking",
       "In-app messaging",
       "Secure payments",
@@ -21,7 +21,7 @@ const pricingOptions = [
     popular: true,
   },
   {
-    title: "8-Seater Bus",
+    title: "Premium Keke",
     price: "₦600",
     unit: "per seat",
     total: "₦5,400 total",

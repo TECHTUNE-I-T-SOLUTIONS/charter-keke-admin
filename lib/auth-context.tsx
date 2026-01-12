@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 export type UserRole = "user" | "driver" | "admin"
 
@@ -15,6 +16,7 @@ export interface User {
   referralCode: string
   referredBy?: string
   createdAt: string
+  profilePictureUrl?: string
 }
 
 interface AuthContextType {
@@ -44,23 +46,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const router = useRouter()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
-    // Check for existing session
-    const checkSession = async () => {
+    // First, check NextAuth session
+    if (status === "authenticated" && session?.user) {
+      const nextAuthUser: User = {
+        id: (session.user as any).id || "",
+        email: session.user.email || "",
+        phone: (session.user as any).phone,
+        firstName: (session.user as any).firstName || "",
+        lastName: (session.user as any).lastName || "",
+        role: (session.user as any).role || "user",
+        referralCode: (session.user as any).referralCode || "",
+        referredBy: (session.user as any).referredBy,
+        profilePictureUrl: (session.user as any).profilePictureUrl || "",
+        createdAt: (session.user as any).createdAt || new Date().toISOString(),
+      }
+      setUser(nextAuthUser)
+      localStorage.setItem("charterkeke_user", JSON.stringify(nextAuthUser))
+      setIsLoading(false)
+    } else if (status === "unauthenticated") {
+      // Check for existing session in localStorage as fallback
       try {
-        const storedUser = localStorage.getItem("easely_user")
+        const storedUser = localStorage.getItem("charterkeke_user")
         if (storedUser) {
           setUser(JSON.parse(storedUser))
+        } else {
+          setUser(null)
         }
       } catch (error) {
         console.error("Session check failed:", error)
-      } finally {
-        setIsLoading(false)
+        setUser(null)
       }
+      setIsLoading(false)
     }
-    checkSession()
-  }, [])
+    // status === "loading" - keep isLoading true
+  }, [session, status])
 
   const generateReferralCode = () => {
     return `EASE${Math.random().toString(36).substring(2, 8).toUpperCase()}`
@@ -74,34 +96,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Demo users for testing
       const demoUsers: Record<string, User> = {
-        "user@easely.com": {
+        "user@charterkeke.com": {
           id: "1",
-          email: "user@easely.com",
+          email: "user@charterkeke.com",
           phone: "+2348083191228",
           firstName: "Demo",
-          lastName: "User",
+          lastName: "Rider",
           role: "user",
-          referralCode: "EASEUSER01",
+          referralCode: "CKRIDER01",
           createdAt: new Date().toISOString(),
         },
-        "driver@easely.com": {
+        "driver@charterkeke.com": {
           id: "2",
-          email: "driver@easely.com",
+          email: "driver@charterkeke.com",
           phone: "+2348083191229",
           firstName: "Demo",
           lastName: "Driver",
           role: "driver",
-          referralCode: "EASEDRV01",
+          referralCode: "CKDRIVER01",
           createdAt: new Date().toISOString(),
         },
-        "admin@easely.com": {
+        "admin@charterkeke.com": {
           id: "3",
-          email: "admin@easely.com",
+          email: "admin@charterkeke.com",
           phone: "+2348083191230",
           firstName: "Demo",
           lastName: "Admin",
           role: "admin",
-          referralCode: "EASEADM01",
+          referralCode: "CKADMIN01",
           createdAt: new Date().toISOString(),
         },
       }
@@ -110,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (foundUser && password === "demo123") {
         setUser(foundUser)
-        localStorage.setItem("easely_user", JSON.stringify(foundUser))
+        localStorage.setItem("charterkeke_user", JSON.stringify(foundUser))
         return { success: true }
       }
 
@@ -141,7 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setUser(newUser)
-      localStorage.setItem("easely_user", JSON.stringify(newUser))
+      localStorage.setItem("charterkeke_user", JSON.stringify(newUser))
       return { success: true }
     } catch (error) {
       return { success: false, error: "Registration failed. Please try again." }
@@ -155,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500))
       setUser(null)
-      localStorage.removeItem("easely_user")
+      localStorage.removeItem("charterkeke_user")
       setShowLogoutConfirm(false)
       router.push("/")
     } finally {

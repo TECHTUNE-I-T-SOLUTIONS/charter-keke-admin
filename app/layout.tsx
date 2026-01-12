@@ -2,11 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Playfair_Display } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/lib/auth-context"
-import { LogoutDialog } from "@/components/logout-dialog"
-import { Toaster } from "@/components/ui/sonner"
-import { NotificationPrompt } from "@/components/notification-prompt"
+import { Providers } from "./providers"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -15,14 +11,18 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: "EASELY - Ride Sharing for Students",
+  title: "Charter Keke - Affordable Keke Rides in Lagos",
   description:
-    "The easiest way for students to share rides. Safe, affordable, and community-driven ride-sharing in Ilorin, Nigeria.",
-  keywords: ["ride sharing", "students", "Ilorin", "Nigeria", "campus rides", "affordable transport"],
-  authors: [{ name: "EASELY Team" }],
+    "Fast and affordable keke rides across Debari, Shomolu, and Yaba in Lagos, Nigeria. Book your ride in seconds.",
+  keywords: ["keke rides", "tricycle", "Lagos", "Nigeria", "affordable transport", "ride sharing"],
+  authors: [{ name: "Charter Keke Team" }],
+  icons: {
+    icon: "/charter keke.png",
+    apple: "/charter keke.png",
+  },
   openGraph: {
-    title: "EASELY - Ride Sharing for Students",
-    description: "The easiest way for students to share rides. Safe, affordable, and community-driven.",
+    title: "Charter Keke - Affordable Keke Rides in Lagos",
+    description: "Fast and affordable keke rides across Debari, Shomolu, and Yaba. Book your ride in seconds.",
     type: "website",
   },
 }
@@ -53,14 +53,9 @@ export default function RootLayout({
         <meta name="theme-color" content="#052659" />
       </head>
       <body className={`${playfair.className} font-serif antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange={false}>
-          <AuthProvider>
-            {children}
-            <LogoutDialog />
-            <NotificationPrompt />
-          </AuthProvider>
-          <Toaster richColors position="top-right" />
-        </ThemeProvider>
+        <Providers>
+          {children}
+        </Providers>
         <Analytics />
       </body>
     </html>

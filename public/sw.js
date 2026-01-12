@@ -1,5 +1,5 @@
-// EASELY Service Worker for Push Notifications
-const CACHE_NAME = "easely-v1"
+// Charter Keke Service Worker for Push Notifications
+const CACHE_NAME = "charterkeke-v1"
 const OFFLINE_URL = "/offline.html"
 
 // Install event
@@ -30,11 +30,11 @@ self.addEventListener("push", (event) => {
   console.log("[SW] Push received")
 
   let data = {
-    title: "EASELY",
+    title: "Charter Keke",
     body: "You have a new notification",
     icon: "/logo.png",
     badge: "/logo.png",
-    tag: "easely-notification",
+    tag: "charterkeke-notification",
     data: { url: "/" },
   }
 

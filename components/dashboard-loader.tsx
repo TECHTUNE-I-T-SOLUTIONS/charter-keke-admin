@@ -12,7 +12,7 @@ export function DashboardLoader() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <Image src="/images/easely-06.png" alt="EASELY" width={120} height={120} className="drop-shadow-2xl" />
+          <Image src="/charter keke.png" alt="Charter Keke" width={112} height={112} className="rounded-2xl drop-shadow-2xl" />
         </motion.div>
 
         <div className="flex flex-col items-center gap-4">

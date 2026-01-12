@@ -1,134 +1,182 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { useAuth } from "@/lib/auth-context"
+import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
 import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Wallet, TrendingUp, TrendingDown, ArrowUpRight } from "lucide-react"
+import { AnimatedSidebar } from "@/components/animated-sidebar"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Loader, TrendingUp, Calendar, AlertCircle } from "lucide-react"
+import { toast } from "sonner"
 
-function EarningsContent() {
-  const { user } = useAuth()
+export default function DriverEarnings() {
+  const { data: session } = useSession()
+  const [earnings, setEarnings] = useState<any>(null)
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [timeframe, setTimeframe] = useState("month")
 
-  const stats = [
-    { label: "Today", value: "₦0", change: "+0%", trend: "up" },
-    { label: "This Week", value: "₦0", change: "+0%", trend: "up" },
-    { label: "This Month", value: "₦0", change: "+0%", trend: "up" },
-    { label: "Total Earnings", value: "₦0", change: "", trend: "neutral" },
-  ]
+  useEffect(() => {
+    if (!session?.user) return
+
+    const fetchEarnings = async () => {
+      try {
+        const response = await fetch(
+          `/api/driver/earnings?timeframe=${timeframe}`
+        )
+        const data = await response.json()
+        setEarnings(data.earnings)
+        setTransactions(data.transactions || [])
+      } catch (error) {
+        console.error("Failed to fetch earnings:", error)
+        toast.error("Failed to load earnings")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchEarnings()
+  }, [session?.user, timeframe])
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
+    <ProtectedRoute>
+      <div className="flex min-h-screen bg-background">
+        <AnimatedSidebar />
 
-      <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
-        <div className="p-4 md:p-6 lg:p-8 space-y-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Earnings</h1>
-            <p className="text-muted-foreground mt-1">Track your income and payout history</p>
-          </motion.div>
+        <main className="flex-1 lg:pl-0 pt-16 lg:pt-0 pb-24 lg:pb-0">
+          <div className="p-4 md:p-6 lg:p-8 space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold">Earnings</h1>
+              <p className="text-muted-foreground mt-2">Track your income</p>
+            </div>
 
-          {/* Earnings Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-          >
-            {stats.map((stat) => (
-              <Card key={stat.label} className="bg-card/50 backdrop-blur border-primary/10">
-                <CardContent className="p-4 md:p-6">
-                  <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                  <p className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</p>
-                  {stat.change && (
-                    <div
-                      className={`flex items-center gap-1 mt-2 text-sm ${stat.trend === "up" ? "text-emerald-500" : "text-red-500"}`}
-                    >
-                      {stat.trend === "up" ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                      {stat.change}
+            {/* Earnings Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground font-medium">
+                        Net Earnings This {timeframe}
+                      </p>
+                      <p className="text-3xl font-bold mt-2">
+                        ₦{(earnings?.driver_net_amount || 0).toLocaleString()}
+                      </p>
                     </div>
-                  )}
+                    <TrendingUp className="h-8 w-8 text-emerald-600" />
+                  </div>
                 </CardContent>
               </Card>
-            ))}
-          </motion.div>
 
-          {/* Balance & Payout */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="grid lg:grid-cols-2 gap-6"
-          >
-            <Card className="bg-gradient-to-br from-primary to-secondary text-white overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-full bg-white/20">
-                    <Wallet className="h-5 w-5" />
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground font-medium">
+                        Gross Earnings
+                      </p>
+                      <p className="text-3xl font-bold mt-2">
+                        ₦{(earnings?.total_ride_earnings || 0).toLocaleString()}
+                      </p>
+                    </div>
+                    <Calendar className="h-8 w-8 text-blue-600" />
                   </div>
-                  <span className="font-medium">Available Balance</span>
-                </div>
-                <p className="text-4xl font-bold mb-2">₦0.00</p>
-                <p className="text-sm opacity-80 mb-6">Ready for payout</p>
-                <Button className="bg-white text-primary hover:bg-white/90">
-                  Request Payout
-                  <ArrowUpRight className="h-4 w-4 ml-2" />
-                </Button>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card className="bg-card/50 backdrop-blur border-primary/10">
-              <CardHeader>
-                <CardTitle>Payout Settings</CardTitle>
-                <CardDescription>Configure your payout preferences</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 rounded-lg bg-muted/30 border border-primary/10">
-                  <p className="text-sm text-muted-foreground mb-1">Bank Account</p>
-                  <p className="font-medium text-foreground">Not configured</p>
-                </div>
-                <Button variant="outline" className="w-full border-primary/20 hover:bg-primary/10 bg-transparent">
-                  Add Bank Account
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Transaction History */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <Card className="bg-card/50 backdrop-blur border-primary/10">
-              <CardHeader>
-                <CardTitle>Transaction History</CardTitle>
-                <CardDescription>Your earnings and payouts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="p-4 rounded-full bg-muted/50 mb-4">
-                    <Wallet className="h-8 w-8 text-muted-foreground" />
+              <Card>
+                <CardContent className="p-6">
+                  <div>
+                    <p className="text-sm text-muted-foreground font-medium">
+                      Completed Rides
+                    </p>
+                    <p className="text-3xl font-bold mt-2">
+                      {earnings?.total_rides_accepted || 0}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Platform Fee (13%): ₦{(earnings?.total_platform_fee || 0).toLocaleString()}
+                    </p>
                   </div>
-                  <h3 className="font-medium text-foreground mb-1">No transactions yet</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Your earning history will appear here after your first ride.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-      </main>
-    </div>
-  )
-}
+                </CardContent>
+              </Card>
+            </div>
 
-export default function EarningsPage() {
-  return (
-    <ProtectedRoute allowedRoles={["driver"]}>
-      <EarningsContent />
+            {/* Time Period Selector */}
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Filter by Period</h2>
+              <Tabs defaultValue="month" onValueChange={setTimeframe}>
+                <TabsList className="grid w-full max-w-md grid-cols-5">
+                  <TabsTrigger value="day">Day</TabsTrigger>
+                  <TabsTrigger value="week">Week</TabsTrigger>
+                  <TabsTrigger value="month">Month</TabsTrigger>
+                  <TabsTrigger value="year">Year</TabsTrigger>
+                  <TabsTrigger value="all">All Time</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
+            {/* Transactions */}
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Recent Transactions</h2>
+
+              {transactions.length === 0 ? (
+                <Card className="p-8 text-center">
+                  <AlertCircle className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-muted-foreground">No transactions yet</p>
+                </Card>
+              ) : (
+                <div className="space-y-2">
+                  {transactions.map((transaction) => (
+                    <Card key={transaction.id} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold capitalize">
+                            {transaction.source}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {transaction.description}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(transaction.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p
+                            className={`font-bold text-lg ${transaction.transaction_type === "credit" ? "text-emerald-600" : "text-red-600"}`}
+                          >
+                            {transaction.transaction_type === "credit"
+                              ? "+"
+                              : "-"}
+                            ₦{transaction.amount}
+                          </p>
+                          <Badge
+                            variant={
+                              transaction.status === "completed"
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
+                            {transaction.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
     </ProtectedRoute>
   )
 }

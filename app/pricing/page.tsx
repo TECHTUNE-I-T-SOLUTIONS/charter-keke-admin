@@ -11,15 +11,15 @@ import Link from "next/link"
 
 const routes = [
   {
-    from: "Oke-Odo",
-    to: "School Park",
+    from: "Debari",
+    to: "Shomolu",
     price: 700,
     duration: "15-20 min",
     popular: true,
   },
   {
-    from: "School Park",
-    to: "Oke-Odo",
+    from: "Shomolu",
+    to: "Yaba",
     price: 700,
     duration: "15-20 min",
     popular: false,
@@ -29,8 +29,8 @@ const routes = [
 const benefits = [
   "No hidden fees",
   "Pay per seat and per trip depending on your choice",
-  "Split costs with other students",
-  "5% off when a student uses your referral code",
+  "Split costs with other riders",
+  "5% off when a rider uses your referral code",
   "Secure Paystack payments",
   "Real-time price updates",
 ]
@@ -55,7 +55,7 @@ export default function PricingPage() {
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Simple,{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Student-Friendly
+                Rider-Friendly
               </span>{" "}
               Prices
             </h1>
@@ -141,7 +141,7 @@ export default function PricingPage() {
               <div>
                 <h2 className="text-3xl font-bold mb-4">What You Get</h2>
                 <p className="text-muted-foreground dark:text-white mb-8">
-                  EASELY offers the best value for UNILORIN students. Here's what's included with every ride.
+                  Charter Keke offers the best value for keke riders in Lagos. Here's what's included with every ride.
                 </p>
                 <ul className="space-y-4">
                   {benefits.map((benefit, index) => (
@@ -173,7 +173,7 @@ export default function PricingPage() {
                   <span className="text-2xl font-bold">Share & Save</span>
                 </div>
                 <p className="text-muted-foreground dark:text-white mb-6">
-                  When you share a ride with 8 other  students, you all pay just ₦600 each instead of ₦6300 for a private
+                  When you share a ride with 8 other keke riders, you all pay just ₦600 each instead of ₦6300 for a private
                   ride!
                 </p>
                 <div className="p-2 text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
@@ -194,7 +194,7 @@ export default function PricingPage() {
           >
             <h2 className="text-3xl font-bold mb-4">Ready to Save on Your Commute?</h2>
             <p className="text-muted-foreground dark:text-white mb-8">
-              Join EASELY today and start sharing rides with fellow students.
+              Join Charter Keke today and start sharing rides with fellow riders.
             </p>
             <Link href="/auth/register">
               <Button size="lg" className="bg-gradient-to-r from-primary to-secondary group">

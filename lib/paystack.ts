@@ -73,3 +73,99 @@ export function formatNaira(amount: number): string {
     minimumFractionDigits: 0,
   }).format(amount)
 }
+
+// ============ BANK VERIFICATION FUNCTIONS ============
+
+export interface Bank {
+  id: number
+  name: string
+  code: string
+  longcode: string
+  gateway: string | null
+  pay_with_bank: boolean
+  active: boolean
+  country_id: number
+  is_deleted: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BankVerificationResponse {
+  status: boolean
+  message: string
+  data?: {
+    account_number: string
+    account_name: string
+    bank_id: number
+  }
+}
+
+/**
+ * Fetch list of all Nigerian banks from Paystack
+ * Filtered for active banks only
+ */
+export async function fetchBanksFromPaystack(): Promise<Bank[]> {
+  try {
+    const response = await fetch("https://api.paystack.co/bank", {
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || process.env.PAYSTACK_PUBLIC_KEY}`,
+      },
+    })
+
+    if (!response.ok) {
+      console.error("Failed to fetch banks from Paystack:", response.statusText)
+      return []
+    }
+
+    const data = await response.json()
+
+    if (data.status && data.data) {
+      return data.data.filter((bank: Bank) => bank.active)
+    }
+
+    return []
+  } catch (error) {
+    console.error("Error fetching banks:", error)
+    return []
+  }
+}
+
+/**
+ * Verify bank account details using Paystack
+ * Calls the backend API route for security
+ */
+export async function verifyBankAccount(
+  accountNumber: string,
+  bankCode: string
+) {
+  try {
+    const response = await fetch("/api/paystack/verify-account", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        accountNumber,
+        bankCode,
+      }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      return {
+        status: false,
+        message: data.error || "Verification failed",
+      }
+    }
+
+    return data
+  } catch (error) {
+    console.error("Error verifying bank account:", error)
+    return {
+      status: false,
+      message: "Unable to verify account at this time",
+    }
+  }
+}
+

@@ -45,13 +45,13 @@ type Conversations = {
 
 // Mock users and messages
 const mockUsers: User[] = [
-	{ id: 1, name: "Jane Doe", email: "jane@easely.com", avatar: "https://img.icons8.com/?size=100&id=23259&format=png&color=000000" },
-	{ id: 2, name: "John Smith", email: "john@easely.com", avatar: "https://img.icons8.com/?size=100&id=9ZAO_U356VVd&format=png&color=000000" },
-	{ id: 3, name: "Mary Lee", email: "mary@easely.com", avatar: "https://img.icons8.com/?size=100&id=108321&format=png&color=000000" },
+	{ id: 1, name: "Jane Doe", email: "jane@charterkeke.com", avatar: "https://img.icons8.com/?size=100&id=23259&format=png&color=000000" },
+	{ id: 2, name: "John Smith", email: "john@charterkeke.com", avatar: "https://img.icons8.com/?size=100&id=9ZAO_U356VVd&format=png&color=000000" },
+	{ id: 3, name: "Mary Lee", email: "mary@charterkeke.com", avatar: "https://img.icons8.com/?size=100&id=108321&format=png&color=000000" },
 ];
 const mockConversations: Conversations = {
 	1: [
-		{ from: "admin", text: "Hi Jane, welcome to EASELY!", time: "09:00" },
+		{ from: "admin", text: "Hi Jane, welcome to Charter Keke!", time: "09:00" },
 		{ from: "Jane Doe", text: "Thank you! Excited to use the platform.", time: "09:01" },
 	],
 	2: [

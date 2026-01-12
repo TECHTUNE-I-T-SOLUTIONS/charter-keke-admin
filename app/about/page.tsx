@@ -16,12 +16,12 @@ const values = [
   {
     icon: Users,
     title: "Community",
-    description: "Built by students, for students. We understand your needs.",
+    description: "Built by Lagosians, for keke riders. We understand your needs.",
   },
   {
     icon: Heart,
     title: "Affordability",
-    description: "Student budgets matter. We keep prices fair and transparent.",
+    description: "Keke rider budgets matter. We keep prices fair and transparent.",
   },
 ]
 
@@ -40,16 +40,15 @@ export default function AboutPage() {
             className="text-center max-w-3xl mx-auto"
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
-              <GraduationCap className="h-4 w-4" />
-              <span className="text-sm font-medium">For UNILORIN Students</span>
+              <Image src="/charter keke.png" alt="Charter Keke" width={24} height={24} />
+              <span className="text-sm font-medium">Keke Transport in Lagos</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               About{" "}
-              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">EASELY</span>
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Charter Keke</span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              We're on a mission to make campus transportation easier, safer, and more affordable for every UNILORIN
-              student.
+              We're on a mission to make keke rides easier, safer, and more affordable for every Lagosian.
             </p>
           </motion.div>
         </section>
@@ -61,17 +60,14 @@ export default function AboutPage() {
               <h2 className="text-3xl font-bold mb-6 text-center">Our Story</h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  EASELY was born out of a simple observation: getting to and from the University of Ilorin shouldn't be
-                  a daily struggle. We saw students waiting endlessly for buses, paying high prices for taxis, or
-                  missing classes because of transportation issues.
+                  Charter Keke was born out of a simple observation: getting around Lagos shouldn't be a daily struggle. We saw people waiting endlessly for rides, paying high prices, or missing commitments because of transportation issues.
                 </p>
                 <p>
-                  We created EASELY to connect students with student drivers, making rides more accessible, affordable,
-                  and safe. By sharing rides, we're not just saving money – we're building a stronger campus community.
+                  We created Charter Keke to connect riders with verified keke drivers, making rides more accessible, affordable,
+                  and safe. By sharing rides, we're not just saving money – we're building a stronger community.
                 </p>
                 <p>
-                  Today, EASELY serves the routes between Oke-Odo, Tanke, downtown Ilorin, and the School Park, helping
-                  students get where they need to go, when they need to be there.
+                  Today, Charter Keke serves routes across Debari, Shomolu, and Yaba, helping people get where they need to go, when they need to be there.
                 </p>
               </div>
             </motion.div>
@@ -82,8 +78,15 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                <Image src="/images/easely-06.png" alt="EASELY" width={800} height={800} className="drop-shadow-2xl" />
+              <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center overflow-hidden">
+                <video
+                  src="/Inside a Green Rickshaw in Sri Lanka - Free Stock Video Footage.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover rounded-3xl"
+                />
               </div>
               <div className="absolute -bottom-4 -right-4 p-4 rounded-2xl bg-card border border-border shadow-lg">
                 <p className="text-2xl font-bold text-primary">2025</p>
@@ -107,7 +110,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-2xl font-bold mb-4">Our Mission</h3>
               <p className="text-white/90">
-              To provide safe, affordable, and reliable transportation for every UNILORIN student, fostering a
+              To provide safe, affordable, and reliable transportation for every keke rider in Lagos, fostering a
               community of trust and shared responsibility.
               </p>
             </motion.div>
@@ -124,8 +127,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-2xl font-bold mb-4">Our Vision</h3>
               <p className="text-white/90">
-              To become the go-to transportation platform for Nigerian university students, expanding to campuses
-              across the country while maintaining our community-first approach.
+              To become the go-to transportation platform for Lagosians, expanding across the city with reliable keke services while maintaining our community-first approach.
               </p>
             </motion.div>
             </div>
@@ -173,10 +175,10 @@ export default function AboutPage() {
             className="bg-card border border-border rounded-3xl p-8 md:p-12 text-center"
           >
             <Lightbulb className="h-12 w-12 text-primary mx-auto mb-6" />
-            <h2 className="text-3xl font-bold mb-4">Based in Ilorin, Nigeria</h2>
+            <h2 className="text-3xl font-bold mb-4">Based in Lagos, Nigeria</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              EASELY is proudly based in Ilorin. We're local, we understand the challenges, and we're
-              committed to making campus life better for every student.
+              Charter Keke is proudly based in Lagos. We're local, we understand the challenges, and we're
+              committed to making keke transportation better for every rider.
             </p>
           </motion.div>
         </section>

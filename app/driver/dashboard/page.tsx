@@ -1,7 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Image from "next/image"
 import { motion } from "framer-motion"
+import { useSession } from "next-auth/react"
 import { useAuth } from "@/lib/auth-context"
 import { ProtectedRoute } from "@/components/protected-route"
 import { AnimatedSidebar } from "@/components/animated-sidebar"
@@ -9,50 +11,157 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Car, Wallet, Star, TrendingUp, Users, Clock, ArrowRight, Navigation, GraduationCap } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CharterKeKeMap } from "@/components/easely-map"
+import { Car, Wallet, Star, Clock, Users, Navigation, AlertCircle, Loader, MapPin } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 
 function DriverDashboardContent() {
-  const { user } = useAuth()
+  const { data: session } = useSession()
+  const { user: contextUser } = useAuth()
   const [isOnline, setIsOnline] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [driverData, setDriverData] = useState<any>(null)
+  const [activeRides, setActiveRides] = useState<any[]>([])
+  const [mapMarkers, setMapMarkers] = useState<any[]>([])
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
+
+  const user = session?.user
+    ? {
+        id: (session.user as any).id || "",
+        email: session.user.email || "",
+        phone: (session.user as any).phone,
+        firstName: (session.user as any).firstName || "Driver",
+        lastName: (session.user as any).lastName || "",
+        role: (session.user as any).role || "driver",
+      }
+    : contextUser
+
+  // Fetch driver details and active rides
+  useEffect(() => {
+    if (!user?.id) return
+
+    const fetchData = async () => {
+      try {
+        const [detailsRes, ridesRes, statusRes] = await Promise.all([
+          fetch("/api/driver/details"),
+          fetch("/api/driver/active-rides"),
+          fetch("/api/driver/status"),
+        ])
+
+        const detailsData = await detailsRes.json()
+        const ridesData = await ridesRes.json()
+        const statusData = await statusRes.json()
+
+        setDriverData(detailsData.driver)
+        setActiveRides(ridesData.rides || [])
+        setIsOnline(statusData.status === "online")
+
+        // Create map markers from active rides
+        const markers: any[] = []
+        if (detailsData.driver?.users?.profile_picture_url) {
+          markers.push({
+            id: "driver",
+            lat: 6.5244,
+            lng: 3.3792,
+            title: `${user.firstName} (You)`,
+            type: "driver",
+          })
+        }
+
+        ridesData.rides?.forEach((ride: any) => {
+          markers.push({
+            id: `pickup-${ride.id}`,
+            lat: 6.5244 + Math.random() * 0.05,
+            lng: 3.3792 + Math.random() * 0.05,
+            title: ride.pickup_zone,
+            description: `Pickup for ${ride.users?.first_name}`,
+            type: "pickup",
+          })
+
+          markers.push({
+            id: `destination-${ride.id}`,
+            lat: 6.5244 + Math.random() * 0.1,
+            lng: 3.3792 + Math.random() * 0.1,
+            title: ride.destination_zone,
+            description: "Destination",
+            type: "destination",
+          })
+        })
+
+        setMapMarkers(markers)
+      } catch (error) {
+        console.error("Failed to fetch data:", error)
+        toast.error("Failed to load dashboard data")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [user?.id])
 
   const handleOnlineToggle = (checked: boolean) => {
     setIsOnline(checked)
-    if (checked) {
-      toast.success("You're now online!", {
-        description: "You'll start receiving ride requests from UNILORIN students.",
+    fetch("/api/driver/status", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: checked ? "online" : "offline",
+      }),
+    })
+      .then(() => {
+        if (checked) {
+          toast.success("You're now online!", {
+            description: "You'll start receiving ride requests from Lagos riders.",
+          })
+        } else {
+          toast.info("You're now offline", {
+            description: "You won't receive any ride requests.",
+          })
+        }
       })
-    } else {
-      toast.info("You're now offline", {
-        description: "You won't receive any ride requests.",
+      .catch(() => {
+        setIsOnline(!checked)
+        toast.error("Failed to update status")
       })
-    }
   }
 
   const stats = [
     {
       label: "Today's Earnings",
-      value: "₦0",
+      value: `₦${driverData?.total_earnings || 0}`,
       icon: <Wallet className="h-5 w-5" />,
       color: "from-emerald-500 to-emerald-400",
     },
-    { label: "Rides Completed", value: "0", icon: <Car className="h-5 w-5" />, color: "from-primary to-primary/70" },
-    { label: "Rating", value: "5.0", icon: <Star className="h-5 w-5" />, color: "from-amber-500 to-amber-400" },
     {
-      label: "Hours Online",
-      value: "0h",
+      label: "Rides Completed",
+      value: `${driverData?.total_rides_completed || 0}`,
+      icon: <Car className="h-5 w-5" />,
+      color: "from-primary to-primary/70",
+    },
+    {
+      label: "Rating",
+      value: `${(driverData?.average_rating || 5.0).toFixed(1)}⭐`,
+      icon: <Star className="h-5 w-5" />,
+      color: "from-amber-500 to-amber-400",
+    },
+    {
+      label: "Active Rides",
+      value: `${activeRides.length}`,
       icon: <Clock className="h-5 w-5" />,
-      color: "from-secondary to-secondary/70",
+      color: "from-blue-500 to-blue-400",
     },
   ]
 
   const quickActions = [
     {
-      label: "View Requests",
+      label: "Active Rides",
       href: "/driver/rides",
       icon: <Car className="h-6 w-6" />,
       description: "See ride requests",
+      count: activeRides.length,
     },
     {
       label: "Earnings",
@@ -61,10 +170,10 @@ function DriverDashboardContent() {
       description: "Track your income",
     },
     {
-      label: "Navigation",
-      href: "/driver/rides",
+      label: "History",
+      href: "/driver/history",
       icon: <Navigation className="h-6 w-6" />,
-      description: "Start navigating",
+      description: "Ride history",
     },
     {
       label: "Referrals",
@@ -74,11 +183,22 @@ function DriverDashboardContent() {
     },
   ]
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader className="h-8 w-8 animate-spin mx-auto mb-2" />
+          <p className="text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
       <AnimatedSidebar />
 
-      <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
+      <main className="flex-1 lg:pl-0 pt-16 lg:pt-0 pb-32 md:pb-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
           {/* Header with Online Toggle */}
           <motion.div
@@ -89,11 +209,22 @@ function DriverDashboardContent() {
           >
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <GraduationCap className="h-5 w-5 text-primary" />
-                <span className="text-sm text-primary font-medium">UNILORIN Driver</span>
+                <Image
+                  src="/charter keke.png"
+                  alt="Charter Keke"
+                  width={24}
+                  height={24}
+                />
+                <span className="text-sm text-primary font-medium">
+                  Charter Keke Driver
+                </span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Welcome, {user?.firstName}!</h1>
-              <p className="text-muted-foreground mt-1">Serve UNILORIN students with safe rides.</p>
+              <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">
+                Welcome, {user?.firstName}!
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Serve Lagos riders with safe and reliable keke transport.
+              </p>
             </div>
 
             <motion.div whileHover={{ scale: 1.02 }}>
@@ -104,9 +235,14 @@ function DriverDashboardContent() {
                   <div
                     className={`relative w-3 h-3 rounded-full ${isOnline ? "bg-emerald-500" : "bg-muted-foreground"}`}
                   >
-                    {isOnline && <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping" />}
+                    {isOnline && (
+                      <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping" />
+                    )}
                   </div>
-                  <Label htmlFor="online-toggle" className="font-medium text-foreground">
+                  <Label
+                    htmlFor="online-toggle"
+                    className="font-medium text-foreground"
+                  >
                     {isOnline ? "Online" : "Offline"}
                   </Label>
                   <Switch
@@ -125,135 +261,134 @@ function DriverDashboardContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
           >
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                whileHover={{ y: -4, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <Card className="bg-card/50 backdrop-blur border-primary/10 overflow-hidden group hover:shadow-lg transition-all duration-300">
-                  <CardContent className="p-4 md:p-6">
-                    <div className={`inline-flex p-2 rounded-lg bg-gradient-to-r ${stat.color} text-white mb-3`}>
+            {stats.map((stat, idx) => (
+              <Card key={idx} className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground font-medium">
+                        {stat.label}
+                      </p>
+                      <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                    </div>
+                    <div
+                      className={`p-3 rounded-lg bg-gradient-to-br ${stat.color} text-white`}
+                    >
                       {stat.icon}
                     </div>
-                    <p className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
+          </motion.div>
+
+          {/* Active Rides & Map */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Tabs defaultValue="map" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="map">Live Map</TabsTrigger>
+                <TabsTrigger value="rides">
+                  Active Rides ({activeRides.length})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="map" className="space-y-4">
+                <CharterKeKeMap
+                  height="h-96"
+                  center={userLocation || [6.5244, 3.3792]}
+                  markers={mapMarkers}
+                  showRoute={false}
+                  showGeolocation={true}
+                  onLocationChange={(lat, lng) => setUserLocation([lat, lng])}
+                  className="mt-4"
+                />
+              </TabsContent>
+
+              <TabsContent value="rides" className="space-y-4">
+                {activeRides.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      No active rides right now. Go online to receive requests!
+                    </p>
+                  </Card>
+                ) : (
+                  <div className="space-y-3">
+                    {activeRides.map((ride) => (
+                      <Card
+                        key={ride.id}
+                        className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <h3 className="font-semibold">
+                              {ride.users?.first_name} {ride.users?.last_name}
+                            </h3>
+                            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                              <MapPin className="h-4 w-4" />
+                              <span>
+                                {ride.pickup_zone} → {ride.destination_zone}
+                              </span>
+                            </div>
+                            <p className="text-sm mt-2">
+                              Status:{" "}
+                              <span className="font-medium capitalize">
+                                {ride.status}
+                              </span>
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-lg">
+                              ₦{ride.fare_amount}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Earn: ₦{ride.driver_earnings}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </motion.div>
 
           {/* Quick Actions */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {quickActions.map((action, index) => (
-                <motion.div
-                  key={action.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
-                  whileHover={{ y: -4 }}
-                >
-                  <Link href={action.href}>
-                    <Card className="bg-card/50 backdrop-blur border-primary/10 hover:border-primary/30 hover:shadow-lg transition-all duration-300 cursor-pointer group h-full">
-                      <CardContent className="p-4 md:p-6 flex flex-col items-center text-center">
-                        <div className="p-3 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 text-primary group-hover:from-primary group-hover:to-secondary group-hover:text-white transition-all duration-300 mb-3">
-                          {action.icon}
-                        </div>
-                        <h3 className="font-semibold text-foreground">{action.label}</h3>
-                        <p className="text-xs text-muted-foreground mt-1">{action.description}</p>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Active Ride Requests */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Card className="bg-card/50 backdrop-blur border-primary/10">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Car className="h-5 w-5 text-primary" />
-                  Ride Requests
-                </CardTitle>
-                <CardDescription>
-                  {isOnline ? "Waiting for ride requests from students..." : "Go online to receive ride requests"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <motion.div
-                    animate={isOnline ? { scale: [1, 1.1, 1] } : {}}
-                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                    className={`p-4 rounded-full mb-4 ${isOnline ? "bg-emerald-500/10" : "bg-muted/50"}`}
-                  >
-                    <Car className={`h-8 w-8 ${isOnline ? "text-emerald-500" : "text-muted-foreground"}`} />
-                  </motion.div>
-                  <h3 className="font-medium text-foreground mb-1">
-                    {isOnline ? "No ride requests yet" : "You're offline"}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-                    {isOnline
-                      ? "New ride requests from UNILORIN students will appear here."
-                      : "Toggle your status to online to start receiving ride requests."}
-                  </p>
-                  {!isOnline && (
-                    <Button
-                      onClick={() => handleOnlineToggle(true)}
-                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:opacity-90"
-                    >
-                      Go Online
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Weekly Summary */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <Card className="bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 border-primary/20">
-              <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <motion.div
-                    animate={{ rotate: [0, 5, -5, 0] }}
-                    transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-                    className="p-3 rounded-full bg-gradient-to-r from-primary to-secondary text-white"
-                  >
-                    <TrendingUp className="h-6 w-6" />
-                  </motion.div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">This Week's Summary</h3>
-                    <p className="text-sm text-muted-foreground">0 rides completed | ₦0 earned</p>
-                  </div>
-                </div>
-                <Button asChild variant="outline" className="border-primary/20 hover:bg-primary/10 bg-transparent">
-                  <Link href="/driver/earnings">
-                    View Details
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {quickActions.map((action, idx) => (
+                <Link key={idx} href={action.href}>
+                  <Card className="h-full cursor-pointer hover:shadow-md hover:border-primary/50 transition-all">
+                    <CardContent className="p-6 text-center">
+                      <div className="mb-3 inline-block p-3 rounded-lg bg-primary/10 text-primary">
+                        {action.icon}
+                      </div>
+                      <h3 className="font-semibold">{action.label}</h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {action.description}
+                      </p>
+                      {action.count !== undefined && (
+                        <div className="mt-2 inline-block px-2 py-1 bg-primary/20 text-primary text-xs font-bold rounded">
+                          {action.count}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
           </motion.div>
         </div>
       </main>

@@ -1,141 +1,148 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
+import { useSession } from "next-auth/react"
 import { useAuth } from "@/lib/auth-context"
 import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { AnimatedSidebar } from "@/components/animated-sidebar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
-import { Wallet, Plus, CreditCard, Loader2 } from "lucide-react"
+import { Wallet, TrendingUp, TrendingDown, AlertCircle, Loader } from "lucide-react"
 
 function WalletContent() {
-  const { user } = useAuth()
-  const [amount, setAmount] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const { data: session } = useSession()
+  const { user: contextUser } = useAuth()
+  const [loading, setLoading] = useState(true)
+  const [walletData, setWalletData] = useState<any>(null)
+  const [transactions, setTransactions] = useState<any[]>([])
 
-  const quickAmounts = [500, 1000, 2000, 5000]
+  const user = session?.user
+    ? {
+        id: (session.user as any).id || "",
+        email: session.user.email || "",
+        firstName: (session.user as any).firstName || "User",
+      }
+    : contextUser
 
-  const handleTopUp = async () => {
-    if (!amount || Number.parseFloat(amount) < 100) {
-      toast.error("Minimum top-up amount is ₦100")
-      return
+  useEffect(() => {
+    if (!user?.id) return
+
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const walletRes = await fetch("/api/user/wallet")
+        const walletData = await walletRes.json()
+
+        setWalletData(walletData.wallet)
+        setTransactions(walletData.transactions || [])
+      } catch (error) {
+        console.error("Failed to fetch wallet data:", error)
+        toast.error("Failed to load wallet data")
+      } finally {
+        setLoading(false)
+      }
     }
 
-    setIsLoading(true)
+    fetchData()
+  }, [user?.id])
 
-    // Simulate Paystack payment
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader className="h-8 w-8 animate-spin mx-auto mb-2" />
+          <p className="text-muted-foreground">Loading wallet...</p>
+        </div>
+      </div>
+    )
+  }
 
-    toast.success("Payment gateway ready!", {
-      description: "Paystack integration will be activated on launch.",
-    })
+  const balance = walletData?.balance || 0
+  const totalCredit = transactions.filter((t) => t.type === "credit").reduce((sum, t) => sum + t.amount, 0)
+  const totalDebit = transactions.filter((t) => t.type === "debit").reduce((sum, t) => sum + t.amount, 0)
 
-    setIsLoading(false)
+  const getTransactionIcon = (type: string) => {
+    return type === "credit" ? (
+      <TrendingUp className="h-4 w-4 text-emerald-500" />
+    ) : (
+      <TrendingDown className="h-4 w-4 text-red-500" />
+    )
+  }
+
+  const getTransactionColor = (type: string) => {
+    return type === "credit" ? "text-emerald-600" : "text-red-600"
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
+    <div className="flex min-h-screen bg-background pb-24 lg:pb-0">
+      <AnimatedSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">My Wallet</h1>
-            <p className="text-muted-foreground mt-1">Manage your EASELY wallet and transactions</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">
+              My Wallet
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your Charter Keke wallet and transaction history
+            </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Balance Card */}
+          {/* Balance Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Available Balance */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="lg:col-span-1"
             >
-              <Card className="bg-gradient-to-br from-primary to-secondary text-white overflow-hidden relative">
-                <div className="absolute inset-0 bg-[url('/placeholder.svg?height=200&width=400')] opacity-10" />
-                <CardContent className="p-6 relative z-10">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2 rounded-full bg-white/20">
-                      <Wallet className="h-5 w-5" />
-                    </div>
-                    <span className="font-medium">EASELY Wallet</span>
+              <Card className="bg-gradient-to-br from-primary to-primary/70 text-white overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Wallet className="h-5 w-5" />
+                    <span className="font-medium">Available Balance</span>
                   </div>
-                  <p className="text-sm opacity-80 mb-1">Available Balance</p>
-                  <p className="text-4xl font-bold mb-6">₦0.00</p>
-                  <div className="flex items-center gap-2 text-sm opacity-80">
-                    <CreditCard className="h-4 w-4" />
-                    <span>{user?.email}</span>
-                  </div>
+                  <p className="text-3xl font-bold">₦{balance.toLocaleString()}</p>
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Top Up Card */}
+            {/* Total Credits */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="lg:col-span-2"
             >
-              <Card className="bg-card/50 backdrop-blur border-primary/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="h-5 w-5 text-primary" />
-                    Top Up Wallet
-                  </CardTitle>
-                  <CardDescription>Add funds to your wallet using Paystack</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="amount">Amount (₦)</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      placeholder="Enter amount"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      className="bg-background/50 border-primary/20 focus:border-primary text-lg py-6"
-                    />
+              <Card className="bg-gradient-to-br from-emerald-500 to-emerald-400 text-white overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <TrendingUp className="h-5 w-5" />
+                    <span className="font-medium">Total Credits</span>
                   </div>
+                  <p className="text-3xl font-bold">₦{totalCredit.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-                  <div className="space-y-2">
-                    <Label>Quick Select</Label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {quickAmounts.map((amt) => (
-                        <Button
-                          key={amt}
-                          variant="outline"
-                          onClick={() => setAmount(amt.toString())}
-                          className={`border-primary/20 hover:bg-primary/10 ${amount === amt.toString() ? "bg-primary/10 border-primary" : ""}`}
-                        >
-                          ₦{amt.toLocaleString()}
-                        </Button>
-                      ))}
-                    </div>
+            {/* Total Debits */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Card className="bg-gradient-to-br from-red-500 to-red-400 text-white overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <TrendingDown className="h-5 w-5" />
+                    <span className="font-medium">Total Debits</span>
                   </div>
-
-                  <Button
-                    onClick={handleTopUp}
-                    disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 py-6"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="h-5 w-5 mr-2" />
-                        Pay with Paystack
-                      </>
-                    )}
-                  </Button>
+                  <p className="text-3xl font-bold">₦{totalDebit.toLocaleString()}</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -145,23 +152,60 @@ function WalletContent() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <Card className="bg-card/50 backdrop-blur border-primary/10">
+            <Card>
               <CardHeader>
-                <CardTitle>Transaction History</CardTitle>
-                <CardDescription>Your recent wallet transactions</CardDescription>
+                <CardTitle className="text-lg">Transaction History</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="p-4 rounded-full bg-muted/50 mb-4">
-                    <Wallet className="h-8 w-8 text-muted-foreground" />
+                {transactions.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-muted-foreground">No transactions yet</p>
                   </div>
-                  <h3 className="font-medium text-foreground mb-1">No transactions yet</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Your transaction history will appear here after your first top-up.
-                  </p>
-                </div>
+                ) : (
+                  <div className="space-y-2">
+                    {transactions.map((transaction) => (
+                      <div
+                        key={transaction.id}
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="p-2 rounded-lg bg-muted">
+                            {getTransactionIcon(transaction.type)}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium capitalize">
+                              {transaction.description || transaction.type}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(transaction.created_at).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-bold ${getTransactionColor(transaction.type)}`}>
+                            {transaction.type === "credit" ? "+" : "-"}₦
+                            {transaction.amount.toLocaleString()}
+                          </p>
+                          <Badge variant="outline" className="mt-1">
+                            {transaction.status || "completed"}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>

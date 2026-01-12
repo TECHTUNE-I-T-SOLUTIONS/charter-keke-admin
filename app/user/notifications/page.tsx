@@ -1,120 +1,184 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { useSession } from "next-auth/react"
+import { useAuth } from "@/lib/auth-context"
 import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { Bell, BellOff, Mail, Smartphone, Volume2 } from "lucide-react"
+import { AnimatedSidebar } from "@/components/animated-sidebar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { AlertCircle, Loader, Bell } from "lucide-react"
+import { useState, useEffect } from "react"
+import { toast } from "sonner"
 
 function NotificationsContent() {
+  const { data: session } = useSession()
+  const { user: contextUser } = useAuth()
+  const [loading, setLoading] = useState(true)
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  const user = session?.user
+    ? {
+        id: (session.user as any).id || "",
+        email: session.user.email || "",
+        firstName: (session.user as any).firstName || "User",
+      }
+    : contextUser
+
+  useEffect(() => {
+    if (!user?.id) return
+
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true)
+        const notificationsRes = await fetch("/api/user/notifications")
+        const notificationsData = await notificationsRes.json()
+
+        setNotifications(notificationsData.notifications || [])
+        setUnreadCount(notificationsData.unreadCount || 0)
+      } catch (error) {
+        console.error("Failed to fetch notifications:", error)
+        toast.error("Failed to load notifications")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNotifications()
+  }, [user?.id])
+
+  const handleMarkAsRead = async (notificationId: string) => {
+    try {
+      const res = await fetch("/api/user/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationId }),
+      })
+
+      if (res.ok) {
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notificationId ? { ...n, is_read: true } : n
+          )
+        )
+        setUnreadCount((prev) => Math.max(0, prev - 1))
+        toast.success("Marked as read")
+      }
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error)
+      toast.error("Failed to update notification")
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader className="h-8 w-8 animate-spin mx-auto mb-2" />
+          <p className="text-muted-foreground">Loading notifications...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
+      <AnimatedSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Notifications</h1>
-            <p className="text-muted-foreground mt-1">Manage your notification preferences</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">
+                  Notifications
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Stay updated with your ride information
+                </p>
+              </div>
+              {unreadCount > 0 && (
+                <Badge className="bg-red-100 text-red-800 text-base px-3 py-1">
+                  {unreadCount} new
+                </Badge>
+              )}
+            </div>
           </motion.div>
 
-          <div className="grid gap-6">
-            {/* Notification Preferences */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <Card className="bg-card/50 backdrop-blur border-primary/10">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="h-5 w-5 text-primary" />
-                    Notification Settings
-                  </CardTitle>
-                  <CardDescription>Choose how you want to receive notifications</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        <Volume2 className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <Label htmlFor="push" className="font-medium">
-                          Push Notifications
-                        </Label>
-                        <p className="text-sm text-muted-foreground">Receive real-time updates on your device</p>
-                      </div>
-                    </div>
-                    <Switch id="push" defaultChecked />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-secondary/10">
-                        <Mail className="h-5 w-5 text-secondary" />
-                      </div>
-                      <div>
-                        <Label htmlFor="email" className="font-medium">
-                          Email Notifications
-                        </Label>
-                        <p className="text-sm text-muted-foreground">Get ride confirmations and receipts via email</p>
-                      </div>
-                    </div>
-                    <Switch id="email" defaultChecked />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-emerald-500/10">
-                        <Smartphone className="h-5 w-5 text-emerald-500" />
-                      </div>
-                      <div>
-                        <Label htmlFor="sms" className="font-medium">
-                          SMS Notifications
-                        </Label>
-                        <p className="text-sm text-muted-foreground">Receive important updates via text message</p>
-                      </div>
-                    </div>
-                    <Switch id="sms" />
-                  </div>
-                </CardContent>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            {notifications.length === 0 ? (
+              <Card className="p-8 text-center">
+                <AlertCircle className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground">No notifications yet</p>
               </Card>
-            </motion.div>
-
-            {/* Recent Notifications */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <Card className="bg-card/50 backdrop-blur border-primary/10">
-                <CardHeader>
-                  <CardTitle>Recent Notifications</CardTitle>
-                  <CardDescription>Your latest notifications</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="p-4 rounded-full bg-muted/50 mb-4">
-                      <BellOff className="h-8 w-8 text-muted-foreground" />
+            ) : (
+              <div className="space-y-3">
+                {notifications.map((notification) => (
+                  <Card
+                    key={notification.id}
+                    className={`p-4 transition-colors ${
+                      !notification.is_read
+                        ? "bg-primary/5 border-primary/20"
+                        : ""
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold">
+                            {notification.title}
+                          </h3>
+                          {!notification.is_read && (
+                            <Badge className="bg-primary text-white text-xs">
+                              New
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(
+                            notification.created_at
+                          ).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+                      </div>
+                      {!notification.is_read && (
+                        <Button
+                          onClick={() => handleMarkAsRead(notification.id)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Mark Read
+                        </Button>
+                      )}
                     </div>
-                    <h3 className="font-medium text-foreground mb-1">No notifications yet</h3>
-                    <p className="text-sm text-muted-foreground">
-                      You&apos;ll see your notifications here once you start using EASELY.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </motion.div>
         </div>
       </main>
     </div>
   )
 }
-
 export default function NotificationsPage() {
   return (
     <ProtectedRoute allowedRoles={["user"]}>

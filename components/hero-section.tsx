@@ -29,20 +29,20 @@ export function HeroSection() {
               transition={{ delay: 0.2 }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6"
             >
-              <GraduationCap className="h-4 w-4" />
-              <span className="text-sm font-medium">For University of Ilorin Students</span>
+              <Image src="/charter keke.png" alt="Charter Keke" width={48} height={48} className="rounded-lg" />
+              <span className="text-sm font-medium">Charter Keke - Tricycle Transport</span>
             </motion.div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-balance">
-              Your Campus Ride, Made Easy
+              Fast, Affordable Keke Rides
             </h1>
             <p className="text-lg text-muted-foreground dark:text-[#C1E8FF] mb-4 max-w-lg text-pretty">
-              EASELY connects UNILORIN students for safe, affordable rides between campus and town. From Oke-Odo
-              the School Park and back!
+              Charter Keke connects riders and drivers for affordable, safe tricycle rides across Debari, Shomolu, and Yaba. 
+              Perfect for quick commutes, deliveries, and shared journeys.
             </p>
 
             <p className="text-lg text-primary font-semibold mb-4 max-w-lg text-pretty">
-              It's easy, just choose Easely
+              Your trusted keke, booked in seconds
             </p>
 
             {/* Route Preview */}
@@ -54,12 +54,12 @@ export function HeroSection() {
             >
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-primary" />
-                <span className="text-muted-foreground dark:text-white">Oke-Odo / Tanke / Ilorin</span>
+                <span className="text-muted-foreground dark:text-white">Debari / Shomolu</span>
               </div>
               <ArrowRight className="h-4 w-4 text-primary mx-2" />
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-secondary" />
-                <span className="text-muted-foreground dark:text-white">School Park (UNILORIN)</span>
+                <span className="text-muted-foreground dark:text-white">Yaba / Your Destination</span>
               </div>
             </motion.div>
 
@@ -94,7 +94,7 @@ export function HeroSection() {
                 </div>
                 <div>
                   <p className="font-semibold text-sm">Verified</p>
-                  <p className="text-xs text-muted-foreground dark:text-white">Students</p>
+                  <p className="text-xs text-muted-foreground dark:text-white">Riders</p>
                 </div>
               </motion.div>
               <motion.div
@@ -105,8 +105,8 @@ export function HeroSection() {
                   <Users className="h-5 w-5 text-secondary" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">UNILORIN</p>
-                  <p className="text-xs text-muted-foreground dark:text-white">Community</p>
+                  <p className="font-semibold text-sm">Keke Network</p>
+                  <p className="text-xs text-muted-foreground dark:text-white">Active Drivers</p>
                 </div>
               </motion.div>
               <motion.div
@@ -117,8 +117,8 @@ export function HeroSection() {
                   <Wallet className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">₦700</p>
-                  <p className="text-xs text-muted-foreground dark:text-white">Per Seat</p>
+                  <p className="font-semibold text-sm">Fair Rates</p>
+                  <p className="text-xs text-muted-foreground dark:text-white">No Surge Pricing</p>
                 </div>
               </motion.div>
             </div>
@@ -142,8 +142,8 @@ export function HeroSection() {
                 className="relative"
               >
                 <Image
-                  src="/images/car-303174-1280.png"
-                  alt="Car illustration"
+                  src="/images/keke.png"
+                  alt="Charter Keke - Tricycle illustration"
                   width={500}
                   height={300}
                   className="w-full max-w-lg drop-shadow-2xl"
@@ -157,8 +157,8 @@ export function HeroSection() {
                 transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut", delay: 0.5 }}
                 className="absolute -top-4 -right-4 p-4 rounded-xl bg-card border border-border shadow-lg"
               >
-                <p className="text-2xl font-bold text-primary">₦700</p>
-                <p className="text-xs text-muted-foreground">Per seat to campus</p>
+                <p className="text-2xl font-bold text-primary">Fast</p>
+                <p className="text-xs text-muted-foreground">5-10 min pickup</p>
               </motion.div>
 
               <motion.div

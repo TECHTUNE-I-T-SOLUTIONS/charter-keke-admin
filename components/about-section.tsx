@@ -6,12 +6,12 @@ const values = [
   {
     icon: Target,
     title: "Our Mission",
-    description: "To make campus commuting affordable, safe, and sustainable for every student in Nigeria.",
+    description: "To make keke transportation affordable, safe, and sustainable for every rider in Lagos.",
   },
   {
     icon: Heart,
     title: "Community First",
-    description: "We believe in building connections. Every ride is an opportunity to meet fellow students.",
+    description: "We believe in building connections. Every ride is an opportunity to meet fellow keke riders.",
   },
   {
     icon: Shield,
@@ -32,11 +32,11 @@ export function AboutSection() {
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             About{" "}
-            <span className="bg-gradient-to-r from-[#052659] to-[#4353a4] bg-clip-text text-transparent dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#CCD0E7FF]">EASELY</span>
+            <span className="bg-gradient-to-r from-[#052659] to-[#4353a4] bg-clip-text text-transparent dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#CCD0E7FF]">Charter Keke</span>
           </h2>
           <p className="text-muted-foreground text-lg dark:text-gray-100">
-            We started EASELY with a simple idea: students shouldn&apos;t struggle with expensive transportation. Based
-            in Ilorin, Nigeria, we&apos;re on a mission to transform how students commute - making it easier, cheaper,
+            We started Charter Keke with a simple idea: Lagosians shouldn't struggle with expensive transportation. Based
+            in Lagos, Nigeria, we're on a mission to transform how people commute - making it easier, cheaper,
             and more connected.
           </p>
         </div>
@@ -60,8 +60,8 @@ export function AboutSection() {
           <div className="text-center">
             <h3 className="text-2xl font-bold mb-4">We&apos;re Just Getting Started</h3>
             <p className="text-muted-foreground dark:text-gray-100 max-w-2xl mx-auto">
-              We&apos;re growing every day. Join us on this journey to revolutionize student
-              transportation in Nigeria. Your feedback shapes our future!
+              We're growing every day. Join us on this journey to revolutionize keke
+              transportation in Lagos. Your feedback shapes our future!
             </p>
           </div>
         </div>

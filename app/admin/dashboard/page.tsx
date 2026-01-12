@@ -1,6 +1,8 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
+import { useSession } from "next-auth/react"
 import { useAuth } from "@/lib/auth-context"
 import { ProtectedRoute } from "@/components/protected-route"
 import { AnimatedSidebar } from "@/components/animated-sidebar"
@@ -9,11 +11,21 @@ import { Users, Car, MapPin, Wallet, TrendingUp, Activity, ArrowUpRight, Clock, 
 import Link from "next/link"
 
 function AdminDashboardContent() {
-  const { user } = useAuth()
+  const { data: session } = useSession()
+  const { user: contextUser } = useAuth()
+
+  // Use session data first, fall back to context user
+  const user = session?.user ? { 
+    id: (session.user as any).id || "",
+    email: session.user.email || "",
+    firstName: (session.user as any).firstName || "Admin",
+    lastName: (session.user as any).lastName || "",
+    role: (session.user as any).role || "admin",
+  } : contextUser
 
   const stats = [
     {
-      label: "Total Students",
+      label: "Total Riders",
       value: "0",
       change: "+0%",
       icon: <Users className="h-5 w-5" />,
@@ -49,7 +61,7 @@ function AdminDashboardContent() {
   const recentActivities = [
     { type: "info", message: "System initialized", time: "Just now" },
     { type: "success", message: "Admin dashboard ready", time: "Just now" },
-    { type: "info", message: "UNILORIN routes configured", time: "Just now" },
+    { type: "info", message: "Lagos zones configured", time: "Just now" },
   ]
 
   return (
@@ -61,12 +73,12 @@ function AdminDashboardContent() {
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <div className="flex items-center gap-2 mb-2">
-              <GraduationCap className="h-5 w-5 text-primary" />
-              <span className="text-sm text-primary font-medium">University of Ilorin - Admin</span>
+              <Image src="/charter keke.png" alt="Charter Keke" width={24} height={24} />
+              <span className="text-sm text-primary font-medium">Charter Keke - Admin</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Admin Dashboard</h1>
             <p className="text-muted-foreground mt-1">
-              Welcome back, {user?.firstName}. Managing EASELY for UNILORIN students.
+              Welcome back, {user?.firstName}. Managing Charter Keke for Lagos riders.
             </p>
           </motion.div>
 
@@ -116,7 +128,7 @@ function AdminDashboardContent() {
                   <TrendingUp className="h-5 w-5 text-primary" />
                   Ride Analytics
                 </CardTitle>
-                <CardDescription>UNILORIN route statistics</CardDescription>
+                <CardDescription>Lagos zone statistics</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-64 flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg">

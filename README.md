@@ -1,87 +1,142 @@
-# Easely
+# Charter Keke - Tricycle Ride-Sharing Platform
 
-Easely is a modern, full-featured campus ride-sharing platform built for the University of Ilorin community. It connects students for safe, affordable rides between campus and town, with a focus on security, convenience, and a beautiful user experience.
+## 🛺 Project Overview
 
-## Features
+**Charter Keke** is a modern, production-ready tricycle (keke) ride-sharing platform built for the Lagos metropolitan area, starting with the Debari-Shomolu-Yaba corridor pilot.
 
-- **User & Driver Dashboards:**
-  - Personalized dashboards for riders and drivers
-  - Referral system for both user types
-  - Wallet management and ride history
-  - Notifications and earnings tracking
+### Core Features
 
-- **Admin Panel:**
-  - Analytics dashboard
-  - User, driver, payments, rides, and messages management
-  - Security controls (2FA, login alerts, password management)
-  - Real-time messaging and conversations with users
-
-- **Authentication:**
-  - Secure login and registration
-  - OTP and push notification support
-
-- **Payments:**
-  - Integrated with Paystack for seamless transactions
-
-- **Responsive UI:**
-  - Optimized for desktop, tablet, and mobile
-  - Modern design with framer-motion animations
-
-- **Notifications:**
-  - Real-time notifications for rides, payments, and system alerts
-
-- **Privacy & Safety:**
-  - Dedicated privacy, safety, and terms pages
-
-- **Tech Stack:**
-  - Next.js 16 (App Router)
-  - React 19
-  - TypeScript
-  - Tailwind CSS
-  - Framer Motion
-  - Radix UI
-  - Sonner (toast notifications)
-  - Supabase (planned for backend integration)
-
-## Getting Started
-
-1. **Install dependencies:**
-   ```bash
-   pnpm install
-   ```
-2. **Run the development server:**
-   ```bash
-   pnpm dev
-   ```
-3. **Build for production:**
-   ```bash
-   pnpm build
-   ```
-
-## Folder Structure
-
-- `app/` - All Next.js pages and routes
-- `components/` - Reusable UI and dashboard components
-- `hooks/` - Custom React hooks
-- `lib/` - Utility libraries and context providers
-- `public/` - Static assets
-- `styles/` - Global CSS
-
-## Planned Features
-
-- Supabase integration for authentication, database, and real-time messaging
-- Advanced analytics and reporting for admins
-- Driver onboarding and verification
-- Ride scheduling and matching algorithms
-
-## Contributing
-
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
-
-## License
-
-MIT
+- 👥 **Unified User Management** - Riders, drivers, and admins on one platform
+- 🔐 **Secure Authentication** - NextAuth with bcrypt password hashing
+- 🗺️ **Zone-Based Dispatch** - Intelligent driver matching by operating zones
+- 💰 **Wallet System** - Ledger-grade transaction tracking
+- 🔔 **Real-Time Notifications** - In-app, SMS, email, and push notifications
+- 👨‍💼 **Admin Dashboard** - Full system control with granular permissions
+- 📊 **Complete Audit Trail** - All actions tracked and logged
+- 🔄 **Graceful Fallback** - Works without external dependencies
 
 ---
 
-**Easely** — Making campus rides easy, safe, and affordable for everyone at Unilorin.
+## 🏗️ Architecture Overview
+
+### Technology Stack
+
+| Component | Technology |
+|-----------|-----------|
+| Frontend | Next.js 16, React 19, Tailwind CSS |
+| Backend | Next.js API Routes |
+| Database | Supabase (PostgreSQL) |
+| Auth | NextAuth.js 5 |
+| Notifications | Supabase Triggers + Termii |
+| Caching | Redis (optional) |
+| Payments | Paystack |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm or npm
+- Supabase account
+- Termii account (for SMS)
+- Resend account (for email)
+
+### Quick Setup
+
+1. **Install dependencies**
+   ```bash
+2. **Configure environment**
+   ```bash
+   cp .env.example .env.local
+   # Fill in all required values
+   ```
+
+3. **Set up database**
+   - Create Supabase project
+   - Run `lib/db-schema.sql` in SQL editor
+   - Create initial admin user
+
+4. **Run development server**
+   ```bash
+   pnpm dev
+   ```
+
+5. **Access the app**
+   - Web: http://localhost:3000
+   - API: http://localhost:3000/api
+
+See [QUICK_SETUP.md](./QUICK_SETUP.md) for detailed instructions.
+
+---
+
+## 📁 Project Structure
+
+```
+charter-keke/
+├── app/
+│   ├── api/                   # All API routes
+│   ├── auth/                  # Authentication pages
+│   ├── user/                  # User dashboard
+│   ├── driver/                # Driver dashboard
+│   └── admin/                 # Admin dashboard
+├── components/                # Reusable components
+├── lib/                       # Core utilities
+│   ├── auth.ts                # NextAuth config
+│   ├── supabase.ts            # Database client
+│   ├── notifications.ts       # Notification utilities
+│   └── db-schema.sql          # Database schema
+├── types/                     # TypeScript types
+├── SYSTEM_DOCUMENTATION.md    # Architecture docs
+├── QUICK_SETUP.md             # Setup guide
+└── .env.example               # Environment template
+```
+
+---
+
+## 🔒 Security
+
+- Passwords hashed with bcryptjs
+- JWT-based sessions
+- Server-side role enforcement
+- Immutable audit trails
+- Never trust client-side claims
+
+---
+
+## 📚 Documentation
+
+- **[QUICK_SETUP.md](./QUICK_SETUP.md)** - Step-by-step setup guide
+- **[SYSTEM_DOCUMENTATION.md](./SYSTEM_DOCUMENTATION.md)** - Complete system architecture
+- **[.env.example](./.env.example)** - Environment variables reference
+
+---
+
+## 🐛 Troubleshooting
+
+See [SYSTEM_DOCUMENTATION.md](./SYSTEM_DOCUMENTATION.md#10-maintenance--operations) for troubleshooting guides.
+
+---
+
+## 💼 Team & Roles
+
+| Role | Responsibility |
+|------|-----------------|
+| Founder / Product Lead | Vision, ecosystem intelligence |
+| Technical Partner | Architecture, code implementation |
+| Co-Founder / Field Lead | Ground operations, driver relations |
+
+---
+
+## 📄 License
+
+Proprietary - Unauthorized copying or use is prohibited.
+
+---
+
+**Charter Keke** — Fast, affordable, and reliable tricycle rides across Lagos.
+
+Last Updated: December 23, 2025
+Version: 2.0.0 (MVP)
+

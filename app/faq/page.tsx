@@ -14,16 +14,16 @@ const faqs = [
     category: "General",
     questions: [
       {
-        q: "What is EASELY?",
-        a: "EASELY is a ride-sharing platform designed specifically for University of Ilorin students. We connect student riders with student drivers for safe, affordable transportation between campus and Oke-Odo.",
+        q: "What is Charter Keke?",
+        a: "Charter Keke is a ride-sharing platform connecting riders and drivers for safe, affordable keke rides across Lagos. We serve Debari, Shomolu, and Yaba with fast and reliable transportation.",
       },
       {
-        q: "Who can use EASELY?",
-        a: "EASELY is open to all University of Ilorin students, staff, and verified drivers. You need to create an account and verify your status to use the platform.",
+        q: "Who can use Charter Keke?",
+        a: "Charter Keke is open to all riders and verified keke drivers in Lagos. You need to create an account and complete your profile to use the platform.",
       },
       {
-        q: "What routes does EASELY cover?",
-        a: "We currently cover routes between the School Park (UNILORIN campus) and Oke-Odo. We're constantly expanding based on demand.",
+        q: "What routes does Charter Keke cover?",
+        a: "We currently cover routes across Debari, Shomolu, and Yaba in Lagos. We're constantly expanding to serve more areas based on demand.",
       },
     ],
   },
@@ -40,7 +40,7 @@ const faqs = [
       },
       {
         q: "What payment methods are accepted?",
-        a: "We accept payments through Paystack, which supports debit cards, bank transfers, and USSD. You can also add funds to your EASELY wallet for faster checkouts.",
+        a: "We accept payments through Paystack, which supports debit cards, bank transfers, and USSD. You can also add funds to your Charter Keke wallet for faster checkouts.",
       },
       {
         q: "Can I cancel a booking?",
@@ -52,16 +52,16 @@ const faqs = [
     category: "For Drivers",
     questions: [
       {
-        q: "How do I become an EASELY driver?",
-        a: "Sign up as a driver through our registration page. You'll need to provide your driver's license, vehicle documents, and pass our verification process.",
+        q: "How do I become a Charter Keke driver?",
+        a: "Sign up as a driver through our registration page. You'll need to provide your driver's license, keke registration documents, and pass our verification process.",
       },
       {
         q: "How do drivers get paid?",
         a: "Drivers receive payments directly to their bank account. You can request a payout anytime, and funds are typically transferred within 24 hours.",
       },
       {
-        q: "What percentage does EASELY take?",
-        a: "EASELY takes a small service fee of 15% per ride to maintain the platform and provide support. Drivers keep 85% of each fare.",
+        q: "What percentage does Charter Keke take?",
+        a: "Charter Keke takes a small service fee of 15% per ride to maintain the platform and provide support. Drivers keep 85% of each fare.",
       },
     ],
   },
@@ -69,7 +69,7 @@ const faqs = [
     category: "Safety & Support",
     questions: [
       {
-        q: "Is EASELY safe?",
+        q: "Is Charter Keke safe?",
         a: "Safety is our top priority. All drivers are verified, rides are tracked in real-time, and we have an emergency support system. You can also share your ride status with friends and family.",
       },
       {
@@ -78,7 +78,7 @@ const faqs = [
       },
       {
         q: "How do I contact support?",
-        a: "You can reach us through the Help Center in the app, email us at easely@gmail.com, or call +234 808 319 1228 during business hours.",
+        a: "You can reach us through the Help Center in the app, email us at support@charterkeke.com, or call +234 808 319 1228 during business hours.",
       },
     ],
   },
@@ -121,7 +121,7 @@ export default function FAQPage() {
                 Questions
               </span>
             </h1>
-            <p className="text-lg text-muted-foreground">Find answers to common questions about EASELY</p>
+            <p className="text-lg text-muted-foreground">Find answers to common questions about Charter Keke</p>
           </motion.div>
         </section>
 

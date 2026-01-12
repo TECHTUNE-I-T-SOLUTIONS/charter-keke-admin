@@ -2,33 +2,37 @@
 
 import type React from "react"
 
-import { useEffect, useState } from "react"
+import { useSession, signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useAuth, type UserRole } from "@/lib/auth-context"
+import { useEffect, useState, useRef } from "react"
 import { DashboardLoader } from "./dashboard-loader"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
-  allowedRoles: UserRole[]
+  allowedRoles?: string[]
 }
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [showLoader, setShowLoader] = useState(true)
+  const initialLoadRef = useRef(true)
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        router.push("/auth/login")
-        return
-      }
+    if (status === "unauthenticated") {
+      signIn(undefined, { callbackUrl: "/auth/login" })
+      return
+    }
 
-      if (!allowedRoles.includes(user.role)) {
+    if (status === "authenticated") {
+      const userRole = (session?.user as any)?.role
+      
+      if (allowedRoles && !allowedRoles.includes(userRole)) {
         // Redirect to appropriate dashboard based on role
-        switch (user.role) {
+        switch (userRole) {
           case "admin":
+          case "super_admin":
             router.push("/admin/dashboard")
             break
           case "driver":
@@ -40,17 +44,23 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
         return
       }
 
-      // Show loader for a minimum time to allow proper setup
-      const timer = setTimeout(() => {
+      // Only show loader on initial load, not on navigation
+      if (initialLoadRef.current) {
+        const timer = setTimeout(() => {
+          setIsAuthorized(true)
+          setShowLoader(false)
+          initialLoadRef.current = false
+        }, 500)
+
+        return () => clearTimeout(timer)
+      } else {
         setIsAuthorized(true)
         setShowLoader(false)
-      }, 1500)
-
-      return () => clearTimeout(timer)
+      }
     }
-  }, [user, isLoading, allowedRoles, router])
+  }, [session, status, allowedRoles, router])
 
-  if (isLoading || showLoader) {
+  if (status === "loading" || showLoader) {
     return <DashboardLoader />
   }
 

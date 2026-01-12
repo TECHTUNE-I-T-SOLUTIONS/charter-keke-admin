@@ -40,9 +40,10 @@ export async function subscribeToPushNotifications(): Promise<PushSubscription |
     let subscription = await registration.pushManager.getSubscription()
 
     if (!subscription) {
+      const key = urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: key as any,
       })
       console.log("[v0] Push subscription created")
     }

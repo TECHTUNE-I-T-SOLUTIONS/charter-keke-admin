@@ -2,11 +2,10 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useMemo, useCallback, memo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
 import { useAuth, type UserRole } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -35,6 +34,7 @@ interface NavItem {
   icon: React.ReactNode
 }
 
+// Memoized nav items to prevent recreation on every render
 const userNavItems: NavItem[] = [
   { label: "Dashboard", href: "/user/dashboard", icon: <Home className="h-5 w-5" /> },
   { label: "Book a Ride", href: "/user/book", icon: <Car className="h-5 w-5" /> },
@@ -78,23 +78,18 @@ function getNavItems(role: UserRole): NavItem[] {
   }
 }
 
-export function DashboardSidebar() {
-  const { user, setShowLogoutConfirm } = useAuth()
-  const pathname = usePathname()
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
+// Memoized sidebar content component
+const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { user: any; pathname: string; setIsMobileOpen: (open: boolean) => void; onLogout?: () => void }) => {
+  const navItems = useMemo(() => getNavItems(user.role), [user.role])
 
-  if (!user) return null
-
-  const navItems = getNavItems(user.role)
-
-  const SidebarContent = () => (
+  return (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="p-6 border-b border-primary/10">
-        <Link href="/" className="flex items-center gap-3">
-          <Image src="/images/easely-06.png" alt="EASELY" width={40} height={40} />
-          <span className="text-xl font-serif font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            EASELY
+      <div className="p-4 border-b border-primary/10">
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/charter keke.png" alt="Charter Keke" width={40} height={40} className="rounded-lg" />
+          <span className="text-sm font-serif font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            CHARTER KEKE
           </span>
         </Link>
       </div>
@@ -127,7 +122,7 @@ export function DashboardSidebar() {
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
                 isActive
-                  ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25"
+                  ? "bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-lg shadow-primary/25"
                   : "text-muted-foreground hover:bg-primary/10 hover:text-foreground",
               )}
             >
@@ -143,7 +138,7 @@ export function DashboardSidebar() {
         <Button
           variant="outline"
           className="w-full justify-start gap-3 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive bg-transparent"
-          onClick={() => setShowLogoutConfirm(true)}
+          onClick={onLogout}
         >
           <LogOut className="h-5 w-5" />
           <span>Logout</span>
@@ -151,21 +146,42 @@ export function DashboardSidebar() {
       </div>
     </div>
   )
+})
+
+export const DashboardSidebar = memo(function DashboardSidebarComponent() {
+  const { user, setShowLogoutConfirm } = useAuth()
+  const pathname = usePathname()
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
+
+  if (!user) return null
+
+  // Memoize callback to prevent re-renders
+  const handleLogout = useCallback(() => {
+    setShowLogoutConfirm(true)
+  }, [setShowLogoutConfirm])
+
+  // Memoize the sidebar content render to prevent unnecessary re-renders
+  const sidebarContent = useMemo(
+    () => <SidebarContent user={user} pathname={pathname} setIsMobileOpen={setIsMobileOpen} onLogout={handleLogout} />,
+    [user?.id, user?.firstName, user?.lastName, user?.role, pathname, handleLogout]
+  )
 
   return (
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-64 flex-col bg-card/50 backdrop-blur-xl border-r border-primary/10 h-screen sticky top-0">
-        <SidebarContent />
+        {sidebarContent}
       </aside>
 
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl border-b border-primary/10">
         <div className="flex items-center justify-between p-4">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/images/easely-06.png" alt="EASELY" width={32} height={32} />
-            <span className="text-lg font-serif font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              EASELY
+            <div className="w-8 h-8 bg-gradient-to-r from-[#052659] to-[#4353a4] rounded-lg flex items-center justify-center text-white font-bold text-lg">
+              <Image src="/charter keke.png" alt="Charter Keke" width={32} height={32} className="rounded-lg" />
+            </div>
+            <span className="text-sm font-serif font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              CHARTER KEKE
             </span>
           </Link>
           <Button variant="ghost" size="icon" onClick={() => setIsMobileOpen(true)} className="text-foreground">
@@ -174,37 +190,26 @@ export function DashboardSidebar() {
         </div>
       </header>
 
-      {/* Mobile Sidebar */}
-      <AnimatePresence>
-        {isMobileOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+      {/* Mobile Sidebar - Simple CSS transitions, no Framer Motion */}
+      {isMobileOpen && (
+        <>
+          <div
+            className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-200"
+            onClick={() => setIsMobileOpen(false)}
+          />
+          <aside className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-72 bg-card border-r border-primary/10 transition-transform duration-300 ease-in-out">
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsMobileOpen(false)}
-            />
-            <motion.aside
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-72 bg-card border-r border-primary/10"
+              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
             >
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMobileOpen(false)}
-                className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-              <SidebarContent />
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
+              <X className="h-5 w-5" />
+            </Button>
+            <SidebarContent user={user} pathname={pathname} setIsMobileOpen={setIsMobileOpen} onLogout={handleLogout} />
+          </aside>
+        </>
+      )}
     </>
   )
-}
+})

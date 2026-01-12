@@ -43,7 +43,7 @@ const safetyFeatures = [
 ]
 
 const safetyTips = [
-  "Always verify the driver and vehicle details before getting in",
+  "Always verify the driver and keke details before getting in",
   "Share your ride details with a trusted friend or family member",
   "Sit in the back seat when riding alone",
   "Keep your phone charged and location services enabled",
@@ -74,7 +74,7 @@ export default function SafetyPage() {
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Priority</span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              We've built multiple layers of protection to ensure every EASELY ride is safe and secure.
+              We've built multiple layers of protection to ensure every Charter Keke ride is safe and secure.
             </p>
           </motion.div>
         </section>
@@ -124,7 +124,7 @@ export default function SafetyPage() {
               </div>
               <h2 className="text-3xl font-bold mb-6">A Community Built on Trust</h2>
               <p className="text-muted-foreground mb-6">
-                EASELY is more than just a ride-sharing app - it's a community of UNILORIN students looking out for each
+                Charter Keke is more than just a ride-sharing app - it's a community of Lagos riders and drivers looking out for each
                 other. Our rating and review system helps maintain high standards for both riders and drivers.
               </p>
               <ul className="space-y-3">

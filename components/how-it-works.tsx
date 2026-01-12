@@ -1,6 +1,7 @@
 "use client"
 
-import { MapPin, CreditCard, Car, Users } from "lucide-react"
+import Image from "next/image"
+import { MapPin, CreditCard, Users } from "lucide-react"
 
 const steps = [
   {
@@ -11,7 +12,7 @@ const steps = [
   {
     icon: Users,
     title: "Get Matched",
-    description: "We automatically group you with students heading the same way. Share the journey, share the cost.",
+    description: "We automatically group you with other riders heading the same way. Share the journey, share the cost.",
   },
   {
     icon: CreditCard,
@@ -19,7 +20,6 @@ const steps = [
     description: "Secure payment via Paystack. Only pay your portion - as low as ₦600 per ride!",
   },
   {
-    icon: Car,
     title: "Enjoy the Ride",
     description: "Track your driver in real-time, chat with co-riders, and arrive safely at your destination.",
   },
@@ -32,7 +32,7 @@ export function HowItWorks() {
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             How{" "}
-            <span className="bg-gradient-to-r from-[#052659] to-[#4353a4] bg-clip-text dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#CCD0E7FF] text-transparent">EASELY</span>{" "}
+            <span className="bg-gradient-to-r from-[#052659] to-[#4353a4] bg-clip-text dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#CCD0E7FF] text-transparent">Charter Keke</span>{" "}
             Works
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -49,8 +49,8 @@ export function HowItWorks() {
               )}
 
               <div className="relative z-10 p-6 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#052659] to-[#4353a4] flex items-center justify-center mb-4 text-white">
-                  <step.icon className="h-6 w-6" />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#052659] to-[#4353a4] flex items-center justify-center mb-4 text-white text-lg font-bold overflow-hidden">
+                  {step.icon ? <step.icon className="h-6 w-6" /> : <Image src="/charter keke.png" alt="Charter Keke" width={48} height={48} />}
                 </div>
                 <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#052659] to-[#4353a4] flex items-center justify-center text-white font-bold text-sm">
                   {index + 1}

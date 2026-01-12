@@ -1,11 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo, memo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
+import { useSession, signOut } from "next-auth/react"
 import { useAuth, type UserRole } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -86,12 +86,28 @@ function getNavItems(role: UserRole): NavItem[] {
 }
 
 export function AnimatedSidebar() {
-  const { user, setShowLogoutConfirm } = useAuth()
+  const { user: contextUser, setShowLogoutConfirm } = useAuth()
+  const { data: session } = useSession()
   const pathname = usePathname()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+
+  // Use session data first, fall back to context user - memoize to prevent re-renders
+  const user = useMemo(() => {
+    if (session?.user) {
+      return {
+        id: (session.user as any).id || "",
+        firstName: (session.user as any).firstName || "User",
+        lastName: (session.user as any).lastName || "",
+        role: ((session.user as any).role || "user") as UserRole,
+        email: session.user.email || "",
+        profilePictureUrl: (session.user as any).profilePictureUrl || "",
+      }
+    }
+    return contextUser
+  }, [(session?.user as any)?.id, (session?.user as any)?.firstName, (session?.user as any)?.role, contextUser])
 
   useEffect(() => {
     setMounted(true)
@@ -99,14 +115,9 @@ export function AnimatedSidebar() {
 
   if (!user) return null
 
-  const navItems = getNavItems(user.role)
+  const navItems = useMemo(() => getNavItems(user.role), [user.role])
 
-  const sidebarVariants = {
-    expanded: { width: 256 },
-    collapsed: { width: 80 },
-  }
-
-  const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
+  const SidebarContent = memo(({ isMobile = false }: { isMobile?: boolean }) => (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div
@@ -116,32 +127,19 @@ export function AnimatedSidebar() {
         )}
       >
         <Link href="/" className="flex items-center gap-3">
-          <motion.div
-            initial={{ rotate: 0 }}
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 5 }}
-          >
-            <Image src="/images/easely-06.png" alt="EASELY" width={40} height={40} />
-          </motion.div>
-          <AnimatePresence>
-            {(!isCollapsed || isMobile) && (
-              <motion.span
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                className="text-xl font-serif font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent whitespace-nowrap overflow-hidden"
-              >
-                EASELY
-              </motion.span>
-            )}
-          </AnimatePresence>
+          <Image src="/charter keke.png" alt="Charter Keke" width={40} height={40} className="rounded-lg" />
+          {(!isCollapsed || isMobile) && (
+            <span className="text-xl font-serif font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent whitespace-nowrap overflow-hidden transition-all duration-300">
+              CHARTER KEKE
+            </span>
+          )}
         </Link>
         {!isMobile && (
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex h-8 w-8 rounded-full hover:bg-primary/10"
+            className="hidden lg:flex h-8 w-8 rounded-full hover:bg-primary/10 transition-colors duration-200"
           >
             {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
@@ -149,80 +147,67 @@ export function AnimatedSidebar() {
       </div>
 
       {/* User Info */}
-      <div className={cn("p-4 border-b border-primary/10", isCollapsed && !isMobile && "px-2")}>
-        <motion.div
-          layout
+      <div className={cn("p-4 border-b border-primary/10 transition-all duration-300", isCollapsed && !isMobile && "px-2")}>
+        <div
           className={cn(
-            "flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/10",
+            "flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/10 transition-all duration-300",
             isCollapsed && !isMobile && "flex-col p-2",
           )}
         >
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-medium shrink-0"
-          >
-            {user.firstName[0]}
-            {user.lastName[0]}
-          </motion.div>
-          <AnimatePresence>
-            {(!isCollapsed || isMobile) && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                className="flex-1 min-w-0 overflow-hidden"
-              >
-                <p className="font-medium text-foreground truncate">
-                  {user.firstName} {user.lastName}
-                </p>
-                <p className="text-xs text-muted-foreground capitalize">
-                  {user.role === "user" ? "Student" : user.role}
-                </p>
-              </motion.div>
+          <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-medium shrink-0 overflow-hidden">
+            {user.profilePictureUrl ? (
+              <Image
+                src={user.profilePictureUrl}
+                alt={`${user.firstName} ${user.lastName}`}
+                width={40}
+                height={40}
+                className="h-10 w-10 object-cover"
+              />
+            ) : (
+              <>
+                {user.firstName[0]}
+                {user.lastName[0]}
+              </>
             )}
-          </AnimatePresence>
-        </motion.div>
+          </div>
+          {(!isCollapsed || isMobile) && (
+            <div className="flex-1 min-w-0 overflow-hidden transition-all duration-300">
+              <p className="font-medium text-foreground truncate">
+                {user.firstName} {user.lastName}
+              </p>
+              <p className="text-xs text-muted-foreground capitalize">
+                {user.role === "user" ? "Rider" : user.role}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto scrollbar-thin">
         <TooltipProvider delayDuration={0}>
-          {navItems.map((item, index) => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href
             return (
               <Tooltip key={item.href}>
                 <TooltipTrigger asChild>
                   <Link href={item.href} onClick={() => setIsMobileOpen(false)}>
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      whileHover={{ x: 4 }}
-                      whileTap={{ scale: 0.98 }}
+                    <div
                       className={cn(
-                        "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
+                        "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group cursor-pointer",
                         isCollapsed && !isMobile && "justify-center px-3",
                         isActive
                           ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25"
                           : "text-muted-foreground hover:bg-primary/10 hover:text-foreground",
                       )}
                     >
-                      <motion.div animate={isActive ? { rotate: [0, -10, 10, 0] } : {}} transition={{ duration: 0.5 }}>
-                        {item.icon}
-                      </motion.div>
-                      <AnimatePresence>
-                        {(!isCollapsed || isMobile) && (
-                          <motion.span
-                            initial={{ opacity: 0, width: 0 }}
-                            animate={{ opacity: 1, width: "auto" }}
-                            exit={{ opacity: 0, width: 0 }}
-                            className="font-medium whitespace-nowrap overflow-hidden"
-                          >
-                            {item.label}
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
+                      <div>{item.icon}</div>
+                      {(!isCollapsed || isMobile) && (
+                        <span className="font-medium whitespace-nowrap overflow-hidden transition-all duration-300">
+                          {item.label}
+                        </span>
+                      )}
+                    </div>
                   </Link>
                 </TooltipTrigger>
                 {isCollapsed && !isMobile && (
@@ -244,23 +229,16 @@ export function AnimatedSidebar() {
             variant="ghost"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className={cn(
-              "w-full justify-start gap-3 text-muted-foreground hover:bg-primary/10 hover:text-foreground",
+              "w-full justify-start gap-3 text-muted-foreground hover:bg-primary/10 hover:text-foreground transition-all duration-200",
               isCollapsed && !isMobile && "justify-center px-3",
             )}
           >
             {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            <AnimatePresence>
-              {(!isCollapsed || isMobile) && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  className="whitespace-nowrap overflow-hidden"
-                >
-                  {theme === "dark" ? "Light Mode" : "Dark Mode"}
-                </motion.span>
-              )}
-            </AnimatePresence>
+            {(!isCollapsed || isMobile) && (
+              <span className="whitespace-nowrap overflow-hidden transition-all duration-300">
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              </span>
+            )}
           </Button>
         )}
 
@@ -268,49 +246,41 @@ export function AnimatedSidebar() {
         <Button
           variant="ghost"
           className={cn(
-            "w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive",
+            "w-full justify-start gap-3 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200",
             isCollapsed && !isMobile && "justify-center px-3",
           )}
           onClick={() => setShowLogoutConfirm(true)}
         >
           <LogOut className="h-5 w-5" />
-          <AnimatePresence>
-            {(!isCollapsed || isMobile) && (
-              <motion.span
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                className="whitespace-nowrap overflow-hidden"
-              >
-                Logout
-              </motion.span>
-            )}
-          </AnimatePresence>
+          {(!isCollapsed || isMobile) && (
+            <span className="whitespace-nowrap overflow-hidden transition-all duration-300">
+              Logout
+            </span>
+          )}
         </Button>
       </div>
     </div>
-  )
+  ))
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <motion.aside
-        initial={false}
-        animate={isCollapsed ? "collapsed" : "expanded"}
-        variants={sidebarVariants}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="hidden lg:flex flex-col bg-card/50 backdrop-blur-xl border-r border-primary/10 h-screen sticky top-0 shrink-0"
+      {/* Desktop Sidebar - CSS transitions instead of Framer Motion */}
+      <aside
+        className="hidden lg:flex flex-col bg-card/50 backdrop-blur-xl border-r border-primary/10 h-screen sticky top-0 shrink-0 transition-all duration-300 ease-in-out"
+        style={{
+          width: isCollapsed ? "80px" : "256px",
+        }}
       >
         <SidebarContent />
-      </motion.aside>
+      </aside>
 
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl border-b border-primary/10">
         <div className="flex items-center justify-between p-4">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/images/easely-06.png" alt="EASELY" width={32} height={32} />
+            <Image src="/charter keke.png" alt="Charter Keke" width={32} height={32} className="rounded-lg" />
             <span className="text-lg font-serif font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              EASELY
+              CHARTER KEKE
             </span>
           </Link>
           <div className="flex items-center gap-2">
@@ -319,7 +289,7 @@ export function AnimatedSidebar() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="rounded-full"
+                className="rounded-full transition-colors duration-200"
               >
                 {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
@@ -331,37 +301,26 @@ export function AnimatedSidebar() {
         </div>
       </header>
 
-      {/* Mobile Sidebar */}
-      <AnimatePresence>
-        {isMobileOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+      {/* Mobile Sidebar - CSS transitions instead of Framer Motion */}
+      {isMobileOpen && (
+        <>
+          <div
+            className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-200"
+            onClick={() => setIsMobileOpen(false)}
+          />
+          <aside className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-72 bg-card border-r border-primary/10 transition-transform duration-300 ease-in-out">
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsMobileOpen(false)}
-            />
-            <motion.aside
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-72 bg-card border-r border-primary/10"
+              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground z-10 transition-colors duration-200"
             >
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMobileOpen(false)}
-                className="absolute right-4 top-4 text-muted-foreground hover:text-foreground z-10"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-              <SidebarContent isMobile />
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
+              <X className="h-5 w-5" />
+            </Button>
+            <SidebarContent isMobile />
+          </aside>
+        </>
+      )}
     </>
   )
 }

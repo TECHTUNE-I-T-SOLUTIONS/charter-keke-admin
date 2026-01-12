@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+// @ts-ignore - web-push types not available
 import webpush from "web-push"
 
 // Configure web-push with VAPID keys
@@ -18,11 +19,11 @@ export async function POST(request: NextRequest) {
     }
 
     const payload = JSON.stringify({
-      title: title || "EASELY",
+      title: title || "Charter Keke",
       body: body || "You have a new notification",
       icon: "/logo.png",
       badge: "/logo.png",
-      tag: tag || "easely-notification",
+      tag: tag || "charterkeke-notification",
       data: { url: url || "/" },
     })
 

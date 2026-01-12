@@ -14,14 +14,14 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">1. Acceptance of Terms</h2>
               <p className="text-muted-foreground">
-                By accessing and using EASELY, you accept and agree to be bound by these Terms of Use. If you do not
+                By accessing and using Charter Keke, you accept and agree to be bound by these Terms of Use. If you do not
                 agree to these terms, please do not use our services.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-semibold mb-4">2. Eligibility</h2>
-              <p className="text-muted-foreground">To use EASELY, you must:</p>
+              <p className="text-muted-foreground">To use Charter Keke, you must:</p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mt-4">
                 <li>Be at least 18 years of age</li>
                 <li>Have a valid phone number for verification</li>
@@ -42,16 +42,16 @@ export default function TermsPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">4. Ride Services</h2>
               <p className="text-muted-foreground">
-                EASELY facilitates connections between riders and drivers. We do not provide transportation services
-                directly. Drivers are independent contractors, not employees of EASELY.
+                Charter Keke facilitates connections between riders and drivers. We do not provide transportation services
+                directly. Drivers are independent contractors, not employees of Charter Keke.
               </p>
               <h3 className="text-xl font-semibold mt-4 mb-2">4.1 Pricing</h3>
               <p className="text-muted-foreground">
-                Fares are calculated based on vehicle type and number of passengers. Standard rates:
+                Fares are calculated based on keke type and number of passengers. Standard rates:
               </p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mt-4">
-                <li>4-seater car: ₦700 per seat (₦3,500 total for full capacity)</li>
-                <li>8-seater bus: ₦600 per seat (₦5,400 total for full capacity)</li>
+                <li>Standard Keke: ₦700 per seat (₦3,500 total for full capacity)</li>
+                <li>Premium Keke: ₦600 per seat (₦5,400 total for full capacity)</li>
               </ul>
             </section>
 
@@ -81,17 +81,17 @@ export default function TermsPage() {
               <p className="text-muted-foreground">Drivers must:</p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mt-4">
                 <li>Hold a valid driver&apos;s license</li>
-                <li>Maintain valid vehicle insurance</li>
+                <li>Maintain valid keke insurance</li>
                 <li>Pass our verification process</li>
                 <li>Maintain a minimum rating of 4.0 stars</li>
-                <li>Keep their vehicle in safe operating condition</li>
+                <li>Keep their keke in safe operating condition</li>
               </ul>
             </section>
 
             <section>
               <h2 className="text-2xl font-semibold mb-4">8. Limitation of Liability</h2>
               <p className="text-muted-foreground">
-                EASELY is not liable for any direct, indirect, incidental, special, or consequential damages resulting
+                Charter Keke is not liable for any direct, indirect, incidental, special, or consequential damages resulting
                 from the use of our services. We are not responsible for the actions of drivers or other users.
               </p>
             </section>
@@ -108,9 +108,9 @@ export default function TermsPage() {
               <h2 className="text-2xl font-semibold mb-4">10. Contact</h2>
               <p className="text-muted-foreground">For questions about these Terms of Use, contact us at:</p>
               <ul className="list-none text-muted-foreground space-y-2 mt-4">
-                <li>Email: easely@gmail.com</li>
+                <li>Email: support@charterkeke.com</li>
                 <li>Phone: +234 808 319 1228</li>
-                <li>Location: Ilorin, Nigeria</li>
+                <li>Location: Lagos, Nigeria</li>
               </ul>
             </section>
           </div>

@@ -12,20 +12,20 @@ const steps = [
   {
     icon: UserPlus,
     title: "Create Your Account",
-    description: "Sign up as a student rider or driver. Verify your UNILORIN status and set up your profile.",
+    description: "Sign up as a rider or driver. Complete your profile and get verified to start using Charter Keke.",
     color: "from-primary to-primary/80",
   },
   {
     icon: MapPin,
     title: "Choose Your Route",
     description:
-      "Select your pickup and destination. We cover routes between Oke-Odo, Tanke, Ilorin and the School Park.",
+      "Select your pickup and destination. We cover routes across Debari, Shomolu, and Yaba in Lagos.",
     color: "from-secondary to-secondary/80",
   },
   {
     icon: Car,
     title: "Find Your Ride",
-    description: "Browse available rides or post your own. Connect with verified UNILORIN students and drivers.",
+    description: "Browse available keke rides or request one. Connect with verified drivers and fellow riders.",
     color: "from-primary to-secondary",
   },
   {
@@ -43,7 +43,7 @@ const steps = [
 ]
 
 const features = [
-  { icon: Shield, title: "Verified Students", description: "All users are verified UNILORIN students" },
+  { icon: Shield, title: "Verified Riders", description: "All users are verified for safety" },
   { icon: Smartphone, title: "Real-time Tracking", description: "Track your ride in real-time" },
   { icon: Users, title: "Ride Sharing", description: "Share rides to split costs" },
   { icon: CreditCard, title: "Secure Payments", description: "Powered by Paystack" },
@@ -65,11 +65,11 @@ export default function HowItWorksPage() {
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               How{" "}
-              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">EASELY</span>{" "}
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Charter Keke</span>{" "}
               Works
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Getting around UNILORIN has never been easier. Follow these simple steps to start your journey.
+              Getting around Lagos has never been easier. Follow these simple steps to start your journey.
             </p>
           </motion.div>
         </section>
@@ -125,8 +125,8 @@ export default function HowItWorksPage() {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold mb-4">Why Choose EASELY?</h2>
-            <p className="text-muted-foreground">Built specifically for UNILORIN students</p>
+            <h2 className="text-3xl font-bold mb-4">Why Choose Charter Keke?</h2>
+            <p className="text-muted-foreground">The most reliable keke transport in Lagos</p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -160,7 +160,7 @@ export default function HowItWorksPage() {
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Get Started?</h2>
             <p className="text-white/80 mb-8 max-w-xl mx-auto">
-              Join the UNILORIN community on EASELY and start sharing rides today.
+              Join the Charter Keke community and start sharing affordable rides today.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link href="/auth/register">

@@ -14,7 +14,7 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">1. Information We Collect</h2>
               <p className="text-muted-foreground">
-                EASELY collects information you provide directly to us, including:
+                Charter Keke collects information you provide directly to us, including:
               </p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mt-4">
                 <li>Personal identification information (name, email address, phone number)</li>
@@ -77,9 +77,9 @@ export default function PrivacyPage() {
                 If you have any questions about this Privacy Policy, please contact us at:
               </p>
               <ul className="list-none text-muted-foreground space-y-2 mt-4">
-                <li>Email: easely@gmail.com</li>
+                <li>Email: support@charterkeke.com</li>
                 <li>Phone: +234 808 319 1228</li>
-                <li>Address: Ilorin, Nigeria</li>
+                <li>Address: Lagos, Nigeria</li>
               </ul>
             </section>
           </div>

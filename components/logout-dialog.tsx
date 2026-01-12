@@ -1,6 +1,7 @@
 "use client"
 
 import { useAuth } from "@/lib/auth-context"
+import { signOut } from "next-auth/react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +16,13 @@ import { LogOut } from "lucide-react"
 
 export function LogoutDialog() {
   const { showLogoutConfirm, setShowLogoutConfirm, logout, isLoading } = useAuth()
+
+  const handleLogout = async () => {
+    // First try NextAuth logout
+    await signOut({ redirect: true, callbackUrl: "/auth/login" })
+    // Also call the context logout for cleanup
+    await logout()
+  }
 
   return (
     <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
@@ -31,7 +39,7 @@ export function LogoutDialog() {
         <AlertDialogFooter>
           <AlertDialogCancel className="border-primary/20 hover:bg-primary/10">Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={logout}
+            onClick={handleLogout}
             disabled={isLoading}
             className="bg-gradient-to-r from-primary to-secondary hover:opacity-90"
           >

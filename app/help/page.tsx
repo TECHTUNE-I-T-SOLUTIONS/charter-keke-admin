@@ -53,8 +53,8 @@ const contactMethods = [
     icon: Mail,
     title: "Email Support",
     description: "Get help via email",
-    value: "easely@gmail.com",
-    action: "mailto:easely@gmail.com",
+    value: "support@charterkeke.com",
+    action: "mailto:support@charterkeke.com",
   },
   {
     icon: Phone,
@@ -97,7 +97,7 @@ export default function HelpPage() {
               </span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              Find guides, tutorials, and answers to get the most out of EASELY
+              Find guides, tutorials, and answers to get the most out of Charter Keke
             </p>
           </motion.div>
         </section>

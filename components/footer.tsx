@@ -40,7 +40,7 @@ export function Footer() {
       return
     }
     toast.success("Subscribed!", {
-      description: "You'll receive updates about EASELY.",
+      description: "You'll receive updates about Charter Keke.",
     })
     setEmail("")
   }
@@ -53,33 +53,35 @@ export function Footer() {
           <div className="lg:col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-2">
               <motion.div whileHover={{ rotate: 10 }} transition={{ type: "spring", stiffness: 300 }}>
-                <Image src="/images/easely-06.png" alt="EASELY Logo" width={48} height={48} />
+                <div className="w-12 h-12 bg-gradient-to-r from-[#052659] to-[#4353a4] rounded-lg flex items-center justify-center text-white font-bold text-2xl">
+                <Image src="/charter keke.png" alt="Charter Keke" width={40} height={40} className="rounded-lg" />
+                </div>
               </motion.div>
               <span className="text-xl font-bold bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#F5F9FFFF] bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
-                EASELY
+                CHARTER KEKE
               </span>
             </Link>
             <p className="text-muted-foreground dark:text-white max-w-sm">
-              The official ride-sharing platform for University of Ilorin students. Safe, affordable, and
-              community-driven.
+              Fast, affordable, and reliable keke rides across Lagos. Serving Debari, Shomolu, and Yaba with 24/7
+              service and community-focused transportation.
             </p>
 
-            {/* University Badge */}
+            {/* Lagos Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-              <GraduationCap className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">University of Ilorin</span>
+              <Image src="/charter keke.png" alt="Charter Keke" width={32} height={32} className="rounded-lg" />
+              <span className="text-sm font-medium text-primary">Lagos Transport</span>
             </div>
 
             {/* Contact Info */}
             <div className="space-y-3">
               <a
-                href="mailto:ride.easely@gmail.com"
-                className="flex items-center gap-3 text-muted-foreground dark:text-white hover:text-foreground transition-colors group"
-              >
-                <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <Mail className="h-4 w-4 text-primary" />
-                </div>
-                <span>ride.easely@gmail.com</span>
+              href="mailto:support@charterkeke.com"
+              className="flex items-center gap-3 text-muted-foreground dark:text-white hover:text-foreground transition-colors group"
+            >
+              <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <Mail className="h-4 w-4 text-primary" />
+              </div>
+                <span>support@charterkeke.com</span>
               </a>
               <a
                 href="tel:+2348083191228"
@@ -199,7 +201,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-muted-foreground text-sm dark:text-white">
-            &copy; {new Date().getFullYear()} EASELY. All rights reserved.
+            &copy; {new Date().getFullYear()} Charter Keke. All rights reserved.
           </p>
         </div>
       </div>

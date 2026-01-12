@@ -1,195 +1,239 @@
 "use client"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
+import { useSession } from "next-auth/react"
 import { useAuth } from "@/lib/auth-context"
 import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AnimatedSidebar } from "@/components/animated-sidebar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Copy, Gift, Users, TrendingUp, AlertCircle, Loader } from "lucide-react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Gift, Copy, Share2, Users, Percent, CheckCircle2 } from "lucide-react"
 
 function ReferralsContent() {
-  const { user } = useAuth()
+  const { data: session } = useSession()
+  const { user: contextUser } = useAuth()
+  const [loading, setLoading] = useState(true)
+  const [referralData, setReferralData] = useState<any>(null)
+  const [referrals, setReferrals] = useState<any[]>([])
   const [copied, setCopied] = useState(false)
 
-  const referralLink = `https://easely.vercel.app/auth/register?ref=${user?.referralCode}`
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(referralLink)
-    setCopied(true)
-    toast.success("Referral link copied!", {
-      description: "Share it with your friends to earn rewards.",
-    })
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Join EASELY",
-          text: "Get 5% off your first ride with my referral code!",
-          url: referralLink,
-        })
-      } catch (error) {
-        handleCopy()
+  const user = session?.user
+    ? {
+        id: (session.user as any).id || "",
+        email: session.user.email || "",
+        firstName: (session.user as any).firstName || "User",
       }
-    } else {
-      handleCopy()
+    : contextUser
+
+  useEffect(() => {
+    if (!user?.id) return
+
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const referralsRes = await fetch("/api/user/referrals")
+        const referralsData = await referralsRes.json()
+
+        setReferralData(referralsData.referralCode)
+        setReferrals(referralsData.referrals || [])
+      } catch (error) {
+        console.error("Failed to fetch referrals:", error)
+        toast.error("Failed to load referrals")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [user?.id])
+
+  const handleCopyCode = () => {
+    if (referralData?.referral_code) {
+      navigator.clipboard.writeText(referralData.referral_code)
+      setCopied(true)
+      toast.success("Referral code copied!")
+      setTimeout(() => setCopied(false), 2000)
     }
   }
 
-  const steps = [
-    { icon: <Share2 className="h-5 w-5" />, title: "Share Your Code", desc: "Send your unique code to friends" },
-    { icon: <Users className="h-5 w-5" />, title: "Friends Sign Up", desc: "They register using your code" },
-    { icon: <Percent className="h-5 w-5" />, title: "Both Get Rewarded", desc: "You both get 5% off next booking" },
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader className="h-8 w-8 animate-spin mx-auto mb-2" />
+          <p className="text-muted-foreground">Loading your referrals...</p>
+        </div>
+      </div>
+    )
+  }
+
+  const stats = [
+    {
+      label: "Total Referrals",
+      value: referralData?.total_referrals || 0,
+      icon: <Users className="h-5 w-5" />,
+      color: "from-primary to-primary/70",
+    },
+    {
+      label: "Active Referrals",
+      value: referralData?.active_referrals || 0,
+      icon: <TrendingUp className="h-5 w-5" />,
+      color: "from-emerald-500 to-emerald-400",
+    },
+    {
+      label: "Total Rewards",
+      value: `₦${(referralData?.total_rewards || 0).toLocaleString()}`,
+      icon: <Gift className="h-5 w-5" />,
+      color: "from-amber-500 to-amber-400",
+    },
   ]
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
+    <div className="flex min-h-screen bg-background pb-24 lg:pb-0">
+      <AnimatedSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Referral Program</h1>
-            <p className="text-muted-foreground mt-1">Invite friends and earn rewards together</p>
-          </motion.div>
-
-          {/* Referral Code Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            transition={{ duration: 0.5 }}
           >
-            <Card className="bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 border-primary/20 overflow-hidden">
-              <CardContent className="p-6 md:p-8">
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                  <div className="p-4 rounded-full bg-gradient-to-r from-primary to-secondary text-white">
-                    <Gift className="h-8 w-8" />
-                  </div>
-                  <div className="flex-1 text-center md:text-left">
-                    <h2 className="text-xl font-semibold text-foreground mb-2">Your Referral Code</h2>
-                    <div className="inline-flex items-center gap-3 px-6 py-3 rounded-lg bg-background/80 border border-primary/20">
-                      <span className="text-2xl font-mono font-bold text-primary tracking-wider">
-                        {user?.referralCode}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleCopy}
-                        className="text-primary hover:bg-primary/10"
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">
+              Referral Program
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Invite friends and earn rewards on every ride they take
+            </p>
+          </motion.div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {stats.map((stat, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 * idx }}
+              >
+                <Card className="overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground font-medium">
+                          {stat.label}
+                        </p>
+                        <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                      </div>
+                      <div
+                        className={`p-3 rounded-lg bg-gradient-to-br ${stat.color} text-white`}
                       >
-                        {copied ? <CheckCircle2 className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
-                      </Button>
+                        {stat.icon}
+                      </div>
                     </div>
-                  </div>
-                  <Button onClick={handleShare} className="bg-gradient-to-r from-primary to-secondary hover:opacity-90">
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
 
-          {/* Referral Link */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <Card className="bg-card/50 backdrop-blur border-primary/10">
-              <CardHeader>
-                <CardTitle>Your Referral Link</CardTitle>
-                <CardDescription>Share this link directly with your friends</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
-                  <Input
-                    value={referralLink}
-                    readOnly
-                    className="bg-background/50 border-primary/20 font-mono text-sm"
-                  />
-                  <Button
-                    onClick={handleCopy}
-                    variant="outline"
-                    className="border-primary/20 hover:bg-primary/10 shrink-0 bg-transparent"
-                  >
-                    {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* How It Works */}
+          {/* Referral Code */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Card className="bg-card/50 backdrop-blur border-primary/10">
+            <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
               <CardHeader>
-                <CardTitle>How It Works</CardTitle>
-                <CardDescription>Earn rewards in 3 simple steps</CardDescription>
+                <CardTitle>Your Referral Code</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-3 gap-6">
-                  {steps.map((step, index) => (
-                    <div key={step.title} className="text-center">
-                      <div className="relative inline-block mb-4">
-                        <div className="p-4 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 text-primary">
-                          {step.icon}
-                        </div>
-                        <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-bold flex items-center justify-center">
-                          {index + 1}
-                        </div>
-                      </div>
-                      <h3 className="font-semibold text-foreground mb-1">{step.title}</h3>
-                      <p className="text-sm text-muted-foreground">{step.desc}</p>
-                    </div>
-                  ))}
+                <div className="flex items-center gap-3 p-4 bg-background rounded-lg">
+                  <code className="flex-1 font-mono text-lg font-bold">
+                    {referralData?.referral_code || "N/A"}
+                  </code>
+                  <Button
+                    onClick={handleCopyCode}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Copy className="h-4 w-4" />
+                    {copied ? "Copied!" : "Copy"}
+                  </Button>
                 </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Share this code with friends. Both of you get ₦500 when they complete their first ride!
+                </p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Stats */}
+          {/* Referrals List */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <div className="grid md:grid-cols-3 gap-4">
-              <Card className="bg-card/50 backdrop-blur border-primary/10">
-                <CardContent className="p-6 text-center">
-                  <p className="text-3xl font-bold text-primary">0</p>
-                  <p className="text-sm text-muted-foreground">Friends Referred</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-card/50 backdrop-blur border-primary/10">
-                <CardContent className="p-6 text-center">
-                  <p className="text-3xl font-bold text-secondary">₦0</p>
-                  <p className="text-sm text-muted-foreground">Total Rewards</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-card/50 backdrop-blur border-primary/10">
-                <CardContent className="p-6 text-center">
-                  <p className="text-3xl font-bold text-emerald-500">0</p>
-                  <p className="text-sm text-muted-foreground">Pending Rewards</p>
-                </CardContent>
-              </Card>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Referrals</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {referrals.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-muted-foreground">No referrals yet</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Start inviting friends to earn rewards!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {referrals.map((referral) => (
+                      <div
+                        key={referral.id}
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {referral.referee?.first_name}{" "}
+                            {referral.referee?.last_name}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {referral.referee?.email}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <Badge
+                            className={
+                              referral.status === "active"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-amber-100 text-amber-800"
+                            }
+                          >
+                            {referral.status}
+                          </Badge>
+                          <p className="text-sm font-bold mt-1 text-primary">
+                            ₦{(referral.reward_amount || 0).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </motion.div>
         </div>
       </main>
     </div>
   )
 }
+
 
 export default function ReferralsPage() {
   return (

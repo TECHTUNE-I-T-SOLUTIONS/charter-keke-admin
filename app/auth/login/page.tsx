@@ -4,10 +4,10 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,7 +23,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { login } = useAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,20 +35,34 @@ export default function LoginPage() {
 
     setIsSubmitting(true)
 
-    const result = await login(emailOrPhone, password)
+    try {
+      const credentials = {
+        password,
+        ...(loginMethod === "email" ? { email: emailOrPhone } : { phone: emailOrPhone }),
+      }
 
-    if (result.success) {
-      toast.success("Welcome back!", {
-        description: "Redirecting to your dashboard...",
+      const result = await signIn("credentials", {
+        ...credentials,
+        redirect: false,
       })
 
-      // Get user from localStorage to determine redirect
-      const storedUser = localStorage.getItem("easely_user")
-      if (storedUser) {
-        const user = JSON.parse(storedUser)
+      if (result?.error) {
+        toast.error("Login Failed", {
+          description: result.error || "Invalid credentials",
+        })
+        setIsSubmitting(false)
+      } else if (result?.ok) {
+        toast.success("Welcome back to Charter Keke!", {
+          description: "Redirecting to your dashboard...",
+        })
+        
+        // Get session to determine redirect
+        const session = await fetch("/api/auth/session").then(r => r.json())
         setTimeout(() => {
-          switch (user.role) {
+          const role = session?.user?.role || "user"
+          switch (role) {
             case "admin":
+            case "super_admin":
               router.push("/admin/dashboard")
               break
             case "driver":
@@ -60,9 +73,9 @@ export default function LoginPage() {
           }
         }, 1000)
       }
-    } else {
+    } catch (error) {
       toast.error("Login Failed", {
-        description: result.error,
+        description: "An error occurred. Please try again.",
       })
       setIsSubmitting(false)
     }
@@ -87,19 +100,11 @@ export default function LoginPage() {
               className="mx-auto"
             >
               <Link href="/">
-                <Image
-                  src="/images/easely-06.png"
-                  alt="EASELY"
-                  width={80}
-                  height={80}
-                  className="mx-auto drop-shadow-lg hover:scale-105 transition-transform"
-                />
+                <Image src="/charter keke.png" alt="Charter Keke" width={80} height={80} className="rounded-xl drop-shadow-lg hover:scale-105 transition-transform mx-auto" />
               </Link>
             </motion.div>
-            <CardTitle className="text-2xl font-serif text-foreground">Welcome Back</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Sign in to continue your journey with EASELY
-            </CardDescription>
+            <CardTitle className="text-2xl font-serif text-foreground">Charter Keke</CardTitle>
+            <CardDescription className="text-muted-foreground">Login to your account. Sign in to continue your journey with Charter Keke</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -210,20 +215,6 @@ export default function LoginPage() {
               </form>
             </Tabs>
 
-            <div className="mt-6 p-4 rounded-lg bg-muted/30 border border-primary/10">
-              <p className="text-xs text-muted-foreground text-center mb-2">Demo Accounts (password: demo123)</p>
-              <div className="text-xs text-center space-y-1">
-                <p>
-                  <span className="text-primary">User:</span> user@easely.com
-                </p>
-                <p>
-                  <span className="text-primary">Driver:</span> driver@easely.com
-                </p>
-                <p>
-                  <span className="text-primary">Admin:</span> admin@easely.com
-                </p>
-              </div>
-            </div>
           </CardContent>
 
           <CardFooter className="flex justify-center">

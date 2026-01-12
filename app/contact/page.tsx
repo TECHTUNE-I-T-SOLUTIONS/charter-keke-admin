@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -12,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { toast } from "sonner"
-import { Mail, Phone, MapPin, Send, Loader2, Clock, GraduationCap } from "lucide-react"
+import { Mail, Phone, MapPin, Send, Loader2, Clock } from "lucide-react"
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false)
@@ -41,15 +42,15 @@ export default function ContactPage() {
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
-              <GraduationCap className="h-4 w-4" />
-              <span className="text-sm font-medium">University of Ilorin</span>
+              <Image src="/charter keke.png" alt="Charter Keke" width={24} height={24} />
+              <span className="text-sm font-medium">Lagos Charter Keke</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Get in{" "}
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Touch</span>
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Have questions or feedback? We'd love to hear from you. Our team is here to help UNILORIN students.
+              Have questions or feedback? We'd love to hear from you. Our team is here to help Charter Keke riders and drivers.
             </p>
           </motion.div>
 
@@ -70,9 +71,9 @@ export default function ContactPage() {
 
               <div className="space-y-4">
                 {[
-                  { icon: Mail, label: "Email", value: "easely@gmail.com", href: "mailto:easely@gmail.com" },
+                  { icon: Mail, label: "Email", value: "support@charterkeke.com", href: "mailto:support@charterkeke.com" },
                   { icon: Phone, label: "Phone", value: "+234 808 319 1228", href: "tel:+2348083191228" },
-                  { icon: MapPin, label: "Location", value: "Tanke, Ilorin, Kwara State, Nigeria", href: null },
+                  { icon: MapPin, label: "Location", value: "Debari, Lagos, Nigeria", href: null },
                 ].map((item, index) => (
                   <motion.div
                     key={item.label}

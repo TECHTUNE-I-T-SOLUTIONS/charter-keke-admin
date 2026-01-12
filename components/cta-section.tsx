@@ -21,7 +21,7 @@ export function CTASection() {
 
             <h2 className="text-3xl md:text-5xl font-bold mb-6 text-balance">Ready to Save on Your Daily Commute?</h2>
             <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
-              Join EASELY today and get 5% off your first ride when you use a referral code!
+              Join Charter Keke today and get 5% off your first ride when you use a referral code!
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">

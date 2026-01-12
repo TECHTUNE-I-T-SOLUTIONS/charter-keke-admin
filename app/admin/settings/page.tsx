@@ -15,10 +15,10 @@ import { Bell, Shield, CreditCard, MessageSquare, Globe, Save } from "lucide-rea
 
 function AdminSettingsContent() {
   const [settings, setSettings] = useState({
-    siteName: "EASELY",
-    supportEmail: "easely@gmail.com",
+    siteName: "Charter Keke",
+    supportEmail: "support@charterkeke.com",
     supportPhone: "+234 808 319 1228",
-    location: "Ilorin, Nigeria",
+    location: "Lagos, Nigeria",
     maintenanceMode: false,
     allowRegistration: true,
     requireEmailVerification: true,
@@ -297,7 +297,7 @@ function AdminSettingsContent() {
                     </div>
                     <div className="space-y-2">
                       <Label>Sender ID</Label>
-                      <Input placeholder="EASELY" className="bg-background/50 border-primary/20" />
+                      <Input placeholder="Charter Keke" className="bg-background/50 border-primary/20" />
                     </div>
                   </CardContent>
                 </Card>

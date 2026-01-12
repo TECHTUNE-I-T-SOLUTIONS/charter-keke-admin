@@ -1,22 +1,92 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { useSession } from "next-auth/react"
+import { useAuth } from "@/lib/auth-context"
 import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
+import { AnimatedSidebar } from "@/components/animated-sidebar"
 import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CheckCircle, XCircle, Calendar } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { MapPin, Calendar, Star, AlertCircle, Loader } from "lucide-react"
+import { useState, useEffect } from "react"
+import { toast } from "sonner"
 
 function RideHistoryContent() {
+  const { data: session } = useSession()
+  const { user: contextUser } = useAuth()
+  const [loading, setLoading] = useState(true)
+  const [rides, setRides] = useState<any[]>([])
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+
+  const user = session?.user
+    ? {
+        id: (session.user as any).id || "",
+        email: session.user.email || "",
+        firstName: (session.user as any).firstName || "User",
+      }
+    : contextUser
+
+  useEffect(() => {
+    if (!user?.id) return
+
+    const fetchRides = async () => {
+      try {
+        setLoading(true)
+        const ridesRes = await fetch(`/api/driver/ride-history?page=${page}`)
+        const ridesData = await ridesRes.json()
+
+        if (page === 1) {
+          setRides(ridesData.rides || [])
+        } else {
+          setRides((prev) => [...prev, ...(ridesData.rides || [])])
+        }
+
+        setHasMore((ridesData.rides || []).length === 10)
+      } catch (error) {
+        console.error("Failed to fetch ride history:", error)
+        toast.error("Failed to load ride history")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRides()
+  }, [user?.id, page])
+
+  const handleLoadMore = () => {
+    setPage((prev) => prev + 1)
+  }
+
+  if (loading && page === 1) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader className="h-8 w-8 animate-spin mx-auto mb-2" />
+          <p className="text-muted-foreground">Loading your ride history...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
+      <AnimatedSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Ride History</h1>
-            <p className="text-muted-foreground mt-1">View all your past rides and earnings</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">
+              Ride History
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              View all your completed and cancelled rides
+            </p>
           </motion.div>
 
           <motion.div
@@ -24,74 +94,109 @@ function RideHistoryContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList className="bg-muted/50 p-1">
-                <TabsTrigger
-                  value="all"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  All Rides
-                </TabsTrigger>
-                <TabsTrigger
-                  value="completed"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  Completed
-                </TabsTrigger>
-                <TabsTrigger
-                  value="cancelled"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <XCircle className="h-4 w-4 mr-1" />
-                  Cancelled
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="all" className="mt-6">
-                <Card className="bg-card/50 backdrop-blur border-primary/10">
-                  <CardContent className="py-12">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <div className="p-4 rounded-full bg-muted/50 mb-4">
-                        <Calendar className="h-8 w-8 text-muted-foreground" />
+            {rides.length === 0 ? (
+              <Card className="p-8 text-center">
+                <AlertCircle className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-muted-foreground">No ride history yet</p>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {rides.map((ride) => (
+                  <Card key={ride.id} className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex flex-col gap-4">
+                      {/* Header */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold">
+                            {ride.users?.first_name} {ride.users?.last_name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(ride.created_at).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </p>
+                        </div>
+                        <Badge
+                          className={
+                            ride.status === "completed"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-red-100 text-red-800"
+                          }
+                        >
+                          {ride.status}
+                        </Badge>
                       </div>
-                      <h3 className="font-medium text-foreground mb-1">No ride history</h3>
-                      <p className="text-sm text-muted-foreground max-w-sm">
-                        Your completed rides will appear here. Start driving to build your history!
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
 
-              <TabsContent value="completed" className="mt-6">
-                <Card className="bg-card/50 backdrop-blur border-primary/10">
-                  <CardContent className="py-12">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <div className="p-4 rounded-full bg-muted/50 mb-4">
-                        <CheckCircle className="h-8 w-8 text-muted-foreground" />
+                      {/* Route Info */}
+                      <div className="flex items-center gap-3">
+                        <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{ride.pickup_zone}</p>
+                          <p className="text-xs text-muted-foreground">→</p>
+                          <p className="text-sm font-medium">{ride.destination_zone}</p>
+                        </div>
                       </div>
-                      <h3 className="font-medium text-foreground mb-1">No completed rides</h3>
-                      <p className="text-sm text-muted-foreground">Completed rides will appear here.</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
 
-              <TabsContent value="cancelled" className="mt-6">
-                <Card className="bg-card/50 backdrop-blur border-primary/10">
-                  <CardContent className="py-12">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <div className="p-4 rounded-full bg-muted/50 mb-4">
-                        <XCircle className="h-8 w-8 text-muted-foreground" />
+                      {/* Details */}
+                      <div className="grid grid-cols-3 gap-4 pt-2 border-t">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Fare</p>
+                          <p className="font-bold">₦{ride.fare_amount}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Distance</p>
+                          <p className="font-bold">{ride.distance_km || 0} km</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Duration</p>
+                          <p className="font-bold">{ride.duration_minutes || 0} min</p>
+                        </div>
                       </div>
-                      <h3 className="font-medium text-foreground mb-1">No cancelled rides</h3>
-                      <p className="text-sm text-muted-foreground">Cancelled rides will appear here.</p>
+
+                      {/* Rating */}
+                      {ride.driver_rating && (
+                        <div className="flex items-center gap-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ${
+                                  i < ride.driver_rating
+                                    ? "fill-amber-400 text-amber-400"
+                                    : "text-muted"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            {ride.driver_review || "No review"}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  </Card>
+                ))}
+
+                {hasMore && (
+                  <div className="flex justify-center pt-4">
+                    <Button
+                      onClick={handleLoadMore}
+                      disabled={loading}
+                      variant="outline"
+                    >
+                      {loading ? "Loading..." : "Load More"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </motion.div>
         </div>
       </main>
@@ -99,7 +204,7 @@ function RideHistoryContent() {
   )
 }
 
-export default function RideHistoryPage() {
+export default function HistoryPage() {
   return (
     <ProtectedRoute allowedRoles={["driver"]}>
       <RideHistoryContent />

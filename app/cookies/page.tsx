@@ -21,7 +21,7 @@ export default function CookiesPage() {
 
             <section>
               <h2 className="text-2xl font-semibold mb-4">How We Use Cookies</h2>
-              <p className="text-muted-foreground">EASELY uses cookies to:</p>
+              <p className="text-muted-foreground">Charter Keke uses cookies to:</p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2 mt-4">
                 <li>Keep you signed in to your account</li>
                 <li>Remember your preferences (theme, language)</li>
@@ -64,7 +64,7 @@ export default function CookiesPage() {
 
             <section>
               <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
-              <p className="text-muted-foreground">Questions? Reach us at easely@gmail.com or +234 808 319 1228.</p>
+              <p className="text-muted-foreground">Questions? Reach us at support@charterkeke.com or +234 808 319 1228.</p>
             </section>
           </div>
         </div>
