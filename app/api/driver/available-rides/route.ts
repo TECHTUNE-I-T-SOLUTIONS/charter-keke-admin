@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { getSessionFromRequest } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get driver info
-    const { data: driver } = await supabaseAdmin
+    const { data: driver } = await supabase
       .from("drivers")
       .select("*")
       .eq("user_id", session.user.id)
@@ -24,21 +24,61 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get available rides in driver's zones
-    const { data: rides } = await supabaseAdmin
+    // Get available rides (pending status, not yet accepted by any driver)
+    const { data: rides, error } = await supabase
       .from("rides")
-      .select("*")
-      .in("pickup_zone", driver.operating_zones || [])
-      .eq("status", "dispatched")
+      .select(`
+        id,
+        rider_id,
+        pickup_zone,
+        destination_zone,
+        pickup_description,
+        destination_description,
+        fare_amount,
+        driver_earnings,
+        platform_fee,
+        distance_km,
+        status,
+        pickup_time,
+        created_at
+      `)
+      .eq("status", "pending")
       .order("created_at", { ascending: false })
-      .limit(10);
+      .limit(20);
 
-    return NextResponse.json({ rides });
-  } catch (error) {
-    console.error("Available rides fetch error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+    if (error) {
+      console.error("Available rides fetch error:", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+    }
+
+    // Fetch user data separately for each ride
+    let ridesWithUsers = [];
+    if (rides && rides.length > 0) {
+      ridesWithUsers = await Promise.all(
+        rides.map(async (ride: any) => {
+          const { data: user } = await supabase
+            .from("users")
+            .select("id, first_name, last_name, phone_number, profile_picture_url")
+            .eq("id", ride.rider_id)
+            .single();
+
+          return {
+            ...ride,
+            users: user || {},
+          };
+        })
+      );
+    }
+
+        return NextResponse.json({ rides: ridesWithUsers || [] });
+      } catch (error) {
+        console.error("Available rides error:", error);
+        return NextResponse.json(
+          { error: "Internal server error" },
+          { status: 500 }
+        );
+      }
+    }

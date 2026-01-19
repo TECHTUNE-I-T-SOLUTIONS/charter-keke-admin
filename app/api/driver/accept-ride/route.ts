@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { getSessionFromRequest } from "@/lib/auth";
-import { notifyRiderAboutRideStatus } from "@/lib/notifications";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,9 +21,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Get driver profile
-    const { data: driver } = await supabaseAdmin
+    const { data: driver } = await supabase
       .from("drivers")
-      .select("*")
+      .select("id")
       .eq("user_id", session.user.id)
       .single();
 
@@ -36,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get ride
-    const { data: ride } = await supabaseAdmin
+    const { data: ride } = await supabase
       .from("rides")
       .select("*")
       .eq("id", rideId)
@@ -46,48 +45,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Ride not found" }, { status: 404 });
     }
 
-    // Check if ride is already accepted
-    if (ride.status !== "dispatched") {
+    // Check if ride is still available (pending status)
+    if (ride.status !== "pending") {
       return NextResponse.json(
         { error: "Ride is no longer available" },
         { status: 409 }
       );
     }
 
-    // Accept the ride
-    const { data: updatedRide, error } = await supabaseAdmin
+    // Accept the ride - update status to accepted and assign driver
+    const { data: updatedRide, error } = await supabase
       .from("rides")
       .update({
         status: "accepted",
-        assigned_driver_id: driver.id,
+        driver_id: driver.id,
+        updated_at: new Date().toISOString(),
       })
       .eq("id", rideId)
       .select()
       .single();
 
     if (error) {
+      console.error("Accept ride error:", error);
       return NextResponse.json(
         { error: "Failed to accept ride" },
         { status: 500 }
       );
     }
 
-    // Update dispatch log
-    await supabaseAdmin
-      .from("ride_dispatch_logs")
-      .update({ response: "accepted", response_time: Date.now() })
-      .eq("ride_id", rideId)
-      .eq("driver_id", driver.id);
-
-    // Notify rider
-    await notifyRiderAboutRideStatus(ride.rider_id, rideId, "accepted");
-
     return NextResponse.json({
-      message: "Ride accepted successfully",
+      success: true,
       ride: updatedRide,
     });
   } catch (error) {
-    console.error("Accept ride error:", error);
+    console.error("API error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

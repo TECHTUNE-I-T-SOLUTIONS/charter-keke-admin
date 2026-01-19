@@ -31,6 +31,26 @@ interface DriverDetails {
   amount_to_pay: number
 }
 
+interface RideRoute {
+  id: string
+  pickupLat: number
+  pickupLng: number
+  dropoffLat: number
+  dropoffLng: number
+  pickupZone: string
+  destinationZone: string
+  distance: number
+  fare: number
+  platformFee?: number
+  driverEarnings?: number
+  status: string
+  pickupTime?: string
+  durationMinutes?: number
+  driverLat?: number
+  driverLng?: number
+  rating?: number
+}
+
 function RidesContent() {
   const { data: session } = useSession()
   const { user: contextUser } = useAuth()
@@ -42,6 +62,8 @@ function RidesContent() {
   const [driverDetails, setDriverDetails] = useState<DriverDetails | null>(null)
   const [completedRideId, setCompletedRideId] = useState<string | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [selectedRideRoute, setSelectedRideRoute] = useState<RideRoute | null>(null)
+  const [showRideModal, setShowRideModal] = useState(false)
 
   const user = session?.user
     ? {
@@ -70,19 +92,41 @@ function RidesContent() {
       // Create map markers from active rides
       const markers: any[] = []
       ridesData.rides?.forEach((ride: any) => {
+        // Parse coordinates from descriptions if available
+        let pickupLat = 6.5244 + Math.random() * 0.05
+        let pickupLng = 3.3792 + Math.random() * 0.05
+        let dropoffLat = 6.5244 + Math.random() * 0.1
+        let dropoffLng = 3.3792 + Math.random() * 0.1
+
+        // Try to extract coordinates from description
+        if (ride.pickup_description) {
+          const pickupMatch = ride.pickup_description.match(/Lat:\s*([\d.-]+),\s*Lng:\s*([\d.-]+)/)
+          if (pickupMatch) {
+            pickupLat = parseFloat(pickupMatch[1])
+            pickupLng = parseFloat(pickupMatch[2])
+          }
+        }
+        if (ride.destination_description) {
+          const dropoffMatch = ride.destination_description.match(/Lat:\s*([\d.-]+),\s*Lng:\s*([\d.-]+)/)
+          if (dropoffMatch) {
+            dropoffLat = parseFloat(dropoffMatch[1])
+            dropoffLng = parseFloat(dropoffMatch[2])
+          }
+        }
+
         markers.push({
           id: `pickup-${ride.id}`,
-          lat: ride.pickup_latitude || 6.5244 + Math.random() * 0.05,
-          lng: ride.pickup_longitude || 3.3792 + Math.random() * 0.05,
-          title: ride.pickup_address || ride.pickup_zone,
+          lat: pickupLat,
+          lng: pickupLng,
+          title: ride.pickup_zone,
           type: "pickup",
         })
 
         markers.push({
           id: `destination-${ride.id}`,
-          lat: ride.dropoff_latitude || 6.5244 + Math.random() * 0.1,
-          lng: ride.dropoff_longitude || 3.3792 + Math.random() * 0.1,
-          title: ride.dropoff_address || ride.destination_zone,
+          lat: dropoffLat,
+          lng: dropoffLng,
+          title: ride.destination_zone,
           type: "destination",
         })
       })
@@ -102,6 +146,34 @@ function RidesContent() {
 
     fetchRidesData()
   }, [user?.id])
+
+  const calculateMapCenter = (ride: any): [number, number] => {
+    // Parse coordinates from descriptions
+    let pickupLat = 6.5244
+    let pickupLng = 3.3792
+    let dropoffLat = 6.5244
+    let dropoffLng = 3.3792
+
+    if (ride.pickup_description) {
+      const match = ride.pickup_description.match(/Lat:\s*([\d.-]+),\s*Lng:\s*([\d.-]+)/)
+      if (match) {
+        pickupLat = parseFloat(match[1])
+        pickupLng = parseFloat(match[2])
+      }
+    }
+    if (ride.destination_description) {
+      const match = ride.destination_description.match(/Lat:\s*([\d.-]+),\s*Lng:\s*([\d.-]+)/)
+      if (match) {
+        dropoffLat = parseFloat(match[1])
+        dropoffLng = parseFloat(match[2])
+      }
+    }
+
+    // Calculate center point between pickup and dropoff
+    const centerLat = (pickupLat + dropoffLat) / 2
+    const centerLng = (pickupLng + dropoffLng) / 2
+    return [centerLat, centerLng]
+  }
 
   const handleRideCompleted = async (rideId: string) => {
     try {
@@ -123,6 +195,48 @@ function RidesContent() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Error processing ride completion")
     }
+  }
+
+  const handleViewRoute = (ride: any) => {
+    // Parse coordinates from descriptions
+    let pickupLat = 6.5244
+    let pickupLng = 3.3792
+    let dropoffLat = 6.5244
+    let dropoffLng = 3.3792
+
+    if (ride.pickup_description) {
+      const match = ride.pickup_description.match(/Lat:\s*([\d.-]+),\s*Lng:\s*([\d.-]+)/)
+      if (match) {
+        pickupLat = parseFloat(match[1])
+        pickupLng = parseFloat(match[2])
+      }
+    }
+    if (ride.destination_description) {
+      const match = ride.destination_description.match(/Lat:\s*([\d.-]+),\s*Lng:\s*([\d.-]+)/)
+      if (match) {
+        dropoffLat = parseFloat(match[1])
+        dropoffLng = parseFloat(match[2])
+      }
+    }
+
+    setSelectedRideRoute({
+      id: ride.id,
+      pickupLat,
+      pickupLng,
+      dropoffLat,
+      dropoffLng,
+      pickupZone: ride.pickup_zone,
+      destinationZone: ride.destination_zone,
+      distance: ride.distance_km || 0,
+      fare: ride.fare_amount || 0,
+      platformFee: ride.platform_fee || 0,
+      driverEarnings: ride.driver_earnings || 0,
+      status: ride.status,
+      pickupTime: ride.pickup_time,
+      durationMinutes: ride.duration_minutes,
+      rating: ride.rating || undefined,
+    })
+    setShowRideModal(true)
   }
 
   if (loading) {
@@ -183,13 +297,39 @@ function RidesContent() {
               </TabsList>
 
               <TabsContent value="map" className="space-y-4">
+                {activeRides.length > 0 && (
+                  <div className="p-4 bg-card/50 rounded-lg border border-border space-y-2">
+                    <p className="text-sm font-semibold text-foreground">
+                      Viewing: {activeRides[0].pickup_zone} → {activeRides[0].destination_zone}
+                    </p>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Distance</p>
+                        <p className="font-semibold">{activeRides[0].distance_km?.toFixed(2) || '0.00'} km</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Status</p>
+                        <p className="font-semibold capitalize">{activeRides[0].status}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Fare</p>
+                        <p className="font-semibold">₦{activeRides[0].fare_amount?.toLocaleString() || '0'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Time</p>
+                        <p className="font-semibold">
+                          {new Date(activeRides[0].pickup_time).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <CharterKeKeMap
                   height="h-96"
-                  center={userLocation || [6.5244, 3.3792]}
+                  center={activeRides.length > 0 ? calculateMapCenter(activeRides[0]) : [6.5244, 3.3792]}
                   markers={mapMarkers}
-                  showRoute={false}
-                  showGeolocation={true}
-                  onLocationChange={(lat, lng) => setUserLocation([lat, lng])}
+                  showRoute={activeRides.length > 0}
+                  showGeolocation={false}
                   className="mt-4"
                 />
               </TabsContent>
@@ -209,43 +349,51 @@ function RidesContent() {
                       >
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <h3 className="font-semibold">
+                            <h3 className="font-semibold text-sm">
                               {ride.drivers?.users?.first_name}{" "}
-                              {ride.drivers?.users?.last_name}
+                              {ride.drivers?.users?.last_name || "Driver"}
                             </h3>
-                            <Badge>{ride.status}</Badge>
+                            <Badge className="capitalize">{ride.status}</Badge>
                           </div>
 
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="h-4 w-4 flex-shrink-0" />
-                            <div>
-                              <p>{ride.pickup_zone}</p>
-                              <p className="text-xs">→</p>
-                              <p>{ride.destination_zone}</p>
+                            <div className="flex-1">
+                              <p className="text-xs font-medium line-clamp-1">{ride.pickup_zone}</p>
+                              <p className="text-xs text-center">↓</p>
+                              <p className="text-xs font-medium line-clamp-1">{ride.destination_zone}</p>
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between pt-2 border-t">
+                          <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Distance</p>
+                              <p className="font-semibold text-sm">{ride.distance_km?.toFixed(2) || '0.00'} km</p>
+                            </div>
                             <div>
                               <p className="text-xs text-muted-foreground">Fare</p>
-                              <p className="font-bold">₦{ride.fare_amount}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">Status</p>
-                              <p className="font-medium capitalize text-sm">
-                                {ride.status}
-                              </p>
+                              <p className="font-semibold text-sm">₦{ride.fare_amount?.toLocaleString() || '0'}</p>
                             </div>
                           </div>
 
-                          {ride.drivers?.rating && (
+                          {ride.rating && (
                             <div className="flex items-center gap-1 text-sm">
                               <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
                               <span className="text-muted-foreground">
-                                {ride.drivers.rating}
+                                {ride.rating.toFixed(1)}
                               </span>
                             </div>
                           )}
+
+                          <Button
+                            onClick={() => handleViewRoute(ride)}
+                            variant="secondary"
+                            size="sm"
+                            className="w-full"
+                          >
+                            <MapPin className="h-4 w-4 mr-2" />
+                            View Route
+                          </Button>
 
                           {ride.status === "completed" && (
                             <Button
@@ -330,6 +478,137 @@ function RidesContent() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Ride Route Modal */}
+      {/* Ride Route Modal with Map Background */}
+      {showRideModal && selectedRideRoute && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/40">
+          {/* Compact Modal Container - Much smaller */}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="w-full sm:max-w-sm md:max-w-md h-[60vh] sm:h-[500px] rounded-2xl overflow-hidden bg-background relative shadow-2xl border border-border"
+          >
+            {/* Map - Takes majority of space */}
+            <CharterKeKeMap
+              height="100%"
+              center={[
+                (selectedRideRoute.pickupLat + selectedRideRoute.dropoffLat) / 2,
+                (selectedRideRoute.pickupLng + selectedRideRoute.dropoffLng) / 2,
+              ]}
+              zoom={13}
+              markers={[
+                {
+                  id: "pickup",
+                  lat: selectedRideRoute.pickupLat,
+                  lng: selectedRideRoute.pickupLng,
+                  title: selectedRideRoute.pickupZone,
+                  type: "pickup",
+                },
+                {
+                  id: "destination",
+                  lat: selectedRideRoute.dropoffLat,
+                  lng: selectedRideRoute.dropoffLng,
+                  title: selectedRideRoute.destinationZone,
+                  type: "destination",
+                },
+              ]}
+              showRoute={true}
+              showGeolocation={false}
+              className="w-full h-full"
+            />
+
+            {/* Close Button - Top Right */}
+            <button
+              onClick={() => setShowRideModal(false)}
+              className="absolute top-2 right-2 z-20 bg-background/90 hover:bg-background/100 rounded-full p-1.5 transition-all shadow-md"
+            >
+              <span className="text-base font-bold text-foreground">✕</span>
+            </button>
+
+            {/* Route Info Overlay - Top Left */}
+            <div className="absolute top-2 left-2 right-10 z-20 bg-card/95 backdrop-blur rounded-lg p-2 shadow-lg border border-border/50">
+              <p className="text-xs font-bold text-foreground line-clamp-1">
+                {selectedRideRoute.distance.toFixed(2)} km • ₦{selectedRideRoute.fare.toLocaleString()}
+              </p>
+              <p className="text-[10px] text-muted-foreground line-clamp-1">
+                {selectedRideRoute.pickupZone} → {selectedRideRoute.destinationZone}
+              </p>
+            </div>
+
+            {/* Bottom Compact Info Panel */}
+            <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-card/98 via-card/95 to-transparent backdrop-blur-sm pt-8 pb-2 px-2">
+              <div className="space-y-1.5">
+                {/* Mini Status Row */}
+                <div className="flex items-center justify-between gap-1 px-1">
+                  <Badge variant="outline" className="capitalize text-xs h-5">
+                    {selectedRideRoute.status}
+                  </Badge>
+                  <div className="text-right">
+                    <p className="text-[10px] text-muted-foreground">Your Pay</p>
+                    <p className="text-sm font-bold text-primary">₦{selectedRideRoute.fare.toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {/* Mini Details Grid */}
+                <div className="grid grid-cols-3 gap-1">
+                  <div className="p-1.5 rounded bg-muted/50 text-center">
+                    <p className="text-[9px] text-muted-foreground">Distance</p>
+                    <p className="text-xs font-bold text-foreground">{selectedRideRoute.distance.toFixed(1)} km</p>
+                  </div>
+                  {/* <div className="p-1.5 rounded bg-green-500/10 border border-green-500/20 text-center">
+                    <p className="text-[9px] text-muted-foreground">Driver</p>
+                    <p className="text-xs font-bold text-green-600 dark:text-green-400">
+                      ₦{Math.round((selectedRideRoute.driverEarnings || 0) / 100) * 100}
+                    </p>
+                  </div> */}
+                  <button
+                    onClick={() => setShowRideModal(false)}
+                    className="p-1.5 rounded bg-muted/50 hover:bg-muted transition-colors text-center"
+                  >
+                    <p className="text-xs font-bold text-foreground">Close</p>
+                  </button>
+                </div>
+
+                {/* Expandable Details */}
+                {(selectedRideRoute.pickupTime || selectedRideRoute.rating || selectedRideRoute.platformFee) && (
+                  <details className="group">
+                    <summary className="text-xs font-semibold text-muted-foreground cursor-pointer hover:text-foreground px-1 py-0.5">
+                    More Details
+                    </summary>
+                    <div className="text-xs space-y-1 pt-1 px-1">
+                      {selectedRideRoute.pickupTime && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Pickup:</span>
+                          <span className="font-medium">
+                            {new Date(selectedRideRoute.pickupTime).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      {selectedRideRoute.rating && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Rating:</span>
+                          <span className="font-medium">⭐ {selectedRideRoute.rating.toFixed(1)}</span>
+                        </div>
+                      )}
+                      {/* {selectedRideRoute.platformFee !== undefined && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Platform Fee:</span>
+                          <span className="font-medium">₦{selectedRideRoute.platformFee.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                        </div>
+                      )} */}
+                    </div>
+                  </details>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }

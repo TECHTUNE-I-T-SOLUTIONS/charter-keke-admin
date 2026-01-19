@@ -96,7 +96,7 @@ export function Footer() {
                 <div className="p-2 rounded-lg bg-primary/10">
                   <MapPin className="h-4 w-4 text-primary" />
                 </div>
-                <span>Ilorin, Nigeria</span>
+                <span>Lagos, Nigeria</span>
               </div>
             </div>
           </div>

@@ -95,24 +95,64 @@ export function LeafletMap({
   useEffect(() => {
     if (!mapInstanceRef.current) return
 
-    const handleMapClick = (e: any) => {
+    const handleMapClick = async (e: any) => {
       if (activeLocationPicker) {
         const { lat, lng } = e.latlng
-        const location: Location = {
-          lat,
-          lng,
-          address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-        }
+        
+        // Try to get address name from reverse geocoding with timeout
+        try {
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+          
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`,
+            { signal: controller.signal }
+          )
+          
+          clearTimeout(timeoutId)
+          
+          if (!response.ok) {
+            throw new Error(`Reverse geocoding failed with status ${response.status}`)
+          }
+          
+          const data = await response.json()
+          const address = data.address?.road || data.address?.suburb || data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`
+          
+          const location: Location = {
+            lat,
+            lng,
+            address,
+          }
 
-        if (activeLocationPicker === "pickup") {
-          onPickupSet(location)
-          toast.success("Pickup location set!")
-        } else {
-          onDropoffSet(location)
-          toast.success("Dropoff location set!")
-        }
+          if (activeLocationPicker === "pickup") {
+            onPickupSet(location)
+            toast.success("Pickup location set!")
+          } else {
+            onDropoffSet(location)
+            toast.success("Dropoff location set!")
+          }
 
-        setActiveLocationPicker(null)
+          setActiveLocationPicker(null)
+        } catch (error) {
+          // If reverse geocoding fails, fall back to coordinates
+          console.warn("Reverse geocoding failed, using coordinates:", error)
+          
+          const location: Location = {
+            lat,
+            lng,
+            address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+          }
+          
+          if (activeLocationPicker === "pickup") {
+            onPickupSet(location)
+            toast.success("Pickup location set!")
+          } else {
+            onDropoffSet(location)
+            toast.success("Dropoff location set!")
+          }
+          
+          setActiveLocationPicker(null)
+        }
       }
     }
 
@@ -158,7 +198,7 @@ export function LeafletMap({
         icon: createPickupIcon(),
       })
       
-      marker.bindPopup("<b>Pickup Location</b>")
+      marker.bindPopup(`<div class="text-xs"><b>📍 Pickup Location</b><br/>${pickupLocation.address}</div>`)
       marker.addTo(map)
       pickupMarkerRef.current = marker
 
@@ -219,7 +259,7 @@ export function LeafletMap({
         icon: createDropoffIcon(),
       })
       
-      marker.bindPopup("<b>Dropoff Location</b>")
+      marker.bindPopup(`<div class="text-xs"><b>🏁 Dropoff Location</b><br/>${dropoffLocation.address}</div>`)
       marker.addTo(map)
       dropoffMarkerRef.current = marker
 
@@ -271,12 +311,19 @@ export function LeafletMap({
   }, [])
 
   return (
-    <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[600px]">
+    <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
       <div
         ref={mapRef}
-        className="w-full h-full rounded-lg overflow-hidden border border-border/50"
-        style={{ cursor: activeLocationPicker ? "crosshair" : "grab" }}
+        className={`w-full h-full rounded-lg overflow-hidden border border-border/50 ${activeLocationPicker ? 'cursor-crosshair' : 'cursor-grab'}`}
       />
+      {activeLocationPicker && (
+        <div className="absolute inset-0 rounded-lg pointer-events-none flex items-center justify-center z-10">
+          <div className="bg-black/60 backdrop-blur text-white px-4 py-3 rounded-lg text-center animate-pulse">
+            <div className="text-sm font-semibold">Click on the map to set {activeLocationPicker} location</div>
+            <div className="text-xs mt-1 opacity-80">Press Escape or select another location to cancel</div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

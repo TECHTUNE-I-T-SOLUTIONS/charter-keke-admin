@@ -368,7 +368,7 @@ export function CharterKeKeMap({
         <Button
           onClick={handleRecenterToUser}
           size="sm"
-          className="absolute bottom-4 right-4 z-10 bg-white text-foreground hover:bg-primary hover:text-white shadow-lg"
+          className="absolute bottom-4 right-4 z-10 bg-white dark:bg-gray-800 text-foreground hover:bg-primary hover:text-white shadow-lg"
           title="Center map on your location"
         >
           <Locate className="h-4 w-4 mr-1" />

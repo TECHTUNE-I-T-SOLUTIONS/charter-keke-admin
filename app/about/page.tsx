@@ -89,7 +89,7 @@ export default function AboutPage() {
                 />
               </div>
               <div className="absolute -bottom-4 -right-4 p-4 rounded-2xl bg-card border border-border shadow-lg">
-                <p className="text-2xl font-bold text-primary">2025</p>
+                <p className="text-2xl font-bold text-primary">2026</p>
                 <p className="text-sm text-muted-foreground">Launched</p>
               </div>
             </motion.div>

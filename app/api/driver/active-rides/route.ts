@@ -10,6 +10,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Get driver ID from users table
+    const { data: driverData } = await supabase
+      .from("drivers")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .single()
+
+    if (!driverData?.id) {
+      return NextResponse.json(
+        { error: "Driver profile not found" },
+        { status: 404 }
+      )
+    }
+
     // Get driver's active rides (in_progress or accepted)
     const { data: rides, error } = await supabase
       .from("rides")
@@ -23,14 +37,15 @@ export async function GET(request: NextRequest) {
         destination_description,
         fare_amount,
         driver_earnings,
+        platform_fee,
         seats_booked,
+        distance_km,
         status,
         pickup_time,
-        created_at,
-        users:rider_id (id, first_name, last_name, phone_number, profile_picture_url)
+        created_at
       `
       )
-      .eq("driver_id", session.user.id)
+      .eq("driver_id", driverData.id)
       .in("status", ["accepted", "in_progress"])
       .order("created_at", { ascending: false })
 
@@ -42,7 +57,26 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ rides: rides || [] }, { status: 200 })
+    // Fetch user data separately for each ride
+    let ridesWithUsers = []
+    if (rides && rides.length > 0) {
+      ridesWithUsers = await Promise.all(
+        rides.map(async (ride: any) => {
+          const { data: user } = await supabase
+            .from("users")
+            .select("id, first_name, last_name, phone_number, profile_picture_url")
+            .eq("id", ride.rider_id)
+            .single()
+
+          return {
+            ...ride,
+            users: user || {},
+          }
+        })
+      )
+    }
+
+    return NextResponse.json({ rides: ridesWithUsers || [] }, { status: 200 })
   } catch (error) {
     console.error("Get active rides error:", error)
     return NextResponse.json(

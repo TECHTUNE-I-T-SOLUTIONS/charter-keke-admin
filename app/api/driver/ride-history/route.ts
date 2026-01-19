@@ -12,56 +12,79 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get("page") || "1")
-    const limit = parseInt(searchParams.get("limit") || "10")
-    const offset = (page - 1) * limit
+    const filter = searchParams.get("filter") || "all"
 
-    // Get driver's completed/cancelled rides
-    const { data: rides, error, count } = await supabase
+    // Get driver
+    const { data: driver } = await supabase
+      .from("drivers")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .single()
+
+    if (!driver) {
+      return NextResponse.json(
+        { error: "Driver profile not found" },
+        { status: 404 }
+      )
+    }
+
+    // Build date filter
+    let query = supabase
       .from("rides")
       .select(
         `
         id,
-        rider_id,
         pickup_zone,
         destination_zone,
         fare_amount,
         driver_earnings,
-        status,
-        rating,
-        review,
-        pickup_time,
-        dropoff_time,
+        platform_fee,
         distance_km,
-        duration_minutes,
         completed_at,
-        created_at,
-        users:rider_id (id, first_name, last_name, profile_picture_url)
-      `,
-        { count: "exact" }
+        rating,
+        users:rider_id (first_name, last_name)
+      `
       )
-      .eq("driver_id", session.user.id)
-      .in("status", ["completed", "cancelled"])
-      .order("completed_at", { ascending: false, nullsFirst: false })
-      .range(offset, offset + limit - 1)
+      .eq("driver_id", driver.id)
+      .eq("status", "completed")
+      .order("completed_at", { ascending: false })
+
+    // Apply date filter
+    const now = new Date()
+    if (filter === "today") {
+      const startOfDay = new Date(now)
+      startOfDay.setHours(0, 0, 0, 0)
+      query = query.gte("completed_at", startOfDay.toISOString())
+    } else if (filter === "week") {
+      const weekAgo = new Date(now)
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      query = query.gte("completed_at", weekAgo.toISOString())
+    }
+
+    // Pagination
+    const limit = 10
+    const offset = (page - 1) * limit
+    query = query.range(offset, offset + limit - 1)
+
+    const { data: rides, error } = await query
 
     if (error) {
-      console.error("Failed to fetch ride history:", error)
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      console.error("Fetch error:", error)
+      return NextResponse.json(
+        { error: "Failed to fetch ride history" },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
       rides: rides || [],
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        pages: Math.ceil((count || 0) / limit),
-      },
+      page,
+      hasMore: (rides || []).length === limit,
     })
   } catch (error) {
     console.error("API error:", error)
     return NextResponse.json(
-      { error: "Failed to fetch ride history" },
+      { error: "Internal server error" },
       { status: 500 }
     )
   }

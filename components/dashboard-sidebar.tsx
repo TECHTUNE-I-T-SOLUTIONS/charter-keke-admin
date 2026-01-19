@@ -50,6 +50,7 @@ const driverNavItems: NavItem[] = [
   { label: "Active Rides", href: "/driver/rides", icon: <Car className="h-5 w-5" /> },
   { label: "Ride History", href: "/driver/history", icon: <History className="h-5 w-5" /> },
   { label: "Earnings", href: "/driver/earnings", icon: <Wallet className="h-5 w-5" /> },
+  { label: "Payments", href: "/driver/payments", icon: <CreditCard className="h-5 w-5" /> },
   { label: "Referrals", href: "/driver/referrals", icon: <Gift className="h-5 w-5" /> },
   { label: "Notifications", href: "/driver/notifications", icon: <Bell className="h-5 w-5" /> },
   { label: "Settings", href: "/driver/settings", icon: <Settings className="h-5 w-5" /> },

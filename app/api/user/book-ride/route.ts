@@ -17,6 +17,10 @@ export async function POST(request: NextRequest) {
       pickup_time,
       estimated_distance, // in kilometers
       number_of_seats,
+      fare_amount,
+      platform_fee,
+      driver_earnings,
+      seats_available,
     } = body
 
     if (!pickup_location || !dropoff_location || !estimated_distance || !number_of_seats) {
@@ -26,27 +30,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Calculate fare: N600 per kilometer
+    // Calculate fare: N600 per kilometer (if not provided)
     const base_fare_per_km = 600
-    const fare_amount = estimated_distance * base_fare_per_km
+    const final_fare_amount = fare_amount || estimated_distance * base_fare_per_km
+    const final_platform_fee = platform_fee || final_fare_amount * 0.15
+    const final_driver_earnings = driver_earnings || final_fare_amount * 0.85
 
     // Create ride record
     const { data: ride, error } = await supabaseAdmin
       .from("rides")
       .insert({
         rider_id: session.user.id,
-        pickup_latitude: pickup_location.lat,
-        pickup_longitude: pickup_location.lng,
-        pickup_address: pickup_location.address,
-        dropoff_latitude: dropoff_location.lat,
-        dropoff_longitude: dropoff_location.lng,
-        dropoff_address: dropoff_location.address,
+        pickup_zone: pickup_location.address,
+        pickup_description: `Lat: ${pickup_location.lat}, Lng: ${pickup_location.lng}`,
+        destination_zone: dropoff_location.address,
+        destination_description: `Lat: ${dropoff_location.lat}, Lng: ${dropoff_location.lng}`,
         pickup_time: pickup_time || new Date().toISOString(),
-        estimated_distance: estimated_distance,
-        fare_amount: fare_amount,
+        distance_km: estimated_distance,
+        fare_amount: final_fare_amount,
+        platform_fee: final_platform_fee,
+        driver_earnings: final_driver_earnings,
+        seats_available: seats_available || 1,
         seats_booked: number_of_seats,
-        status: "pending", // Waiting for driver to accept
-        created_at: new Date().toISOString(),
+        ride_type: "single",
+        status: "pending",
       })
       .select()
       .single()
@@ -59,7 +66,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ride: {
         ...ride,
-        fare_amount: fare_amount,
+        fare_amount: final_fare_amount,
+        platform_fee: final_platform_fee,
+        driver_earnings: final_driver_earnings,
       },
     })
   } catch (error) {

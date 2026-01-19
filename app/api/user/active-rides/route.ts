@@ -21,11 +21,16 @@ export async function GET(request: NextRequest) {
         pickup_description,
         destination_zone,
         destination_description,
+        distance_km,
         fare_amount,
+        platform_fee,
+        driver_earnings,
         seats_available,
         seats_booked,
         status,
         pickup_time,
+        duration_minutes,
+        rating,
         created_at,
         drivers:driver_id (id, user_id, vehicle_picture_url, plate_number, users:user_id (first_name, last_name, phone_number, profile_picture_url))
       `
