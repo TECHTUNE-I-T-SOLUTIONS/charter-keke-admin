@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase"
+import { supabase, supabaseAdmin } from "@/lib/supabase"
 import { getSessionFromRequest } from "@/lib/auth"
 
 // Platform fee: 13% of each ride amount
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const timeframe = searchParams.get("timeframe") || "day" // day, week, month, all
+    const timeframe = searchParams.get("timeframe") || "month" // day, week, month, year, all
 
     // Calculate date range
     let startDate = new Date()
@@ -27,6 +27,9 @@ export async function GET(request: NextRequest) {
         break
       case "month":
         startDate.setMonth(startDate.getMonth() - 1)
+        break
+      case "year":
+        startDate.setFullYear(startDate.getFullYear() - 1)
         break
       case "all":
         startDate = new Date("2000-01-01")
@@ -44,27 +47,52 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Driver not found" }, { status: 404 })
     }
 
-    // Get all rides accepted by this driver in the timeframe
+    // Get all rides accepted by this driver in the timeframe (completed, in_progress, or accepted)
     const { data: rides, error: ridesError } = await supabaseAdmin
       .from("rides")
-      .select("id, fare_amount, status, created_at")
+      .select(`
+        id,
+        fare_amount,
+        driver_earnings,
+        platform_fee,
+        status,
+        created_at,
+        completed_at,
+        pickup_zone,
+        destination_zone,
+        distance_km,
+        rating,
+        users:rider_id (first_name, last_name)
+      `)
       .eq("driver_id", driver.id)
       .gte("created_at", startDate.toISOString())
       .in("status", ["accepted", "in_progress", "completed"])
+      .order("created_at", { ascending: false })
 
     if (ridesError) {
       return NextResponse.json({ error: ridesError.message }, { status: 400 })
     }
 
-    // Calculate earnings: Driver pays platform 13% per ride
+    // Calculate earnings statistics
     let totalRideAmount = 0
     let totalPlatformFee = 0
+    let totalDriverEarnings = 0
+    let totalDistance = 0
+    let totalRatings = 0
+    let ratedRides = 0
 
     rides?.forEach((ride) => {
-      totalRideAmount += ride.fare_amount
-      const platformFee = Math.round(ride.fare_amount * PLATFORM_FEE_PERCENTAGE)
-      totalPlatformFee += platformFee
+      totalRideAmount += ride.fare_amount || 0
+      totalPlatformFee += ride.platform_fee || Math.round((ride.fare_amount || 0) * PLATFORM_FEE_PERCENTAGE)
+      totalDriverEarnings += ride.driver_earnings || 0
+      totalDistance += ride.distance_km || 0
+      if (ride.rating) {
+        totalRatings += ride.rating
+        ratedRides += 1
+      }
     })
+
+    const averageRating = ratedRides > 0 ? (totalRatings / ratedRides).toFixed(1) : "0.0"
 
     return NextResponse.json({
       earnings: {
@@ -72,49 +100,35 @@ export async function GET(request: NextRequest) {
         total_rides_accepted: rides?.length || 0,
         total_ride_earnings: totalRideAmount, // What riders paid
         platform_fee_percentage: PLATFORM_FEE_PERCENTAGE * 100, // 13%
-        total_platform_fee: totalPlatformFee, // What driver owes platform
-        driver_net_amount: totalRideAmount - totalPlatformFee, // What driver keeps
-        driver_payable_to_platform: totalPlatformFee, // For Paystack payment
+        total_platform_fee: totalPlatformFee, // Total platform fees
+        total_driver_earnings: totalDriverEarnings, // What driver actually earned
+        driver_payable_to_platform: totalPlatformFee, // For potential payment
+        average_rating: parseFloat(averageRating),
+        total_distance: totalDistance,
         driver_bank_details: {
           account_number: driver.bank_account_number,
           bank_name: driver.bank_name,
         },
       },
-    })
-
-    // Get transaction history
-    const { data: wallet } = await supabase
-      .from("wallets")
-      .select("id")
-      .eq("user_id", session.user.id)
-      .single()
-
-    const { data: transactions } = await supabase
-      .from("transactions")
-      .select("id, amount, transaction_type, source, created_at, description")
-      .eq("wallet_id", wallet?.id)
-      .gte("created_at", startDate.toISOString())
-      .order("created_at", { ascending: false })
-
-    const periodEarnings = (ridesData || []).reduce(
-      (sum, ride) => sum + (ride.driver_earnings || 0),
-      0
-    )
-
-    return NextResponse.json({
-      earnings: {
-        total: driverData?.total_earnings || 0,
-        period: periodEarnings,
-        timeframe,
-        completedRides: driverData?.total_rides_completed || 0,
-        averageRating: driverData?.average_rating || 0,
-      },
-      transactions: transactions || [],
+      rides: (rides || []).map((ride) => ({
+        id: ride.id,
+        status: ride.status,
+        pickup_zone: ride.pickup_zone,
+        destination_zone: ride.destination_zone,
+        fare_amount: ride.fare_amount,
+        driver_earnings: ride.driver_earnings,
+        platform_fee: ride.platform_fee,
+        distance_km: ride.distance_km,
+        rating: ride.rating,
+        created_at: ride.created_at,
+        completed_at: ride.completed_at,
+        users: ride.users,
+      })),
     })
   } catch (error) {
     console.error("API error:", error)
     return NextResponse.json(
-      { error: "Failed to fetch earnings" },
+      { error: "Failed to fetch earnings data" },
       { status: 500 }
     )
   }

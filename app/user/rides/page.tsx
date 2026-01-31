@@ -18,10 +18,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { UserRideDetailsModal } from "@/components/user-ride-details-modal"
 import { CharterKeKeMap } from "@/components/easely-map"
 import { MapPin, Clock, AlertCircle, Loader, Star, Phone, Building2, RotateCcw } from "lucide-react"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
+import { useUserLocationTracking } from "@/hooks/use-user-location-tracking"
 
 interface DriverDetails {
   name: string
@@ -72,6 +74,16 @@ function RidesContent() {
         firstName: (session.user as any).firstName || "User",
       }
     : contextUser
+
+  // Get first active ride to track location for
+  const activeRideId = activeRides.find(r => r.status === "accepted" || r.status === "in_progress")?.id
+
+  // Start tracking user/rider's location when they have an active ride
+  useUserLocationTracking({
+    rideId: activeRideId,
+    enabled: !!activeRideId && !!session?.user,
+    interval: 10000, // Update every 10 seconds
+  })
 
   // Fetch rides data
   const fetchRidesData = async () => {
@@ -479,135 +491,23 @@ function RidesContent() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Ride Route Modal */}
-      {/* Ride Route Modal with Map Background */}
-      {showRideModal && selectedRideRoute && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/40">
-          {/* Compact Modal Container - Much smaller */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="w-full sm:max-w-sm md:max-w-md h-[60vh] sm:h-[500px] rounded-2xl overflow-hidden bg-background relative shadow-2xl border border-border"
-          >
-            {/* Map - Takes majority of space */}
-            <CharterKeKeMap
-              height="100%"
-              center={[
-                (selectedRideRoute.pickupLat + selectedRideRoute.dropoffLat) / 2,
-                (selectedRideRoute.pickupLng + selectedRideRoute.dropoffLng) / 2,
-              ]}
-              zoom={13}
-              markers={[
-                {
-                  id: "pickup",
-                  lat: selectedRideRoute.pickupLat,
-                  lng: selectedRideRoute.pickupLng,
-                  title: selectedRideRoute.pickupZone,
-                  type: "pickup",
-                },
-                {
-                  id: "destination",
-                  lat: selectedRideRoute.dropoffLat,
-                  lng: selectedRideRoute.dropoffLng,
-                  title: selectedRideRoute.destinationZone,
-                  type: "destination",
-                },
-              ]}
-              showRoute={true}
-              showGeolocation={false}
-              className="w-full h-full"
-            />
-
-            {/* Close Button - Top Right */}
-            <button
-              onClick={() => setShowRideModal(false)}
-              className="absolute top-2 right-2 z-20 bg-background/90 hover:bg-background/100 rounded-full p-1.5 transition-all shadow-md"
-            >
-              <span className="text-base font-bold text-foreground">✕</span>
-            </button>
-
-            {/* Route Info Overlay - Top Left */}
-            <div className="absolute top-2 left-2 right-10 z-20 bg-card/95 backdrop-blur rounded-lg p-2 shadow-lg border border-border/50">
-              <p className="text-xs font-bold text-foreground line-clamp-1">
-                {selectedRideRoute.distance.toFixed(2)} km • ₦{selectedRideRoute.fare.toLocaleString()}
-              </p>
-              <p className="text-[10px] text-muted-foreground line-clamp-1">
-                {selectedRideRoute.pickupZone} → {selectedRideRoute.destinationZone}
-              </p>
-            </div>
-
-            {/* Bottom Compact Info Panel */}
-            <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-card/98 via-card/95 to-transparent backdrop-blur-sm pt-8 pb-2 px-2">
-              <div className="space-y-1.5">
-                {/* Mini Status Row */}
-                <div className="flex items-center justify-between gap-1 px-1">
-                  <Badge variant="outline" className="capitalize text-xs h-5">
-                    {selectedRideRoute.status}
-                  </Badge>
-                  <div className="text-right">
-                    <p className="text-[10px] text-muted-foreground">Your Pay</p>
-                    <p className="text-sm font-bold text-primary">₦{selectedRideRoute.fare.toLocaleString()}</p>
-                  </div>
-                </div>
-
-                {/* Mini Details Grid */}
-                <div className="grid grid-cols-3 gap-1">
-                  <div className="p-1.5 rounded bg-muted/50 text-center">
-                    <p className="text-[9px] text-muted-foreground">Distance</p>
-                    <p className="text-xs font-bold text-foreground">{selectedRideRoute.distance.toFixed(1)} km</p>
-                  </div>
-                  {/* <div className="p-1.5 rounded bg-green-500/10 border border-green-500/20 text-center">
-                    <p className="text-[9px] text-muted-foreground">Driver</p>
-                    <p className="text-xs font-bold text-green-600 dark:text-green-400">
-                      ₦{Math.round((selectedRideRoute.driverEarnings || 0) / 100) * 100}
-                    </p>
-                  </div> */}
-                  <button
-                    onClick={() => setShowRideModal(false)}
-                    className="p-1.5 rounded bg-muted/50 hover:bg-muted transition-colors text-center"
-                  >
-                    <p className="text-xs font-bold text-foreground">Close</p>
-                  </button>
-                </div>
-
-                {/* Expandable Details */}
-                {(selectedRideRoute.pickupTime || selectedRideRoute.rating || selectedRideRoute.platformFee) && (
-                  <details className="group">
-                    <summary className="text-xs font-semibold text-muted-foreground cursor-pointer hover:text-foreground px-1 py-0.5">
-                    More Details
-                    </summary>
-                    <div className="text-xs space-y-1 pt-1 px-1">
-                      {selectedRideRoute.pickupTime && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Pickup:</span>
-                          <span className="font-medium">
-                            {new Date(selectedRideRoute.pickupTime).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
-                      )}
-                      {selectedRideRoute.rating && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Rating:</span>
-                          <span className="font-medium">⭐ {selectedRideRoute.rating.toFixed(1)}</span>
-                        </div>
-                      )}
-                      {/* {selectedRideRoute.platformFee !== undefined && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Platform Fee:</span>
-                          <span className="font-medium">₦{selectedRideRoute.platformFee.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                        </div>
-                      )} */}
-                    </div>
-                  </details>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        </div>
+      {/* Real-Time Ride Details Modal */}
+      {selectedRideRoute && (
+        <UserRideDetailsModal
+          isOpen={showRideModal}
+          onClose={() => setShowRideModal(false)}
+          ride={{
+            id: selectedRideRoute.id,
+            pickup_zone: selectedRideRoute.pickupZone,
+            destination_zone: selectedRideRoute.destinationZone,
+            pickup_description: `Lat: ${selectedRideRoute.pickupLat}, Lng: ${selectedRideRoute.pickupLng}`,
+            destination_description: `Lat: ${selectedRideRoute.dropoffLat}, Lng: ${selectedRideRoute.dropoffLng}`,
+            fare_amount: selectedRideRoute.fare,
+            platform_fee: selectedRideRoute.platformFee,
+            status: selectedRideRoute.status,
+            distance_km: selectedRideRoute.distance,
+          }}
+        />
       )}
     </div>
   )

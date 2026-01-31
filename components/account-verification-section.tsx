@@ -160,7 +160,7 @@ export function AccountVerificationSection({
       <CardContent className="space-y-6">
         {/* Current Status */}
         {hasAccountName && !manualEntry && (
-          <Alert className="border-green-200 bg-green-500 dark:bg-green-900/10">
+          <Alert className="border-green-200 bg-green-300 dark:bg-green-900/10">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800 dark:text-green-300">
               <strong>Account verified:</strong> {accountNameFromApi}
@@ -177,7 +177,7 @@ export function AccountVerificationSection({
         )}
 
         {/* Account Details Display */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-800 dark:bg-gray-900 p-4 rounded-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-300 dark:bg-gray-900 p-4 rounded-lg">
           <div>
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Bank Name

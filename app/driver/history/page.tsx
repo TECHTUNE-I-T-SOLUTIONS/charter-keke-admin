@@ -22,6 +22,7 @@ interface RideHistory {
   platform_fee: number
   distance_km: number
   completed_at: string
+  status: string
   rating?: number
   users: {
     first_name: string
@@ -47,6 +48,21 @@ function RideHistoryContent() {
   const [hasMore, setHasMore] = useState(true)
   const [filter, setFilter] = useState<"all" | "today" | "week">("all")
   const isMountedRef = useRef(true)
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "bg-emerald-500/10 text-emerald-700 border-emerald-200"
+      case "in_progress":
+        return "bg-blue-500/10 text-blue-700 border-blue-200"
+      case "accepted":
+        return "bg-amber-500/10 text-amber-700 border-amber-200"
+      case "pending":
+        return "bg-slate-500/10 text-slate-700 border-slate-200"
+      default:
+        return "bg-slate-500/10 text-slate-700 border-slate-200"
+    }
+  }
 
   const user = session?.user
     ? {
@@ -83,12 +99,19 @@ function RideHistoryContent() {
 
         setHasMore((ridesData.rides || []).length === 10)
 
-        // Fetch stats
-        const statsRes = await fetch("/api/driver/earnings-stats")
+        // Fetch stats from earnings endpoint (same as earnings page)
+        const statsRes = await fetch("/api/driver/earnings?timeframe=all")
         const statsData = await statsRes.json()
         
-        if (isMountedRef.current) {
-          setStats(statsData.stats)
+        if (isMountedRef.current && statsData.earnings) {
+          // Transform earnings data to match stats interface
+          setStats({
+            totalRides: statsData.earnings.total_rides_accepted,
+            totalEarnings: statsData.earnings.total_driver_earnings,
+            totalPlatformFees: statsData.earnings.total_platform_fee,
+            averageRating: statsData.earnings.average_rating,
+            totalDistance: statsData.earnings.total_distance,
+          })
         }
       } catch (error) {
         console.error("Failed to fetch data:", error)
@@ -255,7 +278,9 @@ function RideHistoryContent() {
                                   )}
                                 </p>
                               </div>
-                              <Badge className="capitalize">Completed</Badge>
+                              <Badge className={`capitalize ${getStatusColor(ride.status)}`}>
+                                {ride.status.replace(/_/g, " ")}
+                              </Badge>
                             </div>
 
                             {/* Route */}

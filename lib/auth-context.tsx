@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: true }
       }
 
-      return { success: false, error: "Invalid credentials. Try demo accounts with password: demo123" }
+      return { success: false, error: "Invalid credentials. Try again" }
     } catch (error) {
       return { success: false, error: "An error occurred. Please try again." }
     } finally {

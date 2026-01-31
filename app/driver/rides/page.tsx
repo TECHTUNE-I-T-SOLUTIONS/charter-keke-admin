@@ -7,9 +7,11 @@ import { AnimatedSidebar } from "@/components/animated-sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { CharterKeKeMap } from "@/components/easely-map"
+import { RideDetailsModal } from "@/components/ride-details-modal"
 import { Badge } from "@/components/ui/badge"
-import { Loader, MapPin, Clock, Wallet, ArrowRight, AlertCircle, CheckCircle, Navigation } from "lucide-react"
+import { Loader, MapPin, Clock, Wallet, ArrowRight, AlertCircle, CheckCircle, Navigation, Eye } from "lucide-react"
 import { toast } from "sonner"
+import { useDriverLocationTracking } from "@/hooks/use-driver-location-tracking"
 
 interface Ride {
   id: string
@@ -40,8 +42,20 @@ export default function DriverRides() {
   const [activeTab, setActiveTab] = useState<"available" | "accepted">("available")
   const [acceptingRide, setAcceptingRide] = useState<string | null>(null)
   const [updatingRide, setUpdatingRide] = useState<string | null>(null)
+  const [selectedRide, setSelectedRide] = useState<Ride | null>(null)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const isMountedRef = useRef(true)
+
+  // Get first accepted/in_progress ride to track location for
+  const activeRideId = rides.find(r => r.status === "accepted" || r.status === "in_progress")?.id
+
+  // Start tracking driver's location when they have an active ride
+  useDriverLocationTracking({
+    rideId: activeRideId,
+    enabled: !!activeRideId && !!session?.user,
+    interval: 10000, // Update every 10 seconds
+  })
 
   // Fetch rides
   const fetchRides = async () => {
@@ -185,6 +199,12 @@ export default function DriverRides() {
     } finally {
       setUpdatingRide(null)
     }
+  }
+
+  // Open ride details modal
+  const handleViewDetails = (ride: Ride) => {
+    setSelectedRide(ride)
+    setShowDetailsModal(true)
   }
 
   if (loading) {
@@ -343,6 +363,17 @@ export default function DriverRides() {
 
                         {/* Action Buttons */}
                         <div className="pt-3 border-t space-y-2">
+                          {activeTab === "accepted" && (
+                            <Button
+                              onClick={() => handleViewDetails(ride)}
+                              variant="outline"
+                              className="w-full"
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Full Details
+                            </Button>
+                          )}
+
                           {activeTab === "available" && ride.status === "pending" && (
                             <Button
                               onClick={() => handleAcceptRide(ride.id)}
@@ -416,6 +447,18 @@ export default function DriverRides() {
           </div>
         </main>
       </div>
+
+      {/* Ride Details Modal */}
+      {selectedRide && (
+        <RideDetailsModal
+          isOpen={showDetailsModal}
+          onClose={() => {
+            setShowDetailsModal(false)
+            setSelectedRide(null)
+          }}
+          ride={selectedRide}
+        />
+      )}
     </ProtectedRoute>
   )
 }

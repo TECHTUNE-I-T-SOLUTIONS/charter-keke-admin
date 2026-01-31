@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, Suspense } from "react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { useAuth } from "@/lib/auth-context"
+import { useRouter } from "next/navigation"
 import { ProtectedRoute } from "@/components/protected-route"
 import { AnimatedSidebar } from "@/components/animated-sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import dynamic from "next/dynamic"
+import { BookingMap } from "@/components/booking-map"
 import {
   MapPin,
   Navigation,
@@ -42,21 +43,10 @@ interface SearchResult {
   lng: number
 }
 
-// Lazy load Leaflet map component
-const MapComponent = dynamic(
-  () => import("@/components/leaflet-map").then((mod) => mod.LeafletMap),
-  {
-    loading: () => (
-      <div className="bg-gray-100 rounded-lg flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    ),
-    ssr: false,
-  }
-)
 
 function BookRideContent() {
   const { user } = useAuth()
+  const router = useRouter()
   const mapRef = useRef<HTMLDivElement>(null)
 
   const [pickupLocation, setPickupLocation] = useState<Location | null>(null)
@@ -264,6 +254,8 @@ function BookRideContent() {
       setPlatformFee(0)
       setDriverEarnings(0)
       setPickupTime(new Date().toISOString().slice(0, 16))
+      // Navigate to rides page so user can view their booking
+      router.push("/user/rides")
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to book ride")
     } finally {
@@ -317,7 +309,7 @@ function BookRideContent() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0 pb-4 relative flex-1 flex flex-col">
-                  <MapComponent
+                  <BookingMap
                     pickupLocation={pickupLocation}
                     dropoffLocation={dropoffLocation}
                     onPickupSet={setPickupLocation}

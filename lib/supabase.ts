@@ -8,7 +8,10 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Server-side Supabase instance (full access - for API routes only)
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
+// Only create this if the service role key is available (server-side only)
+export const supabaseAdmin = supabaseServiceRoleKey 
+  ? createClient(supabaseUrl, supabaseServiceRoleKey)
+  : null;
 
 export type Database = {
   public: {
