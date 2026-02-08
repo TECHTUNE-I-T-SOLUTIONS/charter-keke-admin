@@ -1,32 +1,60 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { useAuth } from "@/lib/auth-context"
 import { ProtectedRoute } from "@/components/protected-route"
-import { AnimatedSidebar } from "@/components/animated-sidebar"
+import { DashboardSidebar } from "@/components/dashboard-sidebar"
+import { AdminBottomNavigation } from "@/components/admin-bottom-navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Car, MapPin, Wallet, TrendingUp, Activity, ArrowUpRight, Clock, GraduationCap } from "lucide-react"
+import { Users, Car, MapPin, Wallet, TrendingUp, Activity, ArrowUpRight, Clock, GraduationCap, Loader2 } from "lucide-react"
 import Link from "next/link"
 
 function AdminDashboardContent() {
   const { data: session } = useSession()
   const { user: contextUser } = useAuth()
+  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState({
+    users: { total: 0, active: 0, pending: 0, suspended: 0 },
+    drivers: { total: 0, verified: 0, pending: 0 },
+    rides: { active: 0, completed: 0, cancelled: 0 },
+    revenue: { total: 0, platformFees: 0, fromAcceptedAndInProgress: 0 },
+  })
 
   // Use session data first, fall back to context user
-  const user = session?.user ? { 
-    id: (session.user as any).id || "",
-    email: session.user.email || "",
-    firstName: (session.user as any).firstName || "Admin",
-    lastName: (session.user as any).lastName || "",
-    role: (session.user as any).role || "admin",
-  } : contextUser
+  const user = session?.user
+    ? {
+        id: (session.user as any).id || "",
+        email: session.user.email || "",
+        firstName: (session.user as any).firstName || "Admin",
+        lastName: (session.user as any).lastName || "",
+        role: (session.user as any).role || "admin",
+      }
+    : contextUser
 
-  const stats = [
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setIsLoading(true)
+        const response = await fetch("/api/admin/stats")
+        const data = await response.json()
+        setStats(data)
+      } catch (error) {
+        console.error("Failed to fetch stats:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
+
+  const statCards = [
     {
       label: "Total Riders",
-      value: "0",
+      value: stats.users.total.toString(),
       change: "+0%",
       icon: <Users className="h-5 w-5" />,
       color: "from-primary to-primary/70",
@@ -34,7 +62,7 @@ function AdminDashboardContent() {
     },
     {
       label: "Total Drivers",
-      value: "0",
+      value: stats.drivers.total.toString(),
       change: "+0%",
       icon: <Car className="h-5 w-5" />,
       color: "from-secondary to-secondary/70",
@@ -42,7 +70,7 @@ function AdminDashboardContent() {
     },
     {
       label: "Active Rides",
-      value: "0",
+      value: stats.rides.active.toString(),
       change: "+0%",
       icon: <MapPin className="h-5 w-5" />,
       color: "from-emerald-500 to-emerald-400",
@@ -50,7 +78,7 @@ function AdminDashboardContent() {
     },
     {
       label: "Revenue",
-      value: "₦0",
+      value: `₦${(stats.revenue.total || 0).toLocaleString()}`,
       change: "+0%",
       icon: <Wallet className="h-5 w-5" />,
       color: "from-amber-500 to-amber-400",
@@ -66,7 +94,7 @@ function AdminDashboardContent() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <AnimatedSidebar />
+      <DashboardSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -89,29 +117,35 @@ function AdminDashboardContent() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="grid grid-cols-2 lg:grid-cols-4 gap-4"
           >
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                whileHover={{ y: -4, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <Link href={stat.href}>
-                  <Card className="bg-card/50 backdrop-blur border-primary/10 overflow-hidden group hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer h-full">
-                    <CardContent className="p-4 md:p-6">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className={`p-2 rounded-lg bg-gradient-to-r ${stat.color} text-white`}>{stat.icon}</div>
-                        <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                      </div>
-                      <p className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</p>
-                      <div className="flex items-center justify-between mt-1">
-                        <p className="text-sm text-muted-foreground">{stat.label}</p>
-                        <span className="text-xs text-emerald-500">{stat.change}</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
+            {isLoading ? (
+              <div className="col-span-2 lg:col-span-4 flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              statCards.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Link href={stat.href}>
+                    <Card className="bg-card/50 backdrop-blur border-primary/10 overflow-hidden group hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer h-full">
+                      <CardContent className="p-4 md:p-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className={`p-2 rounded-lg bg-gradient-to-r ${stat.color} text-white`}>{stat.icon}</div>
+                          <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                        <p className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</p>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-sm text-muted-foreground">{stat.label}</p>
+                          <span className="text-xs text-emerald-500">{stat.change}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </motion.div>
+              ))
+            )}
           </motion.div>
 
           {/* Charts Row */}
@@ -244,13 +278,14 @@ function AdminDashboardContent() {
           </motion.div>
         </div>
       </main>
+      <AdminBottomNavigation />
     </div>
   )
 }
 
 export default function AdminDashboard() {
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
       <AdminDashboardContent />
     </ProtectedRoute>
   )

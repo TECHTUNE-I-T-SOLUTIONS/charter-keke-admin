@@ -44,6 +44,9 @@ export function PublicBottomNavigation() {
   // Don't show if user is logged in (they should see dashboard nav instead)
   if (session?.user) return null
 
+  // Don't show on admin pages
+  if (pathname.includes("/admin")) return null
+
   // Determine which nav items to show based on current path
   const isAuthPage = pathname.includes("/auth")
   const navItems = isAuthPage ? authNavItems : publicNavItems

@@ -126,7 +126,7 @@ function AnalyticsContent() {
 
 export default function AnalyticsPage() {
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
       <AnalyticsContent />
     </ProtectedRoute>
   )

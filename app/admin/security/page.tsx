@@ -21,7 +21,7 @@ export default function AdminSecurityPage() {
   }
 
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
       <div className="flex min-h-screen bg-background">
         <DashboardSidebar />
         <main className="flex-1 pt-16 lg:pt-0 flex flex-col">

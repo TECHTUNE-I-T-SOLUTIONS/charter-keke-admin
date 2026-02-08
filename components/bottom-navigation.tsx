@@ -68,6 +68,9 @@ export function BottomNavigation() {
 
   if (!user?.role) return null
 
+  // Don't show on admin pages
+  if (pathname.includes("/admin")) return null
+
   // Only show in dashboard pages
   const isDashboard = pathname.includes("/dashboard") || pathname.includes("/rides") || pathname.includes("/wallet") || pathname.includes("/book") || pathname.includes("/earnings") || pathname.includes("/history") || pathname.includes("/referrals") || pathname.includes("/notifications") || pathname.includes("/settings")
   

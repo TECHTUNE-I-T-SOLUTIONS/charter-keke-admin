@@ -1,17 +1,82 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
+import { AdminBottomNavigation } from "@/components/admin-bottom-navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Users, Search, UserPlus, Filter, Download } from "lucide-react"
+import { Users, Search, UserPlus, Filter, Download, Loader2 } from "lucide-react"
+
+interface User {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  phone_number: string
+  role: string
+  status: string
+  created_at: string
+  profile_picture_url?: string
+}
 
 function UsersContent() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState("")
+  const [users, setUsers] = useState<User[]>([])
+  const [totalUsers, setTotalUsers] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    pending: 0,
+    suspended: 0,
+  })
+
+  // Fetch users data
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setIsLoading(true)
+        const params = new URLSearchParams({
+          limit: "50",
+          offset: "0",
+        })
+        if (searchQuery) params.append("search", searchQuery)
+        if (statusFilter) params.append("status", statusFilter)
+
+        const response = await fetch(`/api/admin/users?${params}`)
+        const data = await response.json()
+        setUsers(data.users || [])
+        setTotalUsers(data.count || 0)
+      } catch (error) {
+        console.error("Failed to fetch users:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    const timer = setTimeout(fetchUsers, 300)
+    return () => clearTimeout(timer)
+  }, [searchQuery, statusFilter])
+
+  // Fetch stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/admin/stats")
+        const data = await response.json()
+        setStats(data.users)
+      } catch (error) {
+        console.error("Failed to fetch stats:", error)
+      }
+    }
+
+    fetchStats()
+  }, [])
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -50,25 +115,25 @@ function UsersContent() {
           >
             <Card className="bg-card/50 backdrop-blur border-primary/10">
               <CardContent className="p-4">
-                <p className="text-2xl font-bold text-foreground">0</p>
+                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
                 <p className="text-sm text-muted-foreground">Total Users</p>
               </CardContent>
             </Card>
             <Card className="bg-card/50 backdrop-blur border-primary/10">
               <CardContent className="p-4">
-                <p className="text-2xl font-bold text-emerald-500">0</p>
+                <p className="text-2xl font-bold text-emerald-500">{stats.active}</p>
                 <p className="text-sm text-muted-foreground">Active</p>
               </CardContent>
             </Card>
             <Card className="bg-card/50 backdrop-blur border-primary/10">
               <CardContent className="p-4">
-                <p className="text-2xl font-bold text-amber-500">0</p>
+                <p className="text-2xl font-bold text-amber-500">{stats.pending}</p>
                 <p className="text-sm text-muted-foreground">Pending</p>
               </CardContent>
             </Card>
             <Card className="bg-card/50 backdrop-blur border-primary/10">
               <CardContent className="p-4">
-                <p className="text-2xl font-bold text-red-500">0</p>
+                <p className="text-2xl font-bold text-red-500">{stats.suspended}</p>
                 <p className="text-sm text-muted-foreground">Suspended</p>
               </CardContent>
             </Card>
@@ -90,6 +155,16 @@ function UsersContent() {
                 className="pl-10 bg-background/50 border-primary/20"
               />
             </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-2 h-10 rounded-md border border-input bg-background/50 text-foreground text-sm"
+            >
+              <option value="">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="suspended">Suspended</option>
+            </select>
             <Button variant="outline" className="border-primary/20 hover:bg-primary/10 bg-transparent">
               <Filter className="h-4 w-4 mr-2" />
               Filters
@@ -111,23 +186,59 @@ function UsersContent() {
                       <TableHead>Email</TableHead>
                       <TableHead>Phone</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Rides</TableHead>
+                      <TableHead>Role</TableHead>
                       <TableHead>Joined</TableHead>
-                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell colSpan={7}>
-                        <div className="flex flex-col items-center justify-center py-12 text-center">
-                          <div className="p-4 rounded-full bg-muted/50 mb-4">
-                            <Users className="h-8 w-8 text-muted-foreground" />
+                    {isLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={6}>
+                          <div className="flex items-center justify-center py-8">
+                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
                           </div>
-                          <h3 className="font-medium text-foreground mb-1">No users yet</h3>
-                          <p className="text-sm text-muted-foreground">Users will appear here once they register.</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                      </TableRow>
+                    ) : users.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6}>
+                          <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <div className="p-4 rounded-full bg-muted/50 mb-4">
+                              <Users className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                            <h3 className="font-medium text-foreground mb-1">No users found</h3>
+                            <p className="text-sm text-muted-foreground">Users will appear here once they register.</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      users.map((user) => (
+                        <TableRow key={user.id} className="border-primary/10">
+                          <TableCell className="font-medium">
+                            {user.first_name} {user.last_name}
+                          </TableCell>
+                          <TableCell className="text-sm">{user.email}</TableCell>
+                          <TableCell className="text-sm">{user.phone_number}</TableCell>
+                          <TableCell>
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                user.status === "active"
+                                  ? "bg-emerald-500/20 text-emerald-500"
+                                  : user.status === "pending"
+                                    ? "bg-amber-500/20 text-amber-500"
+                                    : "bg-red-500/20 text-red-500"
+                              }`}
+                            >
+                              {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-sm">{user.role}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(user.created_at).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -135,13 +246,14 @@ function UsersContent() {
           </motion.div>
         </div>
       </main>
+      <AdminBottomNavigation />
     </div>
   )
 }
 
 export default function UsersPage() {
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
       <UsersContent />
     </ProtectedRoute>
   )

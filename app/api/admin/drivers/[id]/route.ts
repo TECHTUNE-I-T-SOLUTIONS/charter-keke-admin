@@ -1,0 +1,132 @@
+import { NextRequest, NextResponse } from "next/server"
+import { supabase } from "@/lib/supabase"
+
+/**
+ * GET /api/admin/drivers/[id]
+ * Fetch detailed driver info with rides breakdown for earnings
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Unwrap the Promise params (Next.js 15+)
+    const { id: driverId } = await params
+
+    if (!driverId) {
+      return NextResponse.json({ error: "Driver ID is required" }, { status: 400 })
+    }
+
+    // Fetch driver details
+    const { data: driver, error: driverError } = await supabase
+      .from("drivers")
+      .select(
+        `
+        id,
+        user_id,
+        vehicle_type,
+        plate_number,
+        verified,
+        average_rating,
+        total_rides_completed,
+        total_earnings,
+        created_at
+      `
+      )
+      .eq("id", driverId)
+      .single()
+
+    if (driverError) {
+      console.error("Driver fetch error:", driverError)
+      return NextResponse.json({ error: "Driver not found" }, { status: 404 })
+    }
+
+    // Fetch user details
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("id, first_name, last_name, email, phone_number, profile_picture_url")
+      .eq("id", driver.user_id)
+      .single()
+
+    if (userError) {
+      console.error("User fetch error:", userError)
+    }
+
+    // Fetch all rides where driver_id matches and status is accepted, in_progress, or completed
+    const { data: rides, error: ridesError } = await supabase
+      .from("rides")
+      .select(
+        `
+        id,
+        driver_earnings,
+        status,
+        created_at,
+        completed_at
+      `
+      )
+      .eq("driver_id", driverId)
+      .in("status", ["accepted", "in_progress", "completed"])
+      .order("created_at", { ascending: false })
+
+    if (ridesError) {
+      console.error("Rides fetch error:", ridesError)
+    }
+
+    // Calculate earnings per day from rides
+    const earningsMap: Record<string, { amount: number; rides: number }> = {}
+    
+    if (rides && rides.length > 0) {
+      rides.forEach((ride: any) => {
+        const date = new Date(ride.created_at).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+        if (!earningsMap[date]) {
+          earningsMap[date] = { amount: 0, rides: 0 }
+        }
+        earningsMap[date].amount += parseFloat(ride.driver_earnings) || 0
+        earningsMap[date].rides += 1
+      })
+    }
+
+    // Convert to sorted array by date (newest first)
+    const earningsPerDay = Object.entries(earningsMap)
+      .map(([date, data]) => ({
+        date,
+        amount: data.amount,
+        rides: data.rides,
+        status: "completed", // Rides already completed
+      }))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+    return NextResponse.json(
+      {
+        driver: {
+          id: driver.id,
+          first_name: user?.first_name || "",
+          last_name: user?.last_name || "",
+          email: user?.email || "",
+          phone_number: user?.phone_number || "",
+          profile_picture_url: user?.profile_picture_url || "",
+          vehicle_type: driver.vehicle_type,
+          plate_number: driver.plate_number,
+          verified: driver.verified,
+          avg_rating: driver.average_rating || 0,
+          rides_completed: driver.total_rides_completed || 0,
+          total_earnings: driver.total_earnings || 0,
+          created_at: driver.created_at,
+          settlement_count: earningsPerDay.length,
+          earnings_per_day: earningsPerDay,
+        },
+      },
+      { status: 200 }
+    )
+  } catch (error) {
+    console.error("Error fetching driver details:", error)
+    return NextResponse.json(
+      { error: "Failed to fetch driver details" },
+      { status: 500 }
+    )
+  }
+}

@@ -1,24 +1,141 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
+import { AdminBottomNavigation } from "@/components/admin-bottom-navigation"
+import { AdminPaymentDetailsModal } from "@/components/admin-payment-details-modal"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CreditCard, Search, Filter, Download, Wallet, ArrowUpRight, ArrowDownLeft } from "lucide-react"
+import { CreditCard, Search, Filter, Download, Wallet, ArrowUpRight, ArrowDownLeft, Loader2, Calendar, TrendingUp, AlertCircle } from "lucide-react"
+
+interface Payment {
+  id: string
+  driver_first_name: string
+  driver_last_name: string
+  amount: number
+  payment_method: string
+  status: string
+  created_at: string
+}
+
+interface DailyPayment {
+  date: string
+  totalAmount: number
+  count: number
+  completed: number
+  pending: number
+  failed: number
+  methods: Array<{
+    method: string
+    count: number
+  }>
+}
+
+interface PaymentSummary {
+  totalPending: number
+  totalCompleted: number
+  totalFailed: number
+  averageDaily: number
+}
 
 function PaymentsContent() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [payments, setPayments] = useState<Payment[]>([])
+  const [dailyPayments, setDailyPayments] = useState<DailyPayment[]>([])
+  const [paymentSummary, setPaymentSummary] = useState<PaymentSummary>({
+    totalPending: 0,
+    totalCompleted: 0,
+    totalFailed: 0,
+    averageDaily: 0,
+  })
+  const [stats, setStats] = useState({
+    totalRevenue: 0,
+    todayRevenue: 0,
+    pendingPayouts: 0,
+    totalTransactions: 0,
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+
+  // Fetch stats and revenue
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [statsResponse, revenueResponse, dailyResponse] = await Promise.all([
+          fetch("/api/admin/stats"),
+          fetch("/api/admin/revenue?limit=1000"),
+          fetch("/api/admin/payments/daily"),
+        ])
+
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json()
+          const revenueData = revenueResponse.ok ? await revenueResponse.json() : null
+          const dailyData = dailyResponse.ok ? await dailyResponse.json() : null
+
+          setStats({
+            totalRevenue: revenueData?.summary?.totalFares || statsData.revenue?.total || 0,
+            todayRevenue: 0,
+            pendingPayouts: revenueData?.summary?.totalDriverEarnings || 0,
+            totalTransactions: revenueData?.count || 0,
+          })
+
+          if (dailyData) {
+            setDailyPayments(dailyData.dailyPayments || [])
+            setPaymentSummary(dailyData.summary || {
+              totalPending: 0,
+              totalCompleted: 0,
+              totalFailed: 0,
+              averageDaily: 0,
+            })
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch stats:", error)
+      }
+    }
+    fetchStats()
+  }, [])
+
+  // Fetch payments
+  useEffect(() => {
+    const fetchPayments = async () => {
+      setIsLoading(true)
+      try {
+        const params = new URLSearchParams()
+        if (statusFilter !== "all") params.append("status", statusFilter)
+        params.append("limit", "50")
+
+        const response = await fetch(`/api/admin/payments?${params.toString()}`)
+        if (response.ok) {
+          const data = await response.json()
+          setPayments(data.payments || [])
+        }
+      } catch (error) {
+        console.error("Failed to fetch payments:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    const timer = setTimeout(() => {
+      fetchPayments()
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [statusFilter])
 
   return (
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar />
 
-      <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
+      <main className="flex-1 lg:pl-0 pt-16 lg:pt-0 pb-24">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -49,7 +166,7 @@ function PaymentsContent() {
                   <Wallet className="h-4 w-4" />
                   <span className="text-sm opacity-80">Total Revenue</span>
                 </div>
-                <p className="text-2xl font-bold">₦0</p>
+                <p className="text-2xl font-bold">₦{stats.totalRevenue.toLocaleString()}</p>
               </CardContent>
             </Card>
             <Card className="bg-card/50 backdrop-blur border-primary/10">
@@ -58,7 +175,7 @@ function PaymentsContent() {
                   <ArrowUpRight className="h-4 w-4 text-emerald-500" />
                   <span className="text-sm text-muted-foreground">Today</span>
                 </div>
-                <p className="text-2xl font-bold text-foreground">₦0</p>
+                <p className="text-2xl font-bold text-foreground">₦{stats.todayRevenue.toLocaleString()}</p>
               </CardContent>
             </Card>
             <Card className="bg-card/50 backdrop-blur border-primary/10">
@@ -67,7 +184,7 @@ function PaymentsContent() {
                   <ArrowDownLeft className="h-4 w-4 text-amber-500" />
                   <span className="text-sm text-muted-foreground">Pending Payouts</span>
                 </div>
-                <p className="text-2xl font-bold text-foreground">₦0</p>
+                <p className="text-2xl font-bold text-foreground">₦{stats.pendingPayouts.toLocaleString()}</p>
               </CardContent>
             </Card>
             <Card className="bg-card/50 backdrop-blur border-primary/10">
@@ -76,24 +193,87 @@ function PaymentsContent() {
                   <CreditCard className="h-4 w-4 text-primary" />
                   <span className="text-sm text-muted-foreground">Transactions</span>
                 </div>
-                <p className="text-2xl font-bold text-foreground">0</p>
+                <p className="text-2xl font-bold text-foreground">{stats.totalTransactions}</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Transactions */}
+          {/* Pending Payments Alert */}
+          {paymentSummary.totalPending > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-3"
+            >
+              <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">Pending Payments</h3>
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  {paymentSummary.totalPending} payment{paymentSummary.totalPending !== 1 ? "s" : ""} awaiting processing. Average daily processing: ₦{paymentSummary.averageDaily.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Daily Payments Summary */}
+          {dailyPayments.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.17 }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Daily Payments Breakdown</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {dailyPayments.slice(0, 6).map((daily, idx) => (
+                  <Card key={idx} className="bg-card/50 backdrop-blur border-primary/10 hover:border-primary/20 transition">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-semibold text-sm">{daily.date}</span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-primary">
+                            ₦{daily.totalAmount.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-xs border-t border-primary/10 pt-3">
+                        <div>
+                          <p className="text-muted-foreground">Total</p>
+                          <p className="font-bold text-foreground">{daily.count}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-emerald-600 dark:text-emerald-400">Completed</p>
+                          <p className="font-bold text-emerald-600 dark:text-emerald-400">{daily.completed}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-amber-600 dark:text-amber-400">Pending</p>
+                          <p className="font-bold text-amber-600 dark:text-amber-400">{daily.pending}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </motion.div>
+          )}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Tabs defaultValue="all">
+            <Tabs value={statusFilter} onValueChange={setStatusFilter}>
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                 <TabsList className="bg-muted/50">
                   <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="topups">Top-ups</TabsTrigger>
-                  <TabsTrigger value="rides">Ride Payments</TabsTrigger>
-                  <TabsTrigger value="payouts">Payouts</TabsTrigger>
+                  <TabsTrigger value="pending">Pending</TabsTrigger>
+                  <TabsTrigger value="completed">Completed</TabsTrigger>
+                  <TabsTrigger value="failed">Failed</TabsTrigger>
                 </TabsList>
 
                 <div className="flex gap-2">
@@ -112,34 +292,80 @@ function PaymentsContent() {
                 </div>
               </div>
 
-              <TabsContent value="all">
+              <TabsContent value={statusFilter}>
                 <Card className="bg-card/50 backdrop-blur border-primary/10">
                   <CardContent className="p-0">
                     <Table>
                       <TableHeader>
                         <TableRow className="border-primary/10">
                           <TableHead>Transaction ID</TableHead>
-                          <TableHead>User</TableHead>
-                          <TableHead>Type</TableHead>
+                          <TableHead>Driver</TableHead>
+                          <TableHead>Method</TableHead>
                           <TableHead>Amount</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Date</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        <TableRow>
-                          <TableCell colSpan={6}>
-                            <div className="flex flex-col items-center justify-center py-12 text-center">
-                              <div className="p-4 rounded-full bg-muted/50 mb-4">
-                                <CreditCard className="h-8 w-8 text-muted-foreground" />
+                        {isLoading ? (
+                          <TableRow>
+                            <TableCell colSpan={6}>
+                              <div className="flex items-center justify-center py-8">
+                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
                               </div>
-                              <h3 className="font-medium text-foreground mb-1">No transactions yet</h3>
-                              <p className="text-sm text-muted-foreground">
-                                Transactions will appear here once payments start.
-                              </p>
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                            </TableCell>
+                          </TableRow>
+                        ) : payments.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={6}>
+                              <div className="flex flex-col items-center justify-center py-12 text-center">
+                                <div className="p-4 rounded-full bg-muted/50 mb-4">
+                                  <CreditCard className="h-8 w-8 text-muted-foreground" />
+                                </div>
+                                <h3 className="font-medium text-foreground mb-1">No transactions found</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  Transactions will appear here once payments start.
+                                </p>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          payments.map((payment) => (
+                            <TableRow
+                              key={payment.id}
+                              className="border-primary/10 cursor-pointer hover:bg-primary/5 transition"
+                              onClick={() => {
+                                setSelectedPaymentId(payment.id)
+                                setShowPaymentModal(true)
+                              }}
+                            >
+                              <TableCell className="font-medium text-sm">{payment.id.slice(0, 8)}</TableCell>
+                              <TableCell className="text-sm">
+                                {payment.driver_first_name} {payment.driver_last_name}
+                              </TableCell>
+                              <TableCell className="text-sm">{payment.payment_method}</TableCell>
+                              <TableCell className="text-sm font-medium">
+                                ₦{payment.amount.toLocaleString()}
+                              </TableCell>
+                              <TableCell>
+                                <span
+                                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                    payment.status === "completed"
+                                      ? "bg-emerald-500/20 text-emerald-500"
+                                      : payment.status === "pending"
+                                        ? "bg-amber-500/20 text-amber-500"
+                                        : "bg-red-500/20 text-red-500"
+                                  }`}
+                                >
+                                  {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {new Date(payment.created_at).toLocaleDateString()}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
                       </TableBody>
                     </Table>
                   </CardContent>
@@ -149,13 +375,19 @@ function PaymentsContent() {
           </motion.div>
         </div>
       </main>
+      <AdminBottomNavigation />
+      <AdminPaymentDetailsModal
+        open={showPaymentModal}
+        onOpenChange={setShowPaymentModal}
+        paymentId={selectedPaymentId}
+      />
     </div>
   )
 }
 
 export default function PaymentsPage() {
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
       <PaymentsContent />
     </ProtectedRoute>
   )

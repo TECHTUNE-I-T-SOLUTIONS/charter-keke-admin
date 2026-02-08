@@ -1,64 +1,55 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
-import { getSessionFromRequest } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server"
+import { supabase, supabaseAdmin } from "@/lib/supabase"
+import { getSessionFromRequest } from "@/lib/auth"
+import { checkAdminAccess, logAdminAction } from "@/lib/admin"
 
-async function checkAdminAccess(userId: string, requiredPermission: string) {
-  const { data: admin } = await supabaseAdmin
-    .from("admins")
-    .select("permissions")
-    .eq("user_id", userId)
-    .single();
-
-  if (!admin) {
-    return false;
-  }
-
-  const perms = admin.permissions as Record<string, boolean>;
-  return perms[requiredPermission] === true;
-}
-
+/**
+ * GET /api/admin/users
+ * Fetch users list with optional filtering and pagination
+ */
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSessionFromRequest(request);
+    const searchParams = request.nextUrl.searchParams
+    const search = searchParams.get("search") || ""
+    const status = searchParams.get("status") || ""
+    const limit = parseInt(searchParams.get("limit") || "50")
+    const offset = parseInt(searchParams.get("offset") || "0")
 
-    if (!session?.user?.id || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let query = supabase
+      .from("users")
+      .select("id, first_name, last_name, email, phone_number, role, status, created_at, profile_picture_url")
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    // Add status filter
+    if (status) {
+      query = query.eq("status", status)
     }
 
-    const hasAccess = await checkAdminAccess(session.user.id, "view_users");
-    if (!hasAccess) {
-      return NextResponse.json(
-        { error: "Permission denied" },
-        { status: 403 }
-      );
+    // Add search filter
+    if (search) {
+      query = query.or(
+        `first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`
+      )
     }
 
-    const { searchParams } = new URL(request.url);
-    const role = searchParams.get("role");
-    const status = searchParams.get("status");
-    const limit = parseInt(searchParams.get("limit") || "50");
-
-    let query = supabaseAdmin.from("users").select("*");
-
-    if (role) query = query.eq("role", role);
-    if (status) query = query.eq("status", status);
-
-    const { data: users, error } = await query.limit(limit);
+    const { data: users, error, count } = await query
 
     if (error) {
-      return NextResponse.json(
-        { error: "Failed to fetch users" },
-        { status: 500 }
-      );
+      console.error("Users fetch error:", error)
+      return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 })
     }
 
-    return NextResponse.json({ users });
-  } catch (error) {
-    console.error("User fetch error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+      {
+        users: users || [],
+        count: count || 0,
+      },
+      { status: 200 }
+    )
+  } catch (error) {
+    console.error("Users error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
@@ -68,6 +59,13 @@ export async function PUT(request: NextRequest) {
 
     if (!session?.user?.id || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Admin client not available" },
+        { status: 503 }
+      );
     }
 
     const hasAccess = await checkAdminAccess(

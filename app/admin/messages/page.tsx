@@ -272,7 +272,7 @@ function AdminMessagesContent() {
 
 export default function AdminMessagesPage() {
 	return (
-		<ProtectedRoute allowedRoles={["admin"]}>
+		<ProtectedRoute allowedRoles={["admin", "super_admin"]}>
 			<AdminMessagesContent />
 		</ProtectedRoute>
 	)
