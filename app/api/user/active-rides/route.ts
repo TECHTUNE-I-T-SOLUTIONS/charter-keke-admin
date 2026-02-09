@@ -4,9 +4,39 @@ import { getSessionFromRequest } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSessionFromRequest(request)
+    console.log("🔵 [ACTIVE-RIDES] Received request")
+    console.log("🔑 [ACTIVE-RIDES] Authorization header:", request.headers.get("authorization"))
+    
+    // Try NextAuth session first (for web app)
+    let session = await getSessionFromRequest(request)
+    let userId: string | null = null
 
-    if (!session?.user?.id || session.user.role !== "user") {
+    if (session?.user?.id) {
+      console.log("✅ [ACTIVE-RIDES] Found NextAuth session, userId:", session.user.id)
+      userId = session.user.id
+    } else {
+      console.log("⚠️  [ACTIVE-RIDES] No NextAuth session, trying Bearer token")
+      // Fall back to custom Bearer token (for mobile app)
+      const authHeader = request.headers.get("authorization")
+      if (authHeader?.startsWith("Bearer ")) {
+        const token = authHeader.substring(7)
+        console.log("🔑 [ACTIVE-RIDES] Bearer token found, length:", token.length)
+        try {
+          const decoded = Buffer.from(token, "base64").toString("utf-8")
+          console.log("✅ [ACTIVE-RIDES] Decoded token:", decoded)
+          const [id] = decoded.split(":") // Format: userId:timestamp
+          console.log("👤 [ACTIVE-RIDES] Extracted userId:", id)
+          if (id) {
+            userId = id
+          }
+        } catch (e) {
+          console.error("❌ [ACTIVE-RIDES] Failed to decode Bearer token:", e)
+        }
+      }
+    }
+
+    if (!userId) {
+      console.error("❌ [ACTIVE-RIDES] No userId found, returning 401")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -35,7 +65,7 @@ export async function GET(request: NextRequest) {
         drivers:driver_id (id, user_id, vehicle_picture_url, plate_number, users:user_id (first_name, last_name, phone_number, profile_picture_url))
       `
       )
-      .eq("rider_id", session.user.id)
+      .eq("rider_id", userId)
       .in("status", ["pending", "dispatched", "accepted", "in_progress"])
       .order("created_at", { ascending: false })
 

@@ -5,31 +5,86 @@ import type { NextRequest } from "next/server";
 
 /**
  * Get the current session from the request
+ * Supports both NextAuth JWT tokens and custom Bearer tokens (mobile app)
  * Used in API route handlers
  */
 export async function getSessionFromRequest(request: NextRequest) {
   try {
-    const token = await getToken({
+    // First, try to get NextAuth token (for web app)
+    const nextAuthToken = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
     });
 
-    if (!token) {
+    if (nextAuthToken) {
+      return {
+        user: {
+          id: nextAuthToken.id as string,
+          email: nextAuthToken.email as string,
+          firstName: nextAuthToken.firstName as string,
+          lastName: nextAuthToken.lastName as string,
+          role: nextAuthToken.role as string,
+          phone: nextAuthToken.phone as string,
+          referralCode: nextAuthToken.referralCode as string,
+          createdAt: nextAuthToken.createdAt as string,
+        },
+      };
+    }
+
+    // If no NextAuth token, try custom Bearer token (mobile app)
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return null;
     }
 
-    return {
-      user: {
-        id: token.id as string,
-        email: token.email as string,
-        firstName: token.firstName as string,
-        lastName: token.lastName as string,
-        role: token.role as string,
-        phone: token.phone as string,
-        referralCode: token.referralCode as string,
-        createdAt: token.createdAt as string,
-      },
-    };
+    const customToken = authHeader.substring(7); // Remove "Bearer " prefix
+    console.log("🔐 [AUTH] Validating custom Bearer token");
+
+    try {
+      // Decode the custom token (format: userId:timestamp encoded in base64)
+      const decoded = Buffer.from(customToken, "base64").toString("utf-8");
+      const [userId] = decoded.split(":"); // Extract userId
+
+      if (!userId) {
+        console.error("❌ [AUTH] Invalid custom token format");
+        return null;
+      }
+
+      // Fetch user from database to get session info
+      const { data: user, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error || !user) {
+        console.error("❌ [AUTH] User not found for custom token:", error);
+        return null;
+      }
+
+      if (user.status !== "active") {
+        console.error("❌ [AUTH] User is not active:", user.status);
+        return null;
+      }
+
+      console.log("✅ [AUTH] Custom Bearer token validated for user:", userId);
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          role: user.role,
+          phone: user.phone_number,
+          referralCode: user.referral_code,
+          createdAt: user.created_at,
+        },
+      };
+    } catch (e) {
+      console.error("❌ [AUTH] Failed to decode custom token:", e);
+      return null;
+    }
   } catch (error) {
     console.error("Get session error:", error);
     return null;

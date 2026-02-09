@@ -4,9 +4,43 @@ import { getSessionFromRequest } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSessionFromRequest(request)
+    console.log("🔵 [RIDE-HISTORY] Received request")
+    console.log("📋 [RIDE-HISTORY] Headers:", Object.fromEntries(request.headers))
+    
+    // Try NextAuth session first (for web app)
+    let session = await getSessionFromRequest(request)
+    let userId: string | null = null
 
-    if (!session?.user?.id || session.user.role !== "user") {
+    if (session?.user?.id) {
+      console.log("✅ [RIDE-HISTORY] Found NextAuth session, userId:", session.user.id)
+      userId = session.user.id
+    } else {
+      console.log("⚠️  [RIDE-HISTORY] No NextAuth session, trying Bearer token")
+      // Fall back to custom Bearer token (for mobile app)
+      const authHeader = request.headers.get("authorization")
+      console.log("🔑 [RIDE-HISTORY] Authorization header:", authHeader)
+      
+      if (authHeader?.startsWith("Bearer ")) {
+        const token = authHeader.substring(7)
+        console.log("🔑 [RIDE-HISTORY] Bearer token found, length:", token.length)
+        try {
+          const decoded = Buffer.from(token, "base64").toString("utf-8")
+          console.log("✅ [RIDE-HISTORY] Decoded token:", decoded)
+          const [id] = decoded.split(":") // Format: userId:timestamp
+          console.log("👤 [RIDE-HISTORY] Extracted userId:", id)
+          if (id) {
+            userId = id
+          }
+        } catch (e) {
+          console.error("❌ [RIDE-HISTORY] Failed to decode Bearer token:", e)
+        }
+      } else {
+        console.error("❌ [RIDE-HISTORY] No Bearer token in header")
+      }
+    }
+
+    if (!userId) {
+      console.error("❌ [RIDE-HISTORY] No userId found, returning 401")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -38,7 +72,7 @@ export async function GET(request: NextRequest) {
       `,
         { count: "exact" }
       )
-      .eq("rider_id", session.user.id)
+      .eq("rider_id", userId)
       .in("status", ["completed", "cancelled"])
       .order("completed_at", { ascending: false, nullsFirst: false })
       .range(offset, offset + limit - 1)
