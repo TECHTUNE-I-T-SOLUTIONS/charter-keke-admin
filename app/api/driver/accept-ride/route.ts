@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { getSessionFromRequest } from "@/lib/auth";
-import { emitRideAccepted, emitRideTaken } from "@/lib/push-emitters";
+import { acceptRideFirstCome } from "@/lib/ride-acceptance";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,99 +20,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get driver profile
-    const { data: driver } = await supabase
-      .from("drivers")
-      .select("id")
-      .eq("user_id", session.user.id)
-      .single();
+    const acceptance = await acceptRideFirstCome({
+      rideId,
+      driverUserId: session.user.id,
+      source: "app",
+    });
 
-    if (!driver) {
+    if (!acceptance.success) {
       return NextResponse.json(
-        { error: "Driver profile not found" },
-        { status: 404 }
+        {
+          error: acceptance.message,
+          code: acceptance.code,
+        },
+        { status: acceptance.status }
       );
-    }
-
-    // Get ride
-    const { data: ride } = await supabase
-      .from("rides")
-      .select("*")
-      .eq("id", rideId)
-      .single();
-
-    if (!ride) {
-      return NextResponse.json({ error: "Ride not found" }, { status: 404 });
-    }
-
-    // Check if ride is still available (pending status)
-    if (!["pending", "dispatched"].includes(ride.status)) {
-      return NextResponse.json(
-        { error: "Ride is no longer available" },
-        { status: 409 }
-      );
-    }
-
-    // Accept the ride - update status to accepted and assign driver
-    const { data: updatedRide, error } = await supabase
-      .from("rides")
-      .update({
-        status: "accepted",
-        driver_id: driver.id,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", rideId)
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Accept ride error:", error);
-      return NextResponse.json(
-        { error: "Failed to accept ride" },
-        { status: 500 }
-      );
-    }
-
-    // Send push notification to rider that ride was accepted
-    try {
-      // Get rider ID
-      const riderId = ride.rider_id;
-
-      // Get driver details for notification
-      const { data: driverUser } = await supabaseAdmin!
-        .from("users")
-        .select("first_name, last_name")
-        .eq("id", session.user.id)
-        .single();
-
-      const driverName = driverUser 
-        ? `${driverUser.first_name} ${driverUser.last_name}` 
-        : "Driver";
-
-      // Send ride accepted notification
-      await emitRideAccepted(
-        riderId,
-        session.user.id,
-        rideId,
-        driverName,
-        session.user.phone_number || "",
-        "Keke Tricycle",
-        5,
-        ride.pickup_zone,
-        ride.destination_zone,
-        ride.fare || 0
-      );
-
-      // Broadcast to other drivers that ride was taken
-      await emitRideTaken(rideId);
-    } catch (notificationError) {
-      console.error("Failed to send notifications:", notificationError);
-      // Don't fail the entire request if notifications fail
     }
 
     return NextResponse.json({
       success: true,
-      ride: updatedRide,
+      ride: acceptance.ride,
     });
   } catch (error) {
     console.error("API error:", error);

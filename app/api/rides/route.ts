@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { getSessionFromRequest } from "@/lib/auth";
 import { notifyDriverAboutRide } from "@/lib/notifications";
 import { emitRideRequest, emitRideUpdate } from "@/lib/push-emitters";
+import { sendRideRequestSMS } from "@/lib/termii";
 
 export async function POST(request: NextRequest) {
   try {
@@ -63,13 +64,36 @@ export async function POST(request: NextRequest) {
     }
 
     // Find available drivers in the zone
-    const { data: drivers } = await supabaseAdmin!
+    const { data: zoneDrivers } = await supabaseAdmin!
       .from("drivers")
-      .select("user_id")
+      .select("id, user_id")
       .contains("operating_zones", [pickup_zone])
       .eq("availability_status", "online")
       .eq("verified", true)
       .limit(5);
+
+    let drivers = zoneDrivers || [];
+
+    if (drivers.length === 0) {
+      console.log("[RideDispatch] No zone-matched drivers found, using online fallback", {
+        pickup_zone,
+      });
+
+      const { data: fallbackDrivers } = await supabaseAdmin!
+        .from("drivers")
+        .select("id, user_id")
+        .eq("availability_status", "online")
+        .eq("verified", true)
+        .limit(5);
+
+      drivers = fallbackDrivers || [];
+    }
+
+    console.log("[RideDispatch] Candidate drivers count", {
+      rideId: ride.id,
+      count: drivers.length,
+      pickup_zone,
+    });
 
     // Emit push notification to all nearby drivers
     if (ride) {
@@ -91,6 +115,21 @@ export async function POST(request: NextRequest) {
 
     // Notify drivers
     if (drivers && drivers.length > 0) {
+      const driverUserIds = drivers.map((driver: any) => driver.user_id);
+      const { data: driverUsers } = await supabaseAdmin!
+        .from("users")
+        .select("id, phone_number")
+        .in("id", driverUserIds);
+
+      const phoneByUserId = new Map<string, string>();
+      for (const user of driverUsers || []) {
+        if (user.phone_number) {
+          phoneByUserId.set(user.id, user.phone_number);
+        }
+      }
+
+      const smsTasks: Promise<any>[] = [];
+
       for (const driver of drivers) {
         await notifyDriverAboutRide(
           driver.user_id,
@@ -103,18 +142,61 @@ export async function POST(request: NextRequest) {
         await supabaseAdmin!.from("ride_dispatch_logs").insert([
           {
             ride_id: ride.id,
-            driver_id: driver.user_id,
+            driver_id: driver.id,
             dispatch_method: "push",
             created_at: new Date().toISOString(),
           },
         ]);
+
+        const driverPhone = phoneByUserId.get(driver.user_id);
+        if (driverPhone) {
+          smsTasks.push(
+            sendRideRequestSMS({
+              to: driverPhone,
+              rideId: ride.id,
+              pickup: pickup_description || pickup_zone,
+              destination: destination_description || destination_zone,
+              fare: Number((ride as any).fare_amount || (ride as any).fare || parsedFare || 0),
+            }).then(() =>
+              supabaseAdmin!.from("ride_dispatch_logs").insert([
+                {
+                  ride_id: ride.id,
+                  driver_id: driver.id,
+                  dispatch_method: "sms",
+                  created_at: new Date().toISOString(),
+                },
+              ])
+            )
+          );
+        }
       }
+
+      const smsResults = await Promise.allSettled(smsTasks);
+      let smsSuccessCount = 0;
+      for (const result of smsResults) {
+        if (result.status === "rejected") {
+          console.error("SMS dispatch failed:", result.reason);
+        } else {
+          smsSuccessCount += 1;
+        }
+      }
+
+      console.log("[RideDispatch] SMS dispatch summary", {
+        rideId: ride.id,
+        attempted: smsTasks.length,
+        successful: smsSuccessCount,
+      });
 
       // Update ride status to dispatched
       await supabaseAdmin!
         .from("rides")
         .update({ status: "dispatched" })
         .eq("id", ride.id);
+    } else {
+      console.log("[RideDispatch] No online verified drivers available for dispatch", {
+        rideId: ride.id,
+        pickup_zone,
+      });
     }
 
     return NextResponse.json(
