@@ -15,6 +15,10 @@ export async function POST(request: NextRequest) {
     const dob = formData.get("dob") as string;
     const gender = formData.get("gender") as string;
     const role = (formData.get("role") as string) || "user";
+    const homeAddress = ((formData.get("homeAddress") as string) || "").trim();
+    const workAddress = ((formData.get("workAddress") as string) || "").trim();
+    const emergencyContactName = ((formData.get("emergencyContactName") as string) || "").trim();
+    const emergencyContactPhone = ((formData.get("emergencyContactPhone") as string) || "").trim();
 
     // Driver fields
     const vehicleType = formData.get("vehicleType") as string;
@@ -92,28 +96,52 @@ export async function POST(request: NextRequest) {
         profilePictureUrl = uploadResult.url;
       } catch (uploadError) {
         console.error("Profile picture upload error:", uploadError);
-        // Continue without profile picture
+        return NextResponse.json(
+          { error: "Profile picture upload failed. Please try again." },
+          { status: 502 }
+        );
       }
     }
 
     // Create user
-    const { data: newUser, error: createError } = await supabase
+    const createPayload: Record<string, any> = {
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      phone_number: phone,
+      password_hash: hashedPassword,
+      dob: dob || null,
+      gender: gender || null,
+      profile_picture_url: profilePictureUrl,
+      role,
+      status: "active",
+      profile_complete: true,
+      emergency_contact: emergencyContactName || null,
+      emergency_phone: emergencyContactPhone || null,
+      home_address: homeAddress || null,
+      work_address: workAddress || null,
+    };
+
+    let { data: newUser, error: createError } = await supabase
       .from("users")
-      .insert({
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        phone_number: phone,
-        password_hash: hashedPassword,
-        dob: dob || null,
-        gender: gender || null,
-        profile_picture_url: profilePictureUrl,
-        role,
-        status: "active",
-        profile_complete: false,
-      })
+      .insert(createPayload)
       .select()
       .single();
+
+    if (createError && /home_address|work_address/i.test(createError.message || "")) {
+      const payloadWithoutAddresses = { ...createPayload };
+      delete payloadWithoutAddresses.home_address;
+      delete payloadWithoutAddresses.work_address;
+
+      const fallbackInsert = await supabase
+        .from("users")
+        .insert(payloadWithoutAddresses)
+        .select()
+        .single();
+
+      newUser = fallbackInsert.data;
+      createError = fallbackInsert.error;
+    }
 
     if (createError) {
       console.error("Create user error:", createError);
@@ -199,6 +227,10 @@ export async function POST(request: NextRequest) {
           dob: newUser.dob,
           gender: newUser.gender,
           profilePictureUrl: newUser.profile_picture_url,
+          homeAddress: (newUser as any).home_address || "",
+          workAddress: (newUser as any).work_address || "",
+          emergencyContactName: (newUser as any).emergency_contact || "",
+          emergencyContactPhone: (newUser as any).emergency_phone || "",
           role: newUser.role,
           referralCode: referralCode,
         },

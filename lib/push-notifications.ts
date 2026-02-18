@@ -15,7 +15,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!("serviceWorker" in navigator)) {
-    console.log("[v0] Service workers are not supported")
+    console.log("[CK] Service workers are not supported")
     return null
   }
 
@@ -23,10 +23,10 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     const registration = await navigator.serviceWorker.register("/sw.js", {
       scope: "/",
     })
-    console.log("[v0] Service Worker registered successfully")
+    console.log("[CK] Service Worker registered successfully")
     return registration
   } catch (error) {
-    console.error("[v0] Service Worker registration failed:", error)
+    console.error("[CK] Service Worker registration failed:", error)
     return null
   }
 }
@@ -45,12 +45,12 @@ export async function subscribeToPushNotifications(): Promise<PushSubscription |
         userVisibleOnly: true,
         applicationServerKey: key as any,
       })
-      console.log("[v0] Push subscription created")
+      console.log("[CK] Push subscription created")
     }
 
     return subscription
   } catch (error) {
-    console.error("[v0] Failed to subscribe to push notifications:", error)
+    console.error("[CK] Failed to subscribe to push notifications:", error)
     return null
   }
 }
@@ -62,13 +62,13 @@ export async function unsubscribeFromPushNotifications(): Promise<boolean> {
 
     if (subscription) {
       await subscription.unsubscribe()
-      console.log("[v0] Unsubscribed from push notifications")
+      console.log("[CK] Unsubscribed from push notifications")
       return true
     }
 
     return false
   } catch (error) {
-    console.error("[v0] Failed to unsubscribe:", error)
+    console.error("[CK] Failed to unsubscribe:", error)
     return false
   }
 }

@@ -184,11 +184,11 @@ export async function POST(request: NextRequest) {
       userData = {
         ...baseUserData,
         role: 'rider' as const,
-        homeAddress: user.home_address || '',
-        workAddress: user.work_address || '',
-        emergencyContact: user.emergency_contact_name ? {
-          name: user.emergency_contact_name,
-          phone: user.emergency_contact_phone || '',
+        homeAddress: user.home_address || user.homeAddress || '',
+        workAddress: user.work_address || user.workAddress || '',
+        emergencyContact: user.emergency_contact ? {
+          name: user.emergency_contact,
+          phone: user.emergency_phone || '',
         } : undefined,
         rideCount: user.ride_count || 0,
         averageRating: user.average_rating || 0,

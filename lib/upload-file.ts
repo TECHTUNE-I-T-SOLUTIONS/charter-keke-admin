@@ -11,17 +11,30 @@ export async function uploadFileWithServiceRole(
   contentType: string
 ) {
   try {
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error('Supabase server env is missing (SUPABASE_URL/NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY)');
+    }
+
     // Create Supabase client with service role key
     const serviceSupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+      supabaseUrl,
+      serviceRoleKey,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
     );
 
     // Upload file to storage
     const { data, error } = await serviceSupabase.storage
       .from(bucketName)
-      .upload(filePath, fileBuffer, {
-        contentType,
+      .upload(filePath, new Uint8Array(fileBuffer), {
+        contentType: contentType || 'application/octet-stream',
         upsert: true,
       });
 
@@ -40,7 +53,11 @@ export async function uploadFileWithServiceRole(
       url: publicUrlData.publicUrl,
     };
   } catch (error) {
-    console.error('File upload error:', error);
+    console.error('File upload error:', {
+      bucketName,
+      filePath,
+      error: error instanceof Error ? error.message : error,
+    });
     throw error;
   }
 }
@@ -53,9 +70,22 @@ export async function deleteFileWithServiceRole(
   filePath: string
 ) {
   try {
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      throw new Error('Supabase server env is missing (SUPABASE_URL/NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY)');
+    }
+
     const serviceSupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+      supabaseUrl,
+      serviceRoleKey,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
     );
 
     const { error } = await serviceSupabase.storage

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { getSessionFromRequest } from "@/lib/auth";
+import { emitRideAccepted, emitRideTaken } from "@/lib/push-emitters";
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if ride is still available (pending status)
-    if (ride.status !== "pending") {
+    if (!["pending", "dispatched"].includes(ride.status)) {
       return NextResponse.json(
         { error: "Ride is no longer available" },
         { status: 409 }
@@ -71,6 +72,43 @@ export async function POST(request: NextRequest) {
         { error: "Failed to accept ride" },
         { status: 500 }
       );
+    }
+
+    // Send push notification to rider that ride was accepted
+    try {
+      // Get rider ID
+      const riderId = ride.rider_id;
+
+      // Get driver details for notification
+      const { data: driverUser } = await supabaseAdmin!
+        .from("users")
+        .select("first_name, last_name")
+        .eq("id", session.user.id)
+        .single();
+
+      const driverName = driverUser 
+        ? `${driverUser.first_name} ${driverUser.last_name}` 
+        : "Driver";
+
+      // Send ride accepted notification
+      await emitRideAccepted(
+        riderId,
+        session.user.id,
+        rideId,
+        driverName,
+        session.user.phone_number || "",
+        "Keke Tricycle",
+        5,
+        ride.pickup_zone,
+        ride.destination_zone,
+        ride.fare || 0
+      );
+
+      // Broadcast to other drivers that ride was taken
+      await emitRideTaken(rideId);
+    } catch (notificationError) {
+      console.error("Failed to send notifications:", notificationError);
+      // Don't fail the entire request if notifications fail
     }
 
     return NextResponse.json({

@@ -1,279 +1,410 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogTrigger, DialogPortal, DialogOverlay, DialogContent, DialogClose, DialogTitle } from "@/components/ui/dialog"
-import { useEffect } from "react"
-// Mobile detection hook
-function useIsMobile() {
-	const [isMobile, setIsMobile] = useState(false)
-	useEffect(() => {
-		const checkMobile = () => setIsMobile(window.innerWidth < 768)
-		checkMobile()
-		window.addEventListener("resize", checkMobile)
-		return () => window.removeEventListener("resize", checkMobile)
-	}, [])
-	return isMobile
-}
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { Send, User, X, MessageCircle } from "lucide-react"
+import { CheckCircle2, MessageCircle, Paperclip, Send } from "lucide-react"
 
-// Types
-type User = {
-	id: number;
-	name: string;
-	email: string;
-	avatar: string;
-};
-type Message = {
-	from: string;
-	text: string;
-	time: string;
-};
-type Conversations = {
-	[userId: number]: Message[];
-};
+type TicketStatus = "open" | "in_progress" | "resolved" | "closed"
 
-// Mock users and messages
-const mockUsers: User[] = [
-	{ id: 1, name: "Jane Doe", email: "jane@charterkeke.com", avatar: "https://img.icons8.com/?size=100&id=23259&format=png&color=000000" },
-	{ id: 2, name: "John Smith", email: "john@charterkeke.com", avatar: "https://img.icons8.com/?size=100&id=9ZAO_U356VVd&format=png&color=000000" },
-	{ id: 3, name: "Mary Lee", email: "mary@charterkeke.com", avatar: "https://img.icons8.com/?size=100&id=108321&format=png&color=000000" },
-];
-const mockConversations: Conversations = {
-	1: [
-		{ from: "admin", text: "Hi Jane, welcome to Charter Keke!", time: "09:00" },
-		{ from: "Jane Doe", text: "Thank you! Excited to use the platform.", time: "09:01" },
-	],
-	2: [
-		{ from: "admin", text: "Hello John, system maintenance is scheduled for tonight.", time: "08:00" },
-		{ from: "John Smith", text: "Thanks for the update.", time: "08:02" },
-	],
-	3: [
-		{ from: "admin", text: "Hi Mary, let us know if you need help.", time: "10:00" },
-		{ from: "Mary Lee", text: "Will do, thanks!", time: "10:01" },
-	],
-};
+type Ticket = {
+  id: string
+  user_id: string
+  subject: string
+  description: string
+  category: string
+  priority: "low" | "normal" | "high" | "urgent"
+  status: TicketStatus
+  assigned_to?: string | null
+  related_ride_id?: string | null
+  created_at: string
+  updated_at: string
+  resolved_at?: string | null
+  resolution_note?: string | null
+  users?: {
+    id: string
+    first_name: string
+    last_name: string
+    email: string
+    role: string
+    profile_picture_url?: string | null
+  }
+}
+
+type TicketMessage = {
+  id: string
+  ticket_id: string
+  sender_id: string
+  message: string
+  created_at: string
+  attachment_url?: string | null
+  attachment_name?: string | null
+  attachment_mime_type?: string | null
+  users?: {
+    id: string
+    first_name: string
+    last_name: string
+    role: string
+    profile_picture_url?: string | null
+  }
+}
+
+function statusVariant(status: TicketStatus) {
+  if (status === "open") return "secondary" as const
+  if (status === "in_progress") return "default" as const
+  if (status === "resolved") return "outline" as const
+  return "destructive" as const
+}
 
 function AdminMessagesContent() {
-	const isMobile = useIsMobile()
-	const [modalOpen, setModalOpen] = useState(false)
-	const [selectedUser, setSelectedUser] = useState<User | null>(null)
-	const [message, setMessage] = useState("")
-	const [conversations, setConversations] = useState<Conversations>(mockConversations)
+  const [tickets, setTickets] = useState<Ticket[]>([])
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null)
+  const [messages, setMessages] = useState<TicketMessage[]>([])
+  const [loadingTickets, setLoadingTickets] = useState(true)
+  const [loadingMessages, setLoadingMessages] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [newMessage, setNewMessage] = useState("")
+  const [search, setSearch] = useState("")
+  const [resolutionNote, setResolutionNote] = useState("")
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false)
+  const [attachment, setAttachment] = useState<File | null>(null)
+  const pollRef = useRef<NodeJS.Timeout | null>(null)
 
-	const handleUserSelect = (user: User) => {
-		setSelectedUser(user)
-		setModalOpen(false)
-	}
+  const selectedTicket = useMemo(
+    () => tickets.find((t) => t.id === selectedTicketId) || null,
+    [tickets, selectedTicketId]
+  )
 
-	const handleSend = () => {
-		if (!selectedUser || !message.trim()) return
-		setConversations((prev) => ({
-			...prev,
-			[selectedUser.id]: [
-				...(prev[selectedUser.id] || []),
-				{ from: "admin", text: message, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
-			],
-		}))
-		setMessage("")
-		toast.success("Message sent!")
-	}
+  const filteredTickets = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    if (!query) return tickets
+    return tickets.filter((t) =>
+      [t.subject, t.description, t.users?.first_name, t.users?.last_name, t.users?.email]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(query))
+    )
+  }, [tickets, search])
 
-	return (
-		<div className="flex min-h-screen bg-background">
-			<DashboardSidebar />
-			<main className="flex-1 pt-16 lg:pt-0 flex flex-col">
-				<div className="p-4 md:p-6 lg:p-8 flex flex-col gap-6 h-full">
-					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-						<div className="flex items-center justify-between">
-							<div>
-								<h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Admin Messages</h1>
-								<p className="text-muted-foreground mt-1">Manage conversations and send messages to users</p>
-							</div>
-							<Dialog open={modalOpen} onOpenChange={setModalOpen}>
-								<DialogTrigger asChild>
-									<Button variant="outline" className="flex gap-2"><User className="h-5 w-5" />Message User</Button>
-								</DialogTrigger>
-								<DialogPortal>
-									<DialogOverlay className="bg-black/40 fixed inset-0 z-50" />
-									<DialogContent className="max-w-md w-full bg-background rounded-lg shadow-lg p-6 z-50">
-										<DialogTitle>Select User</DialogTitle>
-										<div className="flex items-center justify-between mb-4">
-											<span />
-											<DialogClose asChild>
-												<Button variant="ghost" size="icon"><X className="h-5 w-5" /></Button>
-											</DialogClose>
-										</div>
-										<ScrollArea className="max-h-64">
-											{mockUsers.map(user => (
-												<div key={user.id} className="flex items-center gap-3 py-2 cursor-pointer hover:bg-primary/5 rounded" onClick={() => handleUserSelect(user)}>
-													<Avatar className="h-8 w-8">
-														<AvatarImage src={user.avatar} alt={user.name} />
-														<AvatarFallback>{user.name[0]}</AvatarFallback>
-													</Avatar>
-													<div>
-														<div className="font-medium">{user.name}</div>
-														<div className="text-xs text-muted-foreground">{user.email}</div>
-													</div>
-												</div>
-											))}
-										</ScrollArea>
-									</DialogContent>
-								</DialogPortal>
-							</Dialog>
-						</div>
-					</motion.div>
-					<Separator />
-					{/* Responsive layout: desktop/tablet vs mobile */}
-					{isMobile ? (
-						<div className="flex-1 flex flex-col bg-card/50 rounded-lg border border-primary/10 p-0">
-							{!selectedUser ? (
-								<div className="p-4">
-									<h3 className="font-semibold mb-2 text-lg">Users</h3>
-									<ScrollArea className="max-h-96">
-										{mockUsers.map(user => (
-											  <div key={user.id} className={`flex items-center gap-3 py-2 px-2 rounded cursor-pointer hover:bg-primary/5 ${((selectedUser as User | null)?.id === user.id) ? 'bg-primary/10' : ''}`} onClick={() => setSelectedUser(user)}>
-												<Avatar className="h-7 w-7">
-													<AvatarImage src={user.avatar} alt={user.name} />
-													<AvatarFallback>{user.name[0]}</AvatarFallback>
-												</Avatar>
-												<div>
-													<div className="font-medium text-sm">{user.name}</div>
-													<div className="text-xs text-muted-foreground">{user.email}</div>
-												</div>
-											</div>
-										))}
-									</ScrollArea>
-								</div>
-							) : (
-								<div className="flex flex-col h-full">
-									<div className="flex items-center gap-3 p-4 border-b border-primary/10 bg-background">
-										<Button variant="ghost" size="icon" onClick={() => setSelectedUser(null)}>
-											<svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M15 18l-6-6 6-6" /></svg>
-										</Button>
-										<Avatar className="h-8 w-8">
-											<AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
-											<AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
-										</Avatar>
-										<div>
-											<div className="font-semibold">{selectedUser.name}</div>
-											<div className="text-xs text-muted-foreground">{selectedUser.email}</div>
-										</div>
-									</div>
-									<ScrollArea className="flex-1 min-h-[200px] max-h-[350px] my-4 pr-2">
-										<div className="flex flex-col gap-3 px-4">
-											{(conversations[selectedUser.id] || []).map((msg: Message, idx: number) => (
-												<div key={idx} className={`flex ${msg.from === "admin" ? 'justify-end' : 'justify-start'}`}> 
-													<div className={`max-w-xs px-4 py-2 rounded-lg text-sm ${msg.from === "admin" ? 'bg-primary text-white' : 'bg-background border'}`}>
-														{msg.text}
-														<span className="block text-xs text-muted-foreground mt-1 text-right">{msg.time}</span>
-													</div>
-												</div>
-											))}
-										</div>
-									</ScrollArea>
-									<form className="flex gap-2 p-4 border-t border-primary/10" onSubmit={e => { e.preventDefault(); handleSend(); }}>
-										<Textarea
-											placeholder="Type your message..."
-											value={message}
-											onChange={e => setMessage(e.target.value)}
-											className="resize-none min-h-[40px]"
-										/>
-										<Button type="submit" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90" disabled={!message.trim()}>
-											<Send className="h-5 w-5" />
-										</Button>
-									</form>
-								</div>
-							)}
-						</div>
-					) : (
-						<div className="flex flex-1 flex-col md:flex-row gap-6 h-full">
-							{/* User List (Sidebar) */}
-							<div className="w-full md:w-64 bg-card/50 rounded-lg border border-primary/10 p-4 flex-shrink-0">
-								<h3 className="font-semibold mb-2 text-lg">Users</h3>
-								<ScrollArea className="max-h-96">
-									{mockUsers.map(user => (
-										<div key={user.id} className={`flex items-center gap-3 py-2 px-2 rounded cursor-pointer hover:bg-primary/5 ${selectedUser?.id === user.id ? 'bg-primary/10' : ''}`} onClick={() => setSelectedUser(user)}>
-											<Avatar className="h-7 w-7">
-												<AvatarImage src={user.avatar} alt={user.name} />
-												<AvatarFallback>{user.name[0]}</AvatarFallback>
-											</Avatar>
-											<div>
-												<div className="font-medium text-sm">{user.name}</div>
-												<div className="text-xs text-muted-foreground">{user.email}</div>
-											</div>
-										</div>
-									))}
-								</ScrollArea>
-							</div>
-							{/* Conversation UI */}
-							<div className="flex-1 flex flex-col bg-card/50 rounded-lg border border-primary/10 p-4">
-								{selectedUser ? (
-									<>
-										<div className="flex items-center gap-3 mb-4">
-											<Avatar className="h-9 w-9">
-												<AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
-												<AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
-											</Avatar>
-											<div>
-												<div className="font-semibold">{selectedUser.name}</div>
-												<div className="text-xs text-muted-foreground">{selectedUser.email}</div>
-											</div>
-										</div>
-										<Separator />
-										<ScrollArea className="flex-1 min-h-[200px] max-h-[350px] my-4 pr-2">
-											<div className="flex flex-col gap-3">
-												{(conversations[selectedUser.id] || []).map((msg: Message, idx: number) => (
-													<div key={idx} className={`flex ${msg.from === "admin" ? 'justify-end' : 'justify-start'}`}> 
-														<div className={`max-w-xs px-4 py-2 rounded-lg text-sm ${msg.from === "admin" ? 'bg-primary text-white' : 'bg-background border'}`}>
-															{msg.text}
-															<span className="block text-xs text-muted-foreground mt-1 text-right">{msg.time}</span>
-														</div>
-													</div>
-												))}
-											</div>
-										</ScrollArea>
-										<form className="flex gap-2 mt-2" onSubmit={e => { e.preventDefault(); handleSend(); }}>
-											<Textarea
-												placeholder="Type your message..."
-												value={message}
-												onChange={e => setMessage(e.target.value)}
-												className="resize-none min-h-[40px]"
-											/>
-											<Button type="submit" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90" disabled={!message.trim()}>
-												<Send className="h-5 w-5" />
-											</Button>
-										</form>
-									</>
-								) : (
-									<div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-										<MessageCircle className="h-12 w-12 mb-2 text-primary/40" />
-										<p className="font-medium">Select a user to start a conversation</p>
-									</div>
-								)}
-							</div>
-						</div>
-					)}
-				</div>
-			</main>
-		</div>
-	)
+  const fetchTickets = async () => {
+    try {
+      const res = await fetch("/api/support/tickets?includeClosed=true&limit=100", { cache: "no-store" })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || "Failed to fetch tickets")
+      setTickets(data.tickets || [])
+
+      if (!selectedTicketId && data.tickets?.length) {
+        setSelectedTicketId(data.tickets[0].id)
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to load tickets")
+    } finally {
+      setLoadingTickets(false)
+    }
+  }
+
+  const fetchTicketThread = async (ticketId: string, silent = false) => {
+    if (!ticketId) return
+    try {
+      if (!silent) setLoadingMessages(true)
+      const res = await fetch(`/api/support/tickets/${ticketId}`, { cache: "no-store" })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || "Failed to load messages")
+      setMessages(data.messages || [])
+      if (data.ticket?.resolution_note) setResolutionNote(data.ticket.resolution_note)
+    } catch (error) {
+      if (!silent) toast.error(error instanceof Error ? error.message : "Failed to load thread")
+    } finally {
+      if (!silent) setLoadingMessages(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchTickets()
+  }, [])
+
+  useEffect(() => {
+    if (!selectedTicketId) return
+    fetchTicketThread(selectedTicketId)
+  }, [selectedTicketId])
+
+  useEffect(() => {
+    if (pollRef.current) clearInterval(pollRef.current)
+
+    pollRef.current = setInterval(() => {
+      fetchTickets()
+      if (selectedTicketId) fetchTicketThread(selectedTicketId, true)
+    }, 4000)
+
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [selectedTicketId])
+
+  const uploadAttachment = async (ticketId: string) => {
+    if (!attachment) return null
+
+    const formData = new FormData()
+    formData.append("file", attachment)
+    formData.append("ticketId", ticketId)
+
+    const res = await fetch("/api/support/upload", {
+      method: "POST",
+      body: formData,
+    })
+
+    const data = await res.json()
+    if (!res.ok) throw new Error(data?.error || "Failed to upload image")
+    return data
+  }
+
+  const sendMessage = async () => {
+    if (!selectedTicket) return
+    if (!newMessage.trim() && !attachment) return
+
+    try {
+      setSending(true)
+      const uploaded = await uploadAttachment(selectedTicket.id)
+
+      const res = await fetch(`/api/support/tickets/${selectedTicket.id}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: newMessage.trim(),
+          messageType: uploaded ? "image" : "text",
+          attachmentUrl: uploaded?.url,
+          attachmentName: uploaded?.name,
+          attachmentMimeType: uploaded?.mimeType,
+          attachmentSize: uploaded?.size,
+          attachments: uploaded
+            ? [
+                {
+                  url: uploaded.url,
+                  path: uploaded.path,
+                  name: uploaded.name,
+                  mimeType: uploaded.mimeType,
+                  size: uploaded.size,
+                },
+              ]
+            : [],
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || "Failed to send message")
+
+      setNewMessage("")
+      setAttachment(null)
+      await fetchTicketThread(selectedTicket.id, true)
+      await fetchTickets()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to send message")
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const updateTicketStatus = async (status: TicketStatus) => {
+    if (!selectedTicket) return
+    try {
+      const res = await fetch(`/api/support/tickets/${selectedTicket.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status, resolutionNote }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || "Failed to update ticket")
+      toast.success(`Ticket marked ${status.replace("_", " ")}`)
+      setStatusDialogOpen(false)
+      await fetchTickets()
+      await fetchTicketThread(selectedTicket.id, true)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to update status")
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen bg-background">
+      <DashboardSidebar />
+      <main className="flex-1 pt-16 lg:pt-0">
+        <div className="p-4 md:p-6 lg:p-8 h-full flex flex-col gap-4">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold">Support Messages</h1>
+            <p className="text-muted-foreground mt-1">Realtime support tickets from riders and drivers.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
+            <Card className="lg:col-span-1 min-h-0">
+              <CardContent className="p-4 h-full flex flex-col gap-3">
+                <Input
+                  placeholder="Search tickets..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+
+                <ScrollArea className="flex-1">
+                  <div className="space-y-2 pr-2">
+                    {loadingTickets ? (
+                      <p className="text-sm text-muted-foreground">Loading tickets...</p>
+                    ) : filteredTickets.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No tickets found.</p>
+                    ) : (
+                      filteredTickets.map((ticket) => {
+                        const active = ticket.id === selectedTicketId
+                        return (
+                          <button
+                            key={ticket.id}
+                            onClick={() => setSelectedTicketId(ticket.id)}
+                            className={`w-full text-left p-3 rounded-md border transition ${
+                              active ? "border-primary bg-primary/10" : "border-border hover:bg-muted/40"
+                            }`}
+                          >
+                            <div className="flex justify-between items-start gap-2">
+                              <p className="font-medium line-clamp-1">{ticket.subject}</p>
+                              <Badge variant={statusVariant(ticket.status)}>{ticket.status}</Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                              {(ticket.users?.first_name || "").trim()} {(ticket.users?.last_name || "").trim()} • {ticket.category}
+                            </p>
+                          </button>
+                        )
+                      })
+                    )}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2 min-h-0">
+              <CardContent className="p-4 h-full flex flex-col gap-3">
+                {!selectedTicket ? (
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    <div className="text-center">
+                      <MessageCircle className="h-10 w-10 mx-auto mb-2" />
+                      Select a ticket to view conversation.
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="font-semibold">{selectedTicket.subject}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {selectedTicket.users?.first_name} {selectedTicket.users?.last_name} • {selectedTicket.users?.email}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={statusVariant(selectedTicket.status)}>{selectedTicket.status}</Badge>
+                        <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline">Update Status</Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogTitle>Update Ticket Status</DialogTitle>
+                            <div className="space-y-3 mt-2">
+                              <Textarea
+                                placeholder="Resolution note (optional)"
+                                value={resolutionNote}
+                                onChange={(e) => setResolutionNote(e.target.value)}
+                              />
+                              <div className="flex flex-wrap gap-2">
+                                <Button variant="secondary" onClick={() => updateTicketStatus("in_progress")}>In Progress</Button>
+                                <Button variant="outline" onClick={() => updateTicketStatus("resolved")}>Resolved</Button>
+                                <Button variant="destructive" onClick={() => updateTicketStatus("closed")}>Closed</Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <ScrollArea className="flex-1 min-h-[260px]">
+                      <div className="space-y-3 pr-2">
+                        {loadingMessages ? (
+                          <p className="text-sm text-muted-foreground">Loading messages...</p>
+                        ) : messages.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">No messages yet.</p>
+                        ) : (
+                          messages.map((msg) => {
+                            const isAdminMessage = msg.users?.role === "admin" || msg.users?.role === "super_admin"
+                            const senderName = `${msg.users?.first_name || ""} ${msg.users?.last_name || ""}`.trim() || "Unknown"
+                            return (
+                              <div key={msg.id} className={`flex ${isAdminMessage ? "justify-end" : "justify-start"}`}>
+                                <div className={`max-w-[80%] rounded-md border px-3 py-2 ${isAdminMessage ? "bg-primary text-primary-foreground" : "bg-card"}`}>
+                                  <p className="text-xs opacity-80 mb-1">{senderName}</p>
+                                  <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                                  {msg.attachment_url ? (
+                                    <a href={msg.attachment_url} target="_blank" rel="noreferrer" className="block mt-2 underline text-xs">
+                                      {msg.attachment_name || "View attachment"}
+                                    </a>
+                                  ) : null}
+                                  <p className="text-[10px] opacity-70 mt-1">
+                                    {new Date(msg.created_at).toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            )
+                          })
+                        )}
+                      </div>
+                    </ScrollArea>
+
+                    {selectedTicket.status === "resolved" ? (
+                      <div className="rounded-md border border-emerald-300 bg-emerald-50 text-emerald-900 p-3 text-sm flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Waiting for user confirmation or closure.
+                      </div>
+                    ) : null}
+
+                    <div className="space-y-2">
+                      <Textarea
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Type response..."
+                      />
+                      <div className="flex items-center justify-between gap-3">
+                        <label className="inline-flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                          <Paperclip className="h-4 w-4" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                          />
+                          {attachment ? attachment.name : "Attach image"}
+                        </label>
+                        <Button onClick={sendMessage} disabled={sending || (!newMessage.trim() && !attachment)}>
+                          <Send className="h-4 w-4 mr-2" />
+                          {sending ? "Sending..." : "Send"}
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
 }
 
 export default function AdminMessagesPage() {
-	return (
-		<ProtectedRoute allowedRoles={["admin", "super_admin"]}>
-			<AdminMessagesContent />
-		</ProtectedRoute>
-	)
+  return (
+    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
+      <AdminMessagesContent />
+    </ProtectedRoute>
+  )
 }

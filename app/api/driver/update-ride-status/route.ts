@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { supabase, supabaseAdmin } from "@/lib/supabase"
 import { getSessionFromRequest } from "@/lib/auth"
+import { emitDriverArrived, emitRideCompleted, emitRideUpdate } from "@/lib/push-emitters"
 
 export async function POST(request: NextRequest) {
   try {
@@ -93,6 +94,62 @@ export async function POST(request: NextRequest) {
         { error: "Failed to update ride status" },
         { status: 500 }
       )
+    }
+
+    // Send push notifications based on status
+    try {
+      if (status === "in_progress") {
+        // Driver arrived at pickup
+        const { data: driverUser } = await supabaseAdmin!
+          .from("users")
+          .select("first_name, last_name")
+          .eq("id", session.user.id)
+          .single()
+
+        const driverName = driverUser 
+          ? `${driverUser.first_name} ${driverUser.last_name}` 
+          : "Your Driver"
+
+        await emitDriverArrived(
+          ride.rider_id,
+          rideId,
+          driverName,
+          "Keke Tricycle"
+        )
+
+        await emitRideUpdate(
+          session.user.id,
+          rideId,
+          "status",
+          `You started trip ${rideId.slice(0, 8)} from ${ride.pickup_zone} to ${ride.destination_zone}.`
+        )
+
+        await emitRideUpdate(
+          ride.rider_id,
+          rideId,
+          "status",
+          `Your ride is now in progress from ${ride.pickup_zone} to ${ride.destination_zone}.`
+        )
+      } else if (status === "completed") {
+        // Ride completed - send completion notification to rider
+        await emitRideCompleted(
+          ride.rider_id,
+          session.user.id,
+          rideId,
+          updatedRide.fare || 0,
+          updatedRide.rating
+        )
+
+        await emitRideUpdate(
+          session.user.id,
+          rideId,
+          "status",
+          `Trip ${rideId.slice(0, 8)} completed successfully. Final fare: ₦${updatedRide.fare || 0}.`
+        )
+      }
+    } catch (notificationError) {
+      console.error("Failed to send status notifications:", notificationError)
+      // Don't fail the entire request if notifications fail
     }
 
     return NextResponse.json({

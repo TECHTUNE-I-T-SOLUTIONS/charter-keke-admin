@@ -20,16 +20,16 @@ export async function POST(request: NextRequest) {
     const licensePictureFile = formData.get("licensePicture") as File | null;
 
     // Validate required fields
-    if (!userId || !vehicleType || !plateNumber || !bankName || !bankAccountNumber) {
+    if (!userId || !vehicleType || !plateNumber || !bankName || !bankAccountNumber || !unionName || !emergencyContact) {
       console.error("Missing driver fields:", {
         userId: userId ? "✓" : "missing",
         vehicleType: vehicleType ? "✓" : "missing",
         plateNumber: plateNumber ? "✓" : "missing",
-        unionName: unionName ? "✓" : "missing (optional)",
+        unionName: unionName ? "✓" : "missing",
         bankName: bankName ? "✓" : "missing",
         bankAccountNumber: bankAccountNumber ? "✓" : "missing",
         operatingZones: operatingZonesStr ? "✓" : "missing",
-        emergencyContact: emergencyContact ? "✓" : "missing (optional)",
+        emergencyContact: emergencyContact ? "✓" : "missing",
       })
       return NextResponse.json(
         { 
@@ -38,10 +38,26 @@ export async function POST(request: NextRequest) {
             userId: !userId ? "User ID required" : null,
             vehicleType: !vehicleType ? "Vehicle type required" : null,
             plateNumber: !plateNumber ? "Plate number required" : null,
+            unionName: !unionName ? "Union name required" : null,
             bankName: !bankName ? "Bank name required" : null,
             bankAccountNumber: !bankAccountNumber ? "Bank account number required" : null,
+            emergencyContact: !emergencyContact ? "Emergency contact required" : null,
           }
         },
+        { status: 400 }
+      );
+    }
+
+    if (!vehiclePictureFile || vehiclePictureFile.size === 0) {
+      return NextResponse.json(
+        { error: "Vehicle picture is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!licensePictureFile || licensePictureFile.size === 0) {
+      return NextResponse.json(
+        { error: "License picture is required" },
         { status: 400 }
       );
     }
@@ -71,6 +87,10 @@ export async function POST(request: NextRequest) {
         vehiclePictureUrl = uploadResult.url;
       } catch (error) {
         console.error("Error uploading vehicle picture:", error);
+        return NextResponse.json(
+          { error: "Vehicle picture upload failed. Please try again." },
+          { status: 502 }
+        );
       }
     }
 
@@ -91,6 +111,10 @@ export async function POST(request: NextRequest) {
         licensePictureUrl = uploadResult.url;
       } catch (error) {
         console.error("Error uploading license picture:", error);
+        return NextResponse.json(
+          { error: "License picture upload failed. Please try again." },
+          { status: 502 }
+        );
       }
     }
 

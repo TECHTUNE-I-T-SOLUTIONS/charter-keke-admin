@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
+import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 import { ProtectedRoute } from "@/components/protected-route"
 import { DashboardSidebar } from "@/components/dashboard-sidebar"
@@ -14,6 +16,7 @@ import { toast } from "sonner"
 import { Bell, Shield, CreditCard, MessageSquare, Globe, Save } from "lucide-react"
 
 function AdminSettingsContent() {
+  const { data: session } = useSession()
   const [settings, setSettings] = useState({
     siteName: "Charter Keke",
     supportEmail: "support@charterkeke.com",
@@ -33,6 +36,42 @@ function AdminSettingsContent() {
     paystackEnabled: true,
     termiiEnabled: true,
   })
+  const [avatarUrl, setAvatarUrl] = useState("")
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    (session?.user as any)?.firstName || session?.user?.name || "Admin"
+  )}&background=FF9101&color=000`
+
+  const handleAvatarUpload = async (e: any) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      setUploadingAvatar(true)
+      const formData = new FormData()
+      formData.append("profilePicture", file)
+
+      const response = await fetch("/api/user/profile/avatar", {
+        method: "POST",
+        body: formData,
+      })
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Avatar upload failed")
+      }
+
+      setAvatarUrl(result?.user?.profile_picture_url || "")
+      toast.success("Profile picture updated")
+    } catch (error) {
+      console.error("Admin avatar upload failed:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to upload avatar")
+    } finally {
+      setUploadingAvatar(false)
+      e.target.value = ""
+    }
+  }
 
   const handleSave = () => {
     toast.success("Settings saved successfully")
@@ -90,6 +129,38 @@ function AdminSettingsContent() {
               </TabsList>
 
               <TabsContent value="general" className="mt-6 space-y-6">
+                <Card className="bg-card/50 backdrop-blur border-primary/10">
+                  <CardHeader>
+                    <CardTitle>Admin Profile</CardTitle>
+                    <CardDescription>Upload a new profile picture</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4">
+                      <Image
+                        src={avatarUrl || (session?.user as any)?.image || fallbackAvatar}
+                        alt="Admin avatar"
+                        width={72}
+                        height={72}
+                        className="h-[72px] w-[72px] rounded-full border-2 border-primary object-cover"
+                      />
+                      <div className="space-y-2 w-full max-w-sm">
+                        <Label htmlFor="adminAvatar">Choose picture</Label>
+                        <Input
+                          id="adminAvatar"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarUpload}
+                          disabled={uploadingAvatar}
+                          className="bg-background/50 border-primary/20"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {uploadingAvatar ? "Uploading..." : "PNG, JPG or WEBP"}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <Card className="bg-card/50 backdrop-blur border-primary/10">
                   <CardHeader>
                     <CardTitle>General Settings</CardTitle>
