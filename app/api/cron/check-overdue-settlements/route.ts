@@ -1,10 +1,11 @@
-import { createClient } from "@supabase/supabase-js"
+import { supabaseAdmin } from "@/lib/supabase"
 import { NextRequest, NextResponse } from "next/server"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import {
+  getDateRangeForOffset,
+  getOutstandingSettlements,
+  updateOverdueSettlements,
+  upsertSettlementForDate,
+} from "@/lib/driver-settlement"
 
 // This endpoint should be called by a cron job (e.g., Vercel Cron)
 // Configure in vercel.json:
@@ -17,6 +18,13 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Database client not configured" },
+        { status: 500 }
+      )
+    }
+
     // Verify cron secret
     if (request.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json(
@@ -25,89 +33,74 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const now = new Date()
+    const { searchParams } = new URL(request.url)
+    const targetDriverId = searchParams.get("driverId")
 
-    // Find all overdue pending settlements
-    const { data: overdueSettlements, error: fetchError } = await supabase
-      .from("driver_daily_settlement")
-      .select("id, driver_id, total_platform_fees, payment_due_date")
-      .eq("settlement_status", "pending")
-      .lt("payment_due_date", now.toISOString())
+    let driverIds: string[] = []
 
-    if (fetchError) throw fetchError
+    if (targetDriverId) {
+      driverIds = [targetDriverId]
+    } else {
+      const { data: drivers, error: driversError } = await supabaseAdmin
+        .from("drivers")
+        .select("id")
 
-    if (!overdueSettlements?.length) {
+      if (driversError) throw driversError
+      driverIds = (drivers || []).map((driver) => driver.id).filter(Boolean)
+    }
+
+    if (!driverIds.length) {
       return NextResponse.json({
         success: true,
-        message: "No overdue settlements",
+        message: "No drivers found for settlement check",
         processed: 0,
       })
     }
 
+    const { dateString } = getDateRangeForOffset(-1)
+
     let processedCount = 0
+    let blockedDrivers = 0
+    let totalOutstanding = 0
 
-    // Process each overdue settlement
-    for (const settlement of overdueSettlements) {
+    for (const driverId of driverIds) {
       try {
-        // Update settlement status to overdue
-        await supabase
-          .from("driver_daily_settlement")
-          .update({ settlement_status: "overdue" })
-          .eq("id", settlement.id)
+        await upsertSettlementForDate(driverId, dateString)
+        await updateOverdueSettlements(driverId)
 
-        // Check if driver has other unpaid settlements
-        const { data: allUnpaidSettlements } = await supabase
-          .from("driver_daily_settlement")
-          .select("id")
-          .eq("driver_id", settlement.driver_id)
-          .in("settlement_status", ["pending", "overdue"])
+        const outstanding = await getOutstandingSettlements(driverId)
+        const amountDue = outstanding.reduce(
+          (sum, settlement) => sum + Number(settlement.total_platform_fees || 0),
+          0
+        )
 
-        if (allUnpaidSettlements?.length) {
-          // Lock driver availability
-          await supabase
+        totalOutstanding += amountDue
+
+        if (amountDue > 0) {
+          blockedDrivers += 1
+          await supabaseAdmin
             .from("drivers")
             .update({
-              is_available: false,
-              availability_locked_at: now.toISOString(),
-              availability_lock_reason: "overdue_settlement",
+              availability_status: "offline",
+              updated_at: new Date().toISOString(),
             })
-            .eq("id", settlement.driver_id)
-
-          // Get driver's user ID for notification
-          const { data: driver } = await supabase
-            .from("drivers")
-            .select("user_id")
-            .eq("id", settlement.driver_id)
-            .single()
-
-          if (driver?.user_id) {
-            // Create notification
-            await supabase.from("notifications").insert({
-              user_id: driver.user_id,
-              title: "Driver Status Disabled - Overdue Payment",
-              message: `Your driver account has been disabled due to overdue settlement fees of ₦${settlement.total_platform_fees.toLocaleString(
-                "en-NG"
-              )}. Please pay immediately to restore access.`,
-              type: "alert",
-              channel: "in_app",
-              data: {
-                settlement_id: settlement.id,
-                amount_due: settlement.total_platform_fees,
-              },
-            })
-          }
+            .eq("id", driverId)
         }
 
         processedCount++
       } catch (error) {
-        console.error(`Error processing settlement ${settlement.id}:`, error)
+        console.error(`Error processing settlement for driver ${driverId}:`, error)
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: "Overdue settlements processed",
+      message: "Daily settlement check completed",
       processed: processedCount,
+      blockedDrivers,
+      totalOutstanding,
+      settlementDateChecked: dateString,
+      mode: targetDriverId ? "single_driver" : "all_drivers",
     })
   } catch (error) {
     console.error("Error checking overdue settlements:", error)

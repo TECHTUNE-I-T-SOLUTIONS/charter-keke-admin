@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest } from "@/lib/auth";
 import { acceptRideFirstCome } from "@/lib/ride-acceptance";
+import { getOutstandingSettlements, updateOverdueSettlements } from "@/lib/driver-settlement";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +19,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Ride ID is required" },
         { status: 400 }
+      );
+    }
+
+    const { data: driver } = await supabaseAdmin!
+      .from("drivers")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .single();
+
+    if (!driver?.id) {
+      return NextResponse.json(
+        { error: "Driver profile not found" },
+        { status: 404 }
+      );
+    }
+
+    await updateOverdueSettlements(driver.id);
+    const outstanding = await getOutstandingSettlements(driver.id);
+    const totalOutstanding = outstanding.reduce(
+      (sum, entry) => sum + Number(entry.total_platform_fees || 0),
+      0
+    );
+
+    if (totalOutstanding > 0) {
+      return NextResponse.json(
+        {
+          error: "Outstanding settlements must be paid before accepting rides",
+          code: "settlement_overdue",
+          totalOutstanding,
+        },
+        { status: 403 }
       );
     }
 

@@ -1,0 +1,161 @@
+import { supabaseAdmin } from "@/lib/supabase"
+
+export type SettlementStatus = "pending" | "paid" | "overdue"
+
+export interface DriverSettlementSummary {
+  settlementDate: string
+  totalRides: number
+  totalFareAmount: number
+  totalPlatformFees: number
+  totalDriverEarnings: number
+  status: SettlementStatus
+  paymentDueDate: string
+}
+
+const PLATFORM_FEE_RATE = 0.15
+
+function startOfDay(date: Date) {
+  const copy = new Date(date)
+  copy.setHours(0, 0, 0, 0)
+  return copy
+}
+
+function endOfDay(date: Date) {
+  const copy = new Date(date)
+  copy.setHours(23, 59, 59, 999)
+  return copy
+}
+
+export function getDateRangeForOffset(offsetDays: number) {
+  const target = new Date()
+  target.setDate(target.getDate() + offsetDays)
+  const start = startOfDay(target)
+  const end = new Date(start)
+  end.setDate(start.getDate() + 1)
+  return {
+    start,
+    end,
+    dateString: start.toISOString().slice(0, 10),
+    dueDate: end,
+  }
+}
+
+export async function upsertSettlementForDate(driverId: string, dateString: string) {
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client not initialized")
+  }
+
+  const date = new Date(dateString)
+  const rangeStart = startOfDay(date)
+  const rangeEnd = new Date(rangeStart)
+  rangeEnd.setDate(rangeStart.getDate() + 1)
+
+  // Query rides directly - these are rides the driver actually accepted/completed
+  const { data: rides, error: ridesError } = await supabaseAdmin
+    .from("rides")
+    .select("id, fare_amount, platform_fee, driver_earnings, status, updated_at, created_at")
+    .eq("driver_id", driverId)
+    .in("status", ["accepted", "in_progress", "completed"])
+    .gte("updated_at", rangeStart.toISOString())
+    .lt("updated_at", rangeEnd.toISOString())
+
+  if (ridesError) {
+    throw ridesError
+  }
+
+  let totalRides = 0
+  let totalFareAmount = 0
+  let totalPlatformFees = 0
+  let totalDriverEarnings = 0
+
+  for (const ride of rides || []) {
+    totalRides += 1
+
+    const fare = Number(ride.fare_amount ?? 0)
+    const platformFee = Number(ride.platform_fee ?? fare * PLATFORM_FEE_RATE)
+    const driverEarning = Number(ride.driver_earnings ?? fare - platformFee)
+
+    totalFareAmount += fare
+    totalPlatformFees += platformFee
+    totalDriverEarnings += driverEarning
+  }
+
+  const settlementStatus: SettlementStatus = totalPlatformFees > 0 ? "pending" : "paid"
+  const paymentDueDate = rangeEnd.toISOString()
+
+  const { data: settlement, error: upsertError } = await supabaseAdmin
+    .from("driver_daily_settlement")
+    .upsert(
+      {
+        driver_id: driverId,
+        settlement_date: dateString,
+        total_rides: totalRides,
+        total_fare_amount: totalFareAmount,
+        total_platform_fees: totalPlatformFees,
+        total_driver_earnings: totalDriverEarnings,
+        settlement_status: settlementStatus,
+        payment_due_date: paymentDueDate,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "driver_id,settlement_date",
+      }
+    )
+    .select()
+    .single()
+
+  if (upsertError) {
+    throw upsertError
+  }
+
+  return settlement
+}
+
+export async function updateOverdueSettlements(driverId: string) {
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client not initialized")
+  }
+
+  const today = new Date().toISOString().slice(0, 10)
+
+  await supabaseAdmin
+    .from("driver_daily_settlement")
+    .update({ settlement_status: "overdue", updated_at: new Date().toISOString() })
+    .eq("driver_id", driverId)
+    .lt("settlement_date", today)
+    .eq("settlement_status", "pending")
+}
+
+export async function getOutstandingSettlements(driverId: string) {
+  if (!supabaseAdmin) {
+    throw new Error("Supabase admin client not initialized")
+  }
+
+  const today = new Date().toISOString().slice(0, 10)
+
+  const { data: settlements, error } = await supabaseAdmin
+    .from("driver_daily_settlement")
+    .select("id, settlement_date, total_platform_fees, settlement_status, payment_due_date")
+    .eq("driver_id", driverId)
+    .lt("settlement_date", today)
+    .in("settlement_status", ["pending", "overdue"])
+    .order("settlement_date", { ascending: false })
+
+  if (error) {
+    throw error
+  }
+
+  return settlements || []
+}
+
+export function summarizeSettlement(settlement: any): DriverSettlementSummary {
+  return {
+    settlementDate: settlement.settlement_date,
+    totalRides: settlement.total_rides || 0,
+    totalFareAmount: Number(settlement.total_fare_amount || 0),
+    totalPlatformFees: Number(settlement.total_platform_fees || 0),
+    totalDriverEarnings: Number(settlement.total_driver_earnings || 0),
+    status: settlement.settlement_status as SettlementStatus,
+    paymentDueDate: settlement.payment_due_date,
+  }
+}

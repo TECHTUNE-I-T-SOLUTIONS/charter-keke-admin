@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase"
 import { getSessionFromRequest } from "@/lib/auth"
 import { notifyDriverAboutRide } from "@/lib/notifications"
 import { emitRideRequest, emitRideUpdate } from "@/lib/push-emitters"
-import { sendRideRequestSMS } from "@/lib/termii"
+import { sendRideRequestSMS, toTermiiPhoneNumber } from "@/lib/termii"
 
 export async function POST(request: NextRequest) {
   try {
@@ -133,6 +133,13 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      if (!phoneByUserId.size) {
+        console.log("[RideDispatch] No driver phone numbers available for SMS", {
+          rideId: ride.id,
+          drivers: drivers.length,
+        })
+      }
+
       const smsTasks: Promise<any>[] = []
 
       for (const driver of drivers) {
@@ -149,6 +156,13 @@ export async function POST(request: NextRequest) {
 
         const driverPhone = phoneByUserId.get(driver.user_id)
         if (driverPhone) {
+          const normalized = toTermiiPhoneNumber(driverPhone)
+          if (!normalized) {
+            console.log("[RideDispatch] Invalid driver phone for SMS", {
+              rideId: ride.id,
+              driverId: driver.id,
+            })
+          }
           smsTasks.push(
             sendRideRequestSMS({
               to: driverPhone,

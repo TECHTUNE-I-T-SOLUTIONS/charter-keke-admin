@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { getSessionFromRequest } from "@/lib/auth"
+import {
+  getDateRangeForOffset,
+  upsertSettlementForDate,
+  updateOverdueSettlements,
+  getOutstandingSettlements,
+} from "@/lib/driver-settlement"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
@@ -31,10 +37,21 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    await updateOverdueSettlements(driver.id)
+    const { dateString } = getDateRangeForOffset(-1)
+    await upsertSettlementForDate(driver.id, dateString)
+    const outstanding = await getOutstandingSettlements(driver.id)
+    const totalOutstanding = outstanding.reduce(
+      (sum, entry) => sum + Number(entry.total_platform_fees || 0),
+      0
+    )
+
     return NextResponse.json({
       status: driver.availability_status || "offline",
       updatedAt: driver.updated_at,
       driverId: driver.id,
+      blocked: totalOutstanding > 0,
+      totalOutstanding,
     })
   } catch (error) {
     console.error("Failed to fetch driver status:", error)
@@ -64,6 +81,39 @@ export async function PUT(request: NextRequest) {
         { error: "Invalid status" },
         { status: 400 }
       )
+    }
+
+    const { data: driverRecord } = await supabase
+      .from("drivers")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .single()
+
+    if (!driverRecord?.id) {
+      return NextResponse.json(
+        { error: "Driver not found" },
+        { status: 404 }
+      )
+    }
+
+    if (status === "online") {
+      await updateOverdueSettlements(driverRecord.id)
+      const outstanding = await getOutstandingSettlements(driverRecord.id)
+      const totalOutstanding = outstanding.reduce(
+        (sum, entry) => sum + Number(entry.total_platform_fees || 0),
+        0
+      )
+
+      if (totalOutstanding > 0) {
+        return NextResponse.json(
+          {
+            error: "Outstanding settlements must be paid before going online",
+            code: "settlement_overdue",
+            totalOutstanding,
+          },
+          { status: 403 }
+        )
+      }
     }
 
     const { data: driver, error } = await supabase
