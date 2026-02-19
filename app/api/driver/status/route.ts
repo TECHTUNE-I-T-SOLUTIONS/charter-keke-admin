@@ -37,6 +37,77 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Auto-verify any pending payments before checking settlement status
+    try {
+      const { data: pendingPayments } = await supabase
+        .from("driver_payments")
+        .select("id, payment_reference, settlement_id, metadata")
+        .eq("driver_id", driver.id)
+        .eq("status", "pending")
+
+      if (pendingPayments && pendingPayments.length > 0) {
+        console.log(`[DriverStatus] Auto-verifying ${pendingPayments.length} pending payments`)
+
+        for (const payment of pendingPayments) {
+          try {
+            const verifyUrl = `https://api.paystack.co/transaction/verify/${payment.payment_reference}`
+            const verifyResponse = await fetch(verifyUrl, {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+              },
+            })
+
+            const verifyData = await verifyResponse.json()
+
+            if (verifyData.status && verifyData.data.status === "success") {
+              console.log(`[DriverStatus] Payment ${payment.payment_reference} verified as successful`)
+
+              // Update payment status
+              await supabase
+                .from("driver_payments")
+                .update({
+                  status: "completed",
+                  confirmed_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("id", payment.id)
+
+              // Update transaction status
+              await supabase
+                .from("transactions")
+                .update({
+                  status: "completed",
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("reference", payment.payment_reference)
+
+              // Update settlement status
+              const settlementIds = (payment.metadata as any)?.settlement_ids || []
+              if (payment.settlement_id) {
+                settlementIds.push(payment.settlement_id)
+              }
+
+              if (settlementIds.length > 0) {
+                await supabase
+                  .from("driver_daily_settlement")
+                  .update({
+                    settlement_status: "paid",
+                    paid_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                  })
+                  .in("id", settlementIds)
+              }
+            }
+          } catch (verifyError) {
+            console.error(`[DriverStatus] Error verifying payment ${payment.payment_reference}:`, verifyError)
+          }
+        }
+      }
+    } catch (verifyError) {
+      console.error("[DriverStatus] Error in auto-verification:", verifyError)
+    }
+
     await updateOverdueSettlements(driver.id)
     const { dateString } = getDateRangeForOffset(-1)
     await upsertSettlementForDate(driver.id, dateString)
