@@ -18,16 +18,49 @@ export async function getSessionFromRequest(request: NextRequest) {
     });
 
     if (nextAuthToken) {
+      const userId = (nextAuthToken.id as string) || (nextAuthToken.sub as string) || "";
+
+      if (!userId) {
+        console.warn("⚠️ [AUTH] NextAuth token found but no user id/sub present");
+        return null;
+      }
+
+      let role = (nextAuthToken.role as string) || "";
+      let email = (nextAuthToken.email as string) || "";
+      let firstName = (nextAuthToken.firstName as string) || "";
+      let lastName = (nextAuthToken.lastName as string) || "";
+      let phone = (nextAuthToken.phone as string) || "";
+      let referralCode = (nextAuthToken.referralCode as string) || "";
+      let createdAt = (nextAuthToken.createdAt as string) || "";
+
+      if (!role || !email) {
+        const { data: user } = await supabase
+          .from("users")
+          .select("id, role, email, first_name, last_name, phone_number, referral_code, created_at")
+          .eq("id", userId)
+          .single();
+
+        if (user) {
+          role = role || user.role || "user";
+          email = email || user.email || "";
+          firstName = firstName || user.first_name || "";
+          lastName = lastName || user.last_name || "";
+          phone = phone || user.phone_number || "";
+          referralCode = referralCode || user.referral_code || "";
+          createdAt = createdAt || user.created_at || "";
+        }
+      }
+
       return {
         user: {
-          id: nextAuthToken.id as string,
-          email: nextAuthToken.email as string,
-          firstName: nextAuthToken.firstName as string,
-          lastName: nextAuthToken.lastName as string,
-          role: nextAuthToken.role as string,
-          phone: nextAuthToken.phone as string,
-          referralCode: nextAuthToken.referralCode as string,
-          createdAt: nextAuthToken.createdAt as string,
+          id: userId,
+          email,
+          firstName,
+          lastName,
+          role: role || "user",
+          phone,
+          referralCode,
+          createdAt,
         },
       };
     }
