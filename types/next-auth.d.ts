@@ -28,3 +28,5 @@ declare module "next-auth" {
     firstName?: string;
     lastName?: string;
     profilePictureUrl?: string;
+  }
+}

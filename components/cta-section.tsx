@@ -16,12 +16,12 @@ export function CTASection() {
           <div className="relative z-10 max-w-3xl mx-auto text-center text-white">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 mb-6">
               <Hourglass className="h-4 w-4" />
-              <span className="text-sm font-medium">Limited Time Offer</span>
+              <span className="text-sm font-medium">Introducing our mobile app</span>
             </div>
 
             <h2 className="text-3xl md:text-5xl font-bold mb-6 text-balance">Ready to Save on Your Daily Commute?</h2>
             <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
-              Join Charter Keke today and get 5% off your first ride when you use a referral code!
+              Join Charter Keke today and reduce the stress of having to wait under the sun on queues and signup using your referral code!
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
@@ -38,6 +38,15 @@ export function CTASection() {
                   className="border-white text-white hover:bg-white/20 bg-transparent dark:text-white"
                 >
                   Drive with Us
+                </Button>
+              </Link>
+              <Link href="/download-app">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/20 bg-transparent dark:text-white"
+                >
+                  Download App
                 </Button>
               </Link>
             </div>
