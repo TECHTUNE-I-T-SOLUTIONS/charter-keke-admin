@@ -97,8 +97,14 @@ function AdminMessagesContent() {
 
   const fetchTickets = async () => {
     try {
-      const res = await fetch("/api/support/tickets?includeClosed=true&limit=100", { cache: "no-store" })
+      const res = await fetch("/api/support/tickets?includeClosed=true&limit=100", {
+        cache: "no-store",
+        credentials: "include",
+      })
       const data = await res.json()
+      if (res.status === 401) {
+        throw new Error("Your admin session expired. Please log in again.")
+      }
       if (!res.ok) throw new Error(data?.error || "Failed to fetch tickets")
       setTickets(data.tickets || [])
 
@@ -116,8 +122,14 @@ function AdminMessagesContent() {
     if (!ticketId) return
     try {
       if (!silent) setLoadingMessages(true)
-      const res = await fetch(`/api/support/tickets/${ticketId}`, { cache: "no-store" })
+      const res = await fetch(`/api/support/tickets/${ticketId}`, {
+        cache: "no-store",
+        credentials: "include",
+      })
       const data = await res.json()
+      if (res.status === 401) {
+        throw new Error("Your admin session expired. Please log in again.")
+      }
       if (!res.ok) throw new Error(data?.error || "Failed to load messages")
       setMessages(data.messages || [])
       if (data.ticket?.resolution_note) setResolutionNote(data.ticket.resolution_note)
@@ -159,6 +171,7 @@ function AdminMessagesContent() {
 
     const res = await fetch("/api/support/upload", {
       method: "POST",
+      credentials: "include",
       body: formData,
     })
 
@@ -177,6 +190,7 @@ function AdminMessagesContent() {
 
       const res = await fetch(`/api/support/tickets/${selectedTicket.id}/messages`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: newMessage.trim(),
@@ -218,6 +232,7 @@ function AdminMessagesContent() {
     try {
       const res = await fetch(`/api/support/tickets/${selectedTicket.id}`, {
         method: "PATCH",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, resolutionNote }),
       })

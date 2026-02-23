@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { supabase } from "@/lib/supabase";
+import { authSecret } from "@/lib/auth-secret";
 
 const handler = NextAuth({
   providers: [
@@ -113,7 +114,7 @@ const handler = NextAuth({
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: authSecret,
 });
 
 export { handler as GET, handler as POST };

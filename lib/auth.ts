@@ -2,6 +2,7 @@ import { supabase } from "./supabase";
 import bcrypt from "bcryptjs";
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
+import { authSecret } from "./auth-secret";
 
 /**
  * Get the current session from the request
@@ -13,7 +14,7 @@ export async function getSessionFromRequest(request: NextRequest) {
     // First, try to get NextAuth token (for web app)
     const nextAuthToken = await getToken({
       req: request,
-      secret: process.env.NEXTAUTH_SECRET,
+      secret: authSecret,
     });
 
     if (nextAuthToken) {
@@ -34,6 +35,10 @@ export async function getSessionFromRequest(request: NextRequest) {
     // If no NextAuth token, try custom Bearer token (mobile app)
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      const hasNextAuthCookie = request.cookies.getAll().some((c) => c.name.includes("next-auth.session-token"));
+      if (hasNextAuthCookie) {
+        console.warn("⚠️ [AUTH] NextAuth session cookie exists but token decode failed. Check NEXTAUTH_SECRET/AUTH_SECRET consistency.");
+      }
       return null;
     }
 
