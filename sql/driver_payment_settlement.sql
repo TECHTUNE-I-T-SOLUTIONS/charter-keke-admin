@@ -95,7 +95,7 @@ BEGIN
     -- Check if settlement exists for this driver and date
     SELECT id INTO existing_settlement
     FROM public.driver_daily_settlement
-    WHERE driver_id = NEW.driver_id AND settlement_date = settlement_date
+    WHERE driver_id = NEW.driver_id AND public.driver_daily_settlement.settlement_date = settlement_date
     LIMIT 1;
     
     -- If not, create a new one

@@ -6,7 +6,8 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getSessionFromRequest(request)
 
-    if (!session?.user?.id || session.user.role !== "user") {
+    // Allow any authenticated user to fetch their referrals (rider or driver)
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

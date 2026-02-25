@@ -61,6 +61,8 @@ export async function GET(request: NextRequest) {
     const requestedDate = searchParams.get("date")
     const dateString = requestedDate || new Date().toISOString().slice(0, 10)
 
+    console.info(`[SettlementDaily] request from user=${session.user.id} date=${dateString} url=${request.url}`)
+
     if (!isValidDateInput(dateString)) {
       return NextResponse.json(
         { error: "Invalid date format. Use YYYY-MM-DD." },
@@ -244,8 +246,15 @@ export async function GET(request: NextRequest) {
         lastPaymentDate: resolvedLastPaymentDate,
       },
     })
-  } catch (error) {
-    console.error("[SettlementDaily] error:", error)
+  } catch (error: any) {
+    try {
+      console.error(`[SettlementDaily] error for user=${(error && error.userId) || 'unknown'} date=${(typeof dateString !== 'undefined' && dateString) || 'unknown'}`, error)
+    } catch (logErr) {
+      console.error('[SettlementDaily] error logging failed', logErr)
+    }
+
+    if (error && error.stack) console.error(error.stack)
+
     return NextResponse.json(
       { error: "Failed to fetch daily settlement" },
       { status: 500 }

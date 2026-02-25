@@ -129,7 +129,7 @@ BEGIN
     
     SELECT id INTO existing_settlement
     FROM driver_daily_settlement
-    WHERE driver_id = NEW.driver_id AND settlement_date = settlement_date
+    WHERE driver_id = NEW.driver_id AND driver_daily_settlement.settlement_date = settlement_date
     LIMIT 1;
     
     IF existing_settlement IS NULL THEN

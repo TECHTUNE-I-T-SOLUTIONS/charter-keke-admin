@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Generate referral code
-    const referralCode = `EASE${firstName.substring(0, 2).toUpperCase()}${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const referralCode = `CHKE${firstName.substring(0, 2).toUpperCase()}${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
     // Upload profile picture if provided
     let profilePictureUrl: string | null = null;
@@ -102,6 +102,9 @@ export async function POST(request: NextRequest) {
         );
       }
     }
+
+    // Read optional referral code submitted by the client (referrer code)
+    const incomingReferralCode = (formData.get("referralCode") as string) || '';
 
     // Create user
     const createPayload: Record<string, any> = {
@@ -149,6 +152,23 @@ export async function POST(request: NextRequest) {
         { error: "Failed to create user" },
         { status: 500 }
       );
+    }
+
+    // If the client supplied a referral code (someone referred this signup),
+    // log the usage via DB function so triggers update counts/notifications
+    try {
+      if (incomingReferralCode && incomingReferralCode.trim().length > 0) {
+        const rpcResult = await supabase.rpc('log_referral_code_usage', {
+          p_referral_code: incomingReferralCode.trim(),
+          p_new_user_id: newUser.id,
+        });
+
+        if (rpcResult.error) {
+          console.warn('Referral RPC warning:', rpcResult.error.message || rpcResult.error);
+        }
+      }
+    } catch (rpcErr) {
+      console.error('Referral RPC error:', rpcErr);
     }
 
     // Create wallet for new user (check if it exists first)
