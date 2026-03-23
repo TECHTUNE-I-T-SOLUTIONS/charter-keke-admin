@@ -65,12 +65,12 @@ export default function AppInstallPage() {
 
     if (!assetToDownload) return null;
 
-    // Use the proxy download endpoint for direct downloads (no GitHub redirect)
-    const downloadUrl = new URL('/api/app/downloads', window.location.origin);
-    downloadUrl.searchParams.append('assetUrl', assetToDownload.downloadUrl);
-    downloadUrl.searchParams.append('fileName', assetToDownload.name);
+    // Build download URL with proper encoding
+    const params = new URLSearchParams();
+    params.append('assetUrl', assetToDownload.downloadUrl);
+    params.append('fileName', assetToDownload.name);
 
-    return downloadUrl.toString();
+    return `/api/app/downloads?${params.toString()}`;
   };
 
   const downloadLink = getDownloadLink();

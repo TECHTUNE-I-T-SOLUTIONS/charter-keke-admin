@@ -19,14 +19,24 @@ export async function GET(request: NextRequest) {
 
     // Validate inputs
     if (!assetUrl || !fileName) {
+      console.error('[GET /api/app/downloads] Missing parameters', {
+        assetUrl: !!assetUrl,
+        fileName: !!fileName,
+      });
       return NextResponse.json(
         { error: 'Missing required parameters: assetUrl and fileName' },
         { status: 400 }
       );
     }
 
+    console.log('[GET /api/app/downloads] Download request', {
+      fileName,
+      assetUrlHost: new URL(assetUrl).hostname,
+    });
+
     // Security: Validate that the URL is from GitHub
     if (!assetUrl.includes('github.com') && !assetUrl.includes('githubusercontent.com')) {
+      console.error('[GET /api/app/downloads] Invalid URL source', { assetUrl });
       return NextResponse.json(
         { error: 'Invalid asset URL. Only GitHub URLs are supported.' },
         { status: 400 }
@@ -44,60 +54,98 @@ export async function GET(request: NextRequest) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 300000);
 
-    // Fetch the file from GitHub
-    const response = await fetch(assetUrl, {
-      method: 'GET',
-      headers: {
-        'User-Agent': 'Charter-Keke-App',
-        // Don't include GitHub token - public releases don't need auth
-      },
-      signal: controller.signal,
-    });
+    try {
+      // Fetch the file from GitHub with proper headers
+      const response = await fetch(assetUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Charter-Keke-App/2.0.0',
+          'Accept': 'application/octet-stream',
+        },
+        signal: controller.signal,
+        redirect: 'follow', // Follow redirects from GitHub
+      });
 
-    clearTimeout(timeout);
+      clearTimeout(timeout);
 
-    if (!response.ok) {
-      console.error(
-        `[GET /api/app/downloads] GitHub returned status ${response.status}`
+      if (!response.ok) {
+        console.error('[GET /api/app/downloads] GitHub fetch failed', {
+          status: response.status,
+          statusText: response.statusText,
+          url: assetUrl,
+        });
+        return NextResponse.json(
+          {
+            error: `Failed to fetch the app from GitHub (HTTP ${response.status})`,
+          },
+          { status: response.status }
+        );
+      }
+
+      // Verify we got a response body
+      if (!response.body) {
+        console.error('[GET /api/app/downloads] No response body from GitHub');
+        return NextResponse.json(
+          { error: 'Failed to download: Empty response from GitHub' },
+          { status: 500 }
+        );
+      }
+
+      // Get the content length if available
+      const contentLength = response.headers.get('content-length');
+      const contentType =
+        response.headers.get('content-type') || 'application/octet-stream';
+
+      console.log('[GET /api/app/downloads] Download starting', {
+        fileName: safeFileName,
+        contentLength,
+        contentType,
+      });
+
+      // Create response with proper headers for direct download
+      const headers = new Headers();
+      headers.set('Content-Type', contentType);
+      headers.set(
+        'Content-Disposition',
+        `attachment; filename="${safeFileName}"`
       );
-      return NextResponse.json(
-        { error: 'Failed to fetch the app from GitHub' },
-        { status: response.status }
-      );
+      headers.set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+      headers.set('X-Content-Type-Options', 'nosniff');
+      headers.set('Access-Control-Allow-Origin', '*'); // Allow CORS
+
+      if (contentLength) {
+        headers.set('Content-Length', contentLength);
+      }
+
+      // Stream the response body directly
+      return new NextResponse(response.body, {
+        status: 200,
+        headers,
+      });
+    } catch (fetchError) {
+      clearTimeout(timeout);
+
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.error('[GET /api/app/downloads] Download timeout');
+        return NextResponse.json(
+          {
+            error: 'Download request timed out. Please try again.',
+          },
+          { status: 408 }
+        );
+      }
+
+      console.error('[GET /api/app/downloads] Fetch error', fetchError);
+      throw fetchError;
     }
-
-    // Get the content length if available
-    const contentLength = response.headers.get('content-length');
-    const contentType = response.headers.get('content-type') || 'application/octet-stream';
-
-    // Create response with proper headers for direct download
-    const headers = new Headers();
-    headers.set('Content-Type', contentType);
-    headers.set('Content-Disposition', `attachment; filename="${safeFileName}"`);
-    headers.set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
-    headers.set('X-Content-Type-Options', 'nosniff');
-    
-    if (contentLength) {
-      headers.set('Content-Length', contentLength);
-    }
-
-    // Stream the response body directly
-    return new NextResponse(response.body, {
-      status: 200,
-      headers,
-    });
   } catch (error) {
     console.error('[GET /api/app/downloads] Error:', error);
 
-    if (error instanceof Error && error.name === 'AbortError') {
-      return NextResponse.json(
-        { error: 'Download request timed out. Please try again.' },
-        { status: 408 }
-      );
-    }
-
     return NextResponse.json(
-      { error: 'Failed to download the app. Please try again.' },
+      {
+        error: 'Failed to download the app. Please try again.',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
