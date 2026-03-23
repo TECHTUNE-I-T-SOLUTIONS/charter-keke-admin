@@ -40,7 +40,7 @@ export function CTASection() {
                   Drive with Us
                 </Button>
               </Link>
-              <Link href="/download-app">
+              <Link href="/install">
                 <Button
                   size="lg"
                   variant="outline"

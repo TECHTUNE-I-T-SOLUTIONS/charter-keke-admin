@@ -80,12 +80,57 @@ export async function upsertSettlementForDate(driverId: string, dateString: stri
     totalDriverEarnings += driverEarning
   }
 
-  const settlementStatus: SettlementStatus = totalPlatformFees > 0 ? "pending" : "paid"
   const paymentDueDate = rangeEnd.toISOString()
 
-  const { data: settlement, error: upsertError } = await supabaseAdmin
+  // Check for existing settlement to avoid overwriting a paid status
+  const { data: existingSettlement, error: existingError } = await supabaseAdmin
     .from("driver_daily_settlement")
-    .upsert(
+    .select("*")
+    .eq("driver_id", driverId)
+    .eq("settlement_date", dateString)
+    .maybeSingle()
+
+  if (existingError) {
+    throw existingError
+  }
+
+  const computedStatus: SettlementStatus = totalPlatformFees > 0 ? "pending" : "paid"
+
+  // Preserve 'paid' status if already paid; otherwise use computed status
+  const settlementStatusToSave: SettlementStatus = existingSettlement
+    ? (existingSettlement.settlement_status === "paid" ? "paid" : computedStatus)
+    : computedStatus
+
+  if (existingSettlement) {
+    const { error: updateError } = await supabaseAdmin
+      .from("driver_daily_settlement")
+      .update({
+        total_rides: totalRides,
+        total_fare_amount: totalFareAmount,
+        total_platform_fees: totalPlatformFees,
+        total_driver_earnings: totalDriverEarnings,
+        settlement_status: settlementStatusToSave,
+        payment_due_date: paymentDueDate,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existingSettlement.id)
+
+    if (updateError) throw updateError
+
+    const { data: settlement, error: selError } = await supabaseAdmin
+      .from("driver_daily_settlement")
+      .select("*")
+      .eq("id", existingSettlement.id)
+      .single()
+
+    if (selError) throw selError
+    return settlement
+  }
+
+  // No existing settlement: insert
+  const { data: inserted, error: insertError } = await supabaseAdmin
+    .from("driver_daily_settlement")
+    .insert([
       {
         driver_id: driverId,
         settlement_date: dateString,
@@ -93,22 +138,17 @@ export async function upsertSettlementForDate(driverId: string, dateString: stri
         total_fare_amount: totalFareAmount,
         total_platform_fees: totalPlatformFees,
         total_driver_earnings: totalDriverEarnings,
-        settlement_status: settlementStatus,
+        settlement_status: settlementStatusToSave,
         payment_due_date: paymentDueDate,
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
-      {
-        onConflict: "driver_id,settlement_date",
-      }
-    )
+    ])
     .select()
     .single()
 
-  if (upsertError) {
-    throw upsertError
-  }
-
-  return settlement
+  if (insertError) throw insertError
+  return inserted
 }
 
 export async function updateOverdueSettlements(driverId: string) {
