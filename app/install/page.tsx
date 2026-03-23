@@ -61,8 +61,16 @@ export default function AppInstallPage() {
 
     const apkAsset = latestRelease.assets.find((a) => a.name.endsWith('.apk'));
     const iosAsset = latestRelease.assets.find((a) => a.name.endsWith('.ipa'));
+    const assetToDownload = apkAsset || iosAsset;
 
-    return apkAsset?.downloadUrl || iosAsset?.downloadUrl || null;
+    if (!assetToDownload) return null;
+
+    // Use the proxy download endpoint for direct downloads (no GitHub redirect)
+    const downloadUrl = new URL('/api/app/downloads', window.location.origin);
+    downloadUrl.searchParams.append('assetUrl', assetToDownload.downloadUrl);
+    downloadUrl.searchParams.append('fileName', assetToDownload.name);
+
+    return downloadUrl.toString();
   };
 
   const downloadLink = getDownloadLink();
@@ -166,8 +174,8 @@ export default function AppInstallPage() {
               </div>
 
               {/* Download Button */}
-              {downloadLink && (
-                <a href={downloadLink} download>
+              {downloadLink && latestRelease && (
+                <a href={downloadLink} download={`charter-keke-${latestRelease.version}.apk`}>
                   <Button size="lg" className="w-full bg-[#052659] hover:bg-[#041d40] text-white dark:bg-[#1FABFCFF] dark:hover:bg-[#1a9ad9]">
                     <Download className="mr-2 h-5 w-5" />
                     Download APK
