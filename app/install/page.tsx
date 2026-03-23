@@ -65,12 +65,9 @@ export default function AppInstallPage() {
 
     if (!assetToDownload) return null;
 
-    // Build download URL with proper encoding
-    const params = new URLSearchParams();
-    params.append('assetUrl', assetToDownload.downloadUrl);
-    params.append('fileName', assetToDownload.name);
-
-    return `/api/app/downloads?${params.toString()}`;
+    // Return the GitHub download URL directly
+    // GitHub handles anonymous downloads automatically
+    return assetToDownload.downloadUrl;
   };
 
   const downloadLink = getDownloadLink();
@@ -175,7 +172,11 @@ export default function AppInstallPage() {
 
               {/* Download Button */}
               {downloadLink && latestRelease && (
-                <a href={downloadLink} download={`charter-keke-${latestRelease.version}.apk`}>
+                <a 
+                  href={downloadLink} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Button size="lg" className="w-full bg-[#052659] hover:bg-[#041d40] text-white dark:bg-[#1FABFCFF] dark:hover:bg-[#1a9ad9]">
                     <Download className="mr-2 h-5 w-5" />
                     Download APK
