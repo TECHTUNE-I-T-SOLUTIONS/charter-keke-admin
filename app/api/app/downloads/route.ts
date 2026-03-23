@@ -82,23 +82,26 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      // Verify we got a response body
-      if (!response.body) {
-        console.error('[GET /api/app/downloads] No response body from GitHub');
+      // Read the response as an ArrayBuffer to ensure we have the data
+      const buffer = await response.arrayBuffer();
+
+      if (buffer.byteLength === 0) {
+        console.error('[GET /api/app/downloads] Empty file downloaded');
         return NextResponse.json(
-          { error: 'Failed to download: Empty response from GitHub' },
+          { error: 'Downloaded file is empty' },
           { status: 500 }
         );
       }
 
       // Get the content length if available
-      const contentLength = response.headers.get('content-length');
+      const contentLength = response.headers.get('content-length') || buffer.byteLength.toString();
       const contentType =
         response.headers.get('content-type') || 'application/octet-stream';
 
-      console.log('[GET /api/app/downloads] Download starting', {
+      console.log('[GET /api/app/downloads] Download complete', {
         fileName: safeFileName,
         contentLength,
+        bufferSize: buffer.byteLength,
         contentType,
       });
 
@@ -112,13 +115,10 @@ export async function GET(request: NextRequest) {
       headers.set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
       headers.set('X-Content-Type-Options', 'nosniff');
       headers.set('Access-Control-Allow-Origin', '*'); // Allow CORS
+      headers.set('Content-Length', contentLength);
 
-      if (contentLength) {
-        headers.set('Content-Length', contentLength);
-      }
-
-      // Stream the response body directly
-      return new NextResponse(response.body, {
+      // Return the buffer as the response
+      return new NextResponse(buffer, {
         status: 200,
         headers,
       });
