@@ -29,8 +29,15 @@ export default function AppInstallPage() {
         setLoading(true);
         setError(null);
         
-        const response = await fetch('/api/app/releases?limit=1', {
+        // Add cache-busting query parameter to force fresh data
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/api/app/releases?limit=1&t=${timestamp}`, {
           method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+          },
         });
 
         if (!response.ok) {
@@ -140,13 +147,12 @@ export default function AppInstallPage() {
 
                     {latestRelease.releaseNotes && (
                       <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-                        <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">
+                        <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-3">
                           What's New:
                         </h3>
-                        <p className="text-blue-800 dark:text-blue-300 text-sm leading-relaxed">
-                          {latestRelease.releaseNotes.substring(0, 200)}
-                          {latestRelease.releaseNotes.length > 200 ? '...' : ''}
-                        </p>
+                        <div className="text-blue-800 dark:text-blue-300 text-sm leading-relaxed whitespace-pre-wrap">
+                          {latestRelease.releaseNotes}
+                        </div>
                       </div>
                     )}
                   </div>

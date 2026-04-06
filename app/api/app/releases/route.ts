@@ -28,6 +28,51 @@ interface GitHubRelease {
   }>;
 }
 
+/**
+ * Extract release notes from GitHub release body
+ * Removes installation instructions and other boilerplate
+ * Keeps only the actual release notes/features section
+ */
+function extractReleaseNotes(body: string): string {
+  if (!body) return '';
+  
+  // Look for "Release Notes" or "What's New" section
+  const releaseNotesMatch = body.match(/###\s*(?:Release Notes|What's New)([\s\S]*?)(?:###|$)/i);
+  if (releaseNotesMatch) {
+    return releaseNotesMatch[1].trim();
+  }
+  
+  // Look for content after "## Features" or "## Changes"
+  const featuresMatch = body.match(/##\s*(?:Features|Changes|Improvements)([\s\S]*?)(?:##|###|$)/i);
+  if (featuresMatch) {
+    return featuresMatch[1].trim();
+  }
+  
+  // Remove installation instructions section
+  let notes = body.replace(/##\s*Installation[\s\S]*?(?=##|###|$)/gi, '').trim();
+  
+  // Remove download/assets section
+  notes = notes.replace(/##\s*(?:Download|Assets|Artifacts)[\s\S]*?(?=##|###|$)/gi, '').trim();
+  
+  // Remove note/disclaimer sections
+  notes = notes.replace(/\*\*Note:[\s\S]*?(?=\n\n|$)/gi, '').trim();
+  
+  // If still too long with boilerplate, try to get first meaningful paragraph
+  if (notes.length > 500) {
+    const firstParagraph = notes.split('\n\n')[0];
+    if (firstParagraph && firstParagraph.length > 50) {
+      return firstParagraph;
+    }
+  }
+  
+  // Limit to reasonable length
+  if (notes.length > 300) {
+    return notes.substring(0, 300).trim() + '...';
+  }
+  
+  return notes;
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Optional query parameter to get a specific number of releases
@@ -68,7 +113,7 @@ export async function GET(request: NextRequest) {
         isPrerelease: release.prerelease,
         createdAt: release.created_at,
         publishedAt: release.published_at,
-        releaseNotes: release.body,
+        releaseNotes: extractReleaseNotes(release.body),
         assets: release.assets.map((asset) => ({
           id: asset.id,
           name: asset.name,
@@ -77,10 +122,13 @@ export async function GET(request: NextRequest) {
         })),
       }));
 
-    // Cache the response for 1 hour
+    // Cache the response for 5 minutes (shorter cache for faster updates)
+    // Also add cache-busting headers
     const headers = {
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+      'Cache-Control': 'public, max-age=300, s-maxage=300',
+      'CDN-Cache-Control': 'max-age=300',
+      'Pragma': 'no-cache',
     };
 
     return NextResponse.json(publicReleases, { headers });
