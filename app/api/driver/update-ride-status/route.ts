@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { supabase, supabaseAdmin } from "@/lib/supabase"
 import { getSessionFromRequest } from "@/lib/auth"
 import { emitDriverArrived, emitRideCompleted, emitRideUpdate } from "@/lib/push-emitters"
+import { sendPushNotification } from "@/lib/push-service"
 
 export async function POST(request: NextRequest) {
   try {
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
         // Driver arrived at pickup
         const { data: driverUser } = await supabaseAdmin!
           .from("users")
-          .select("first_name, last_name")
+          .select("first_name, last_name, phone_number")
           .eq("id", session.user.id)
           .single()
 
@@ -110,6 +111,7 @@ export async function POST(request: NextRequest) {
           ? `${driverUser.first_name} ${driverUser.last_name}` 
           : "Your Driver"
 
+        // WebSocket notifications
         await emitDriverArrived(
           ride.rider_id,
           rideId,
@@ -130,6 +132,33 @@ export async function POST(request: NextRequest) {
           "status",
           `Your ride is now in progress from ${ride.pickup_zone} to ${ride.destination_zone}.`
         )
+
+        // Push notification to rider
+        await sendPushNotification([ride.rider_id], {
+          title: "🚗 Driver Arrived",
+          body: `${driverName} is on the way to pick you up`,
+          type: "ride_update",
+          data: {
+            rideId,
+            status: "in_progress",
+            driverName,
+            pickup: ride.pickup_zone,
+            destination: ride.destination_zone,
+          },
+        })
+
+        // Push notification to driver
+        await sendPushNotification([session.user.id], {
+          title: "🚗 Trip Started",
+          body: `Trip ${rideId.slice(0, 8)} started. Heading to ${ride.pickup_zone}`,
+          type: "ride_update",
+          data: {
+            rideId,
+            status: "in_progress",
+            pickup: ride.pickup_zone,
+            destination: ride.destination_zone,
+          },
+        })
       } else if (status === "completed") {
         // Ride completed - send completion notification to rider
         await emitRideCompleted(
@@ -146,6 +175,30 @@ export async function POST(request: NextRequest) {
           "status",
           `Trip ${rideId.slice(0, 8)} completed successfully. Final fare: ₦${updatedRide.fare || 0}.`
         )
+
+        // Push notification to rider
+        await sendPushNotification([ride.rider_id], {
+          title: "✅ Ride Completed",
+          body: `Trip completed. Fare: ₦${updatedRide.fare || 0}`,
+          type: "ride_update",
+          data: {
+            rideId,
+            status: "completed",
+            fare: updatedRide.fare || 0,
+          },
+        })
+
+        // Push notification to driver
+        await sendPushNotification([session.user.id], {
+          title: "✅ Ride Complete",
+          body: `Trip ${rideId.slice(0, 8)} completed. Total fare: ₦${updatedRide.fare || 0}`,
+          type: "ride_update",
+          data: {
+            rideId,
+            status: "completed",
+            fare: updatedRide.fare || 0,
+          },
+        })
       }
     } catch (notificationError) {
       console.error("Failed to send status notifications:", notificationError)

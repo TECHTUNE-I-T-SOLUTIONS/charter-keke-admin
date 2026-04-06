@@ -65,9 +65,10 @@ export default function AppInstallPage() {
 
     if (!assetToDownload) return null;
 
-    // Return the GitHub download URL directly
-    // GitHub handles anonymous downloads automatically
-    return assetToDownload.downloadUrl;
+    // Use our API proxy endpoint for direct downloads
+    // This way the download doesn't require GitHub access and works in all regions
+    const downloadUrl = `/api/app/download/${latestRelease.version}/${assetToDownload.name}`;
+    return downloadUrl;
   };
 
   const downloadLink = getDownloadLink();

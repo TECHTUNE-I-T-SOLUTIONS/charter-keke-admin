@@ -108,44 +108,66 @@ export async function sendSMS(options: TermiiSendSMSOptions) {
     throw new Error(`Invalid destination phone number: ${options.to}`)
   }
 
-  return postTermii("/sms/send", {
-    to: normalizedPhone,
-    from: options.from || senderId,
-    sms: options.message,
-    type: options.type || "plain",
-    channel: options.channel || "generic",
-    api_key: apiKey,
-  })
+  // Try the requested channel first, then fallback to alternatives
+  const channels = [options.channel || "generic"]
+  if (options.channel !== "generic") channels.push("generic")
+  if (options.channel !== "dnd") channels.push("dnd")
+
+  let lastError: Error | null = null
+  for (const channel of channels) {
+    try {
+      console.log(`[Termii] Attempting to send SMS via ${channel} channel`)
+      const result = await postTermii("/sms/send", {
+        to: normalizedPhone,
+        from: options.from || senderId,
+        sms: options.message,
+        type: options.type || "plain",
+        channel,
+        api_key: apiKey,
+      })
+      console.log(`[Termii] SMS sent successfully via ${channel}`, { to: normalizedPhone })
+      return result
+    } catch (error) {
+      lastError = error as Error
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      if (errorMsg.includes("Country Inactive") || errorMsg.includes("400")) {
+        console.log(`[Termii] ${channel} channel failed, trying next channel...`, errorMsg)
+        continue
+      }
+      // If it's a different error, throw immediately
+      throw error
+    }
+  }
+
+  // If all channels failed, throw the last error
+  if (lastError) {
+    throw lastError
+  }
+
+  throw new Error("All SMS channels failed")
 }
 
 export async function sendRideRequestSMS(options: RideRequestSMSOptions) {
   const shortRideRef = options.rideId.slice(0, 8).toUpperCase()
-  const message = `New ride CK-${shortRideRef}: ${options.pickup} -> ${options.destination}. Fare: N${Math.round(
-    options.fare || 0
-  )}. Reply ACCEPT ${options.rideId} to take this trip.`
+  const message = `🚗 CHARTER KEKE RIDE REQUEST
+  
+New ride: CK-${shortRideRef}
+From: ${options.pickup}
+To: ${options.destination}
+Fare: ₦${Math.round(options.fare || 0)}
 
-  const fallbackToGeneric = process.env.TERMII_SMS_FALLBACK_TO_GENERIC !== "false"
+📱 TO ACCEPT THIS RIDE:
+Reply: ACCEPT ${options.rideId}
 
-  try {
-    return await sendSMS({
-      to: options.to,
-      message,
-      channel: "dnd",
-      type: "plain",
-    })
-  } catch (error) {
-    console.error("[Termii] DND SMS failed, considering generic fallback:", error)
-    if (!fallbackToGeneric) {
-      throw error
-    }
+Ride expires in 5 minutes.`
 
-    return sendSMS({
-      to: options.to,
-      message,
-      channel: "generic",
-      type: "plain",
-    })
-  }
+  // Try DND first (transactional), fallback to generic automatically via sendSMS
+  return sendSMS({
+    to: options.to,
+    message,
+    channel: "dnd",
+    type: "plain",
+  })
 }
 
 export async function sendOTP(options: TermiiSendOTPOptions) {
@@ -178,5 +200,99 @@ export async function verifyOTP(options: TermiiVerifyOTPOptions) {
     api_key: apiKey,
     pin_id: options.pinId,
     pin: options.pin,
+  })
+}
+
+export async function sendBulkSMS(phoneNumbers: string[], message: string, channel: "generic" | "dnd" = "generic") {
+  const { apiKey, senderId } = getTermiiConfig()
+
+  const validPhones = phoneNumbers
+    .map(phone => toTermiiPhoneNumber(phone))
+    .filter((phone): phone is string => phone !== null)
+
+  if (validPhones.length === 0) {
+    throw new Error("No valid phone numbers for bulk SMS")
+  }
+
+  // Split into batches of 100 (Termii limit)
+  const batches = []
+  for (let i = 0; i < validPhones.length; i += 100) {
+    batches.push(validPhones.slice(i, i + 100))
+  }
+
+  const results = await Promise.allSettled(
+    batches.map(batch =>
+      postTermii("/sms/send/bulk", {
+        to: batch,
+        from: senderId,
+        sms: message,
+        type: "plain",
+        channel,
+        api_key: apiKey,
+      })
+    )
+  )
+
+  const failed = results.filter(r => r.status === "rejected")
+  if (failed.length > 0) {
+    console.error("[Termii] Some bulk SMS batches failed:", failed.map((r) => (r as PromiseRejectedResult).reason))
+  }
+
+  return {
+    totalPhones: validPhones.length,
+    batches: batches.length,
+    results,
+  }
+}
+
+export async function sendRideAcceptanceSMS(driverPhone: string, rideId: string, riderName?: string) {
+  const message = `✅ RIDE ACCEPTED - CK-${rideId.slice(0, 8).toUpperCase()}
+
+You have accepted the ride.
+${riderName ? `Rider: ${riderName}` : ""}
+
+📍 You will receive pickup location soon.
+🔔 Watch for updates from Charter Keke.
+
+Safe travels!`
+
+  return sendSMS({
+    to: driverPhone,
+    message,
+    channel: "dnd",
+    type: "plain",
+  })
+}
+
+export async function sendRideStatusUpdateSMS(driverPhone: string, rideId: string, status: string, message?: string) {
+  const defaultMessages: Record<string, string> = {
+    "in_progress": `🚗 TRIP STARTED - CK-${rideId.slice(0, 8).toUpperCase()}
+
+Your trip has begun. 
+Start driving safely to the pickup location.
+
+🔔 Follow navigation directions.`,
+    "completed": `✅ TRIP COMPLETED - CK-${rideId.slice(0, 8).toUpperCase()}
+
+Excellent work! Trip completed successfully.
+
+💰 Check your wallet for fare deposit.
+⭐ Rider may rate your service soon.
+
+Thank you for driving with Charter Keke!`,
+    "cancelled": `❌ RIDE CANCELLED - CK-${rideId.slice(0, 8).toUpperCase()}
+
+Unfortunately, this ride has been cancelled.
+
+You can accept other ride requests.`,
+  }
+
+  const smsMessage = message || defaultMessages[status] || `Ride ${rideId.slice(0, 8).toUpperCase()} status: ${status}`
+
+  return sendSMS({
+    to: driverPhone,
+    message: smsMessage,
+    channel: "dnd",
+    type: "plain",
   })
 }

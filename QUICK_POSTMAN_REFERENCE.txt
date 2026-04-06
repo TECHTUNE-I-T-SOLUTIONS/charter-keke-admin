@@ -1,0 +1,234 @@
+# ⚡ Quick Postman Testing Reference
+
+## 3 TESTS TO RUN FIRST
+
+### 🔷 TEST 1: Simple SMS (No Auth Needed) ✅ EASIEST
+
+**URL**: `http://localhost:3000/api/termii/test`  
+**Method**: `POST`  
+**Headers**: `Content-Type: application/json`
+
+**COPY THIS BODY:**
+```json
+{
+  "testType": "simple",
+  "phone": "+2347015250000",
+  "message": "Testing Termii SMS from Charter Keke"
+}
+```
+
+**SUCCESS = You see:**
+```
+"success": true
+"normalizedPhone": "2347015250000"
+```
+
+---
+
+### 🔷 TEST 2: Ride Request SMS (No Auth Needed) ✅ EASY
+
+**URL**: `http://localhost:3000/api/termii/test`  
+**Method**: `POST`  
+**Headers**: `Content-Type: application/json`
+
+**COPY THIS BODY:**
+```json
+{
+  "testType": "ride",
+  "phone": "+2347015250000",
+  "rideId": "550e8400-e29b-41d4-a716-446655440000",
+  "pickup": "Lekki Phase 1",
+  "destination": "Victoria Island",
+  "fare": 2500
+}
+```
+
+**SUCCESS = Driver receives SMS:**
+```
+New ride CK-550E8400: Lekki Phase 1 -> Victoria Island. Fare: N2500. Reply ACCEPT 550e8400-e29b-41d4-a716-446655440000 to take this trip.
+```
+
+---
+
+### 🔷 TEST 3: Webhook - Driver SMS Reply Simulation (No Auth)
+
+**URL**: `http://localhost:3000/api/webhooks/termii`  
+**Method**: `POST`  
+**Headers**: `Content-Type: application/json`
+
+**COPY THIS BODY:**
+```json
+{
+  "type": "incoming_sms",
+  "from": "2347015250000",
+  "message": "ACCEPT 550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**SUCCESS = Response:**
+```json
+{
+  "received": true,
+  "accepted": true,
+  "rideId": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**Driver + Rider receive SMS confirmation** ✅
+
+---
+
+## 🚀 STEPS TO TEST RIGHT NOW
+
+1. **Start Backend**
+   ```
+   cd d:\Codes\easely
+   npm run dev
+   ```
+
+2. **In VS Code Postman**
+   - Tab 1: Paste Test 1 body
+   - Click **Send**
+   - Look for: `"success": true`
+
+3. **Then Test 2**
+   - Change URL body to Test 2
+   - Click **Send**
+   - Look for: `"success": true`
+
+4. **Then Test 3 (Webhook)**
+   - Change URL to webhook endpoint
+   - Paste Test 3 body
+   - Click **Send**
+   - Look for: `"received": true, "accepted": true`
+
+---
+
+## 📊 EXPECTED RESULTS
+
+### Test 1 Works ✅
+- Termii API is reachable
+- Your API key is valid
+- You have SMS credits
+
+### Test 2 Works ✅
+- SMS formatting is correct
+- Ride request message sends
+- Drivers receive SMS (if real numbers)
+
+### Test 3 Works ✅
+- Webhook receives SMS replies
+- Driver lookup works
+- Ride acceptance processes
+- SMS confirmations send
+
+---
+
+## ❌ IF SOMETHING FAILS
+
+### Error: "SMS not sent" or "401 Unauthorized"
+- Check: `.env.local` has correct `TERMII_API_KEY`
+- Check: Base URL is `https://v3.api.termii.com` (NOT old api.ng.termii.com)
+- Check: Termii dashboard shows credits available
+
+### Error: "Invalid phone number"
+- Phone must be: `+2347015250000` or `2347015250000` or `07015250000`
+- System auto-normalizes it
+
+### Error: "Driver not found" (Test 3)
+- Change `"from": "2347015250000"` to a real driver's phone in your database
+- Check: Driver exists in users table with role='driver'
+
+---
+
+## 📱 TO TEST WITH REAL DRIVERS
+
+You need:
+1. Real driver phone numbers in your database
+2. Change phone numbers in Test 1, Test 2, Test 3
+3. Run tests again
+4. Real SMS will be sent to those numbers
+
+---
+
+## 🎯 FULL INTEGRATION TEST (After Tests 1-3 Work)
+
+**Create Ride + Send SMS to All Drivers:**
+
+**URL**: `http://localhost:3000/api/rides`  
+**Method**: `POST`  
+**Headers**: 
+```
+Content-Type: application/json
+Authorization: Bearer YOUR_RIDER_TOKEN
+```
+
+**BODY:**
+```json
+{
+  "pickup_zone": "Lekki Phase 1",
+  "pickup_description": "Shell Petrol Station",
+  "destination_zone": "Victoria Island",
+  "destination_description": "Ajose Adeogun Street",
+  "fare": 2500,
+  "estimated_distance": 15
+}
+```
+
+**SUCCESS:**
+- ✅ Ride created
+- ✅ SMS sent to all available drivers
+- ✅ Push notifications sent
+- ✅ Status is "dispatched"
+
+Check backend logs:
+```
+[RideDispatch] SMS dispatch summary: attempted=5, successful=5
+```
+
+---
+
+## 📋 CHECKLIST
+
+- [ ] Backend running: `npm run dev`
+- [ ] Postman extension open in VS Code
+- [ ] Test 1 passes (simple SMS)
+- [ ] Test 2 passes (ride request SMS)
+- [ ] Test 3 passes (webhook)
+- [ ] Check backend logs showing SMS sent
+- [ ] Verify in Termii dashboard: SMS count increased
+- [ ] Verify in Termii dashboard: Balance decreased
+
+---
+
+## 🔗 USEFUL LINKS
+
+- **Termii Dashboard**: https://dashboard.termii.com
+- **Check Balance**: https://dashboard.termii.com → Wallet
+- **Webhook Logs**: https://dashboard.termii.com → Settings → Webhooks
+- **API Docs**: https://developers.termii.com
+
+---
+
+## 💬 QUICK HELP
+
+**Can't find Postman tab?**
+- VS Code → Extensions → Search "Postman"
+- OR use VS Code REST Client extension
+- OR use curl commands in terminal
+
+**Backend won't start?**
+- Check: `node -v` (need v18+)
+- Check: `npm -v` 
+- Check: All dependencies installed: `npm install`
+- Check port 3000 is free
+
+**API returns 500 error?**
+- Check backend console for error message
+- Check `.env.local` has all variables
+- Check database is accessible
+
+**Rate limiting?**
+- Each test SMS costs credits
+- Monitor: https://dashboard.termii.com → Wallet
+- Plan: ~0.50-1.00 credit per SMS depending on length

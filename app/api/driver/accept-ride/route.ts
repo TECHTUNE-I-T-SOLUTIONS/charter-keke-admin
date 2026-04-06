@@ -3,6 +3,7 @@ import { getSessionFromRequest } from "@/lib/auth";
 import { acceptRideFirstCome } from "@/lib/ride-acceptance";
 import { getOutstandingSettlements, updateOverdueSettlements } from "@/lib/driver-settlement";
 import { supabaseAdmin } from "@/lib/supabase";
+import { sendPushNotification } from "@/lib/push-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,6 +68,39 @@ export async function POST(request: NextRequest) {
         },
         { status: acceptance.status }
       );
+    }
+
+    // Send push notification to rider
+    try {
+      const ride = acceptance.ride;
+      const { data: driverUser } = await supabaseAdmin!
+        .from("users")
+        .select("first_name, last_name, phone_number")
+        .eq("id", session.user.id)
+        .single();
+
+      const driverName = driverUser 
+        ? `${driverUser.first_name} ${driverUser.last_name}` 
+        : "A driver";
+
+      await sendPushNotification([ride.rider_id], {
+        title: "✅ Driver Accepted",
+        body: `${driverName} accepted your ride request`,
+        type: "ride_accepted",
+        data: {
+          rideId: ride.id,
+          driverId: driver.id,
+          driverName,
+          pickupZone: ride.pickup_zone,
+          destinationZone: ride.destination_zone,
+        },
+      });
+      console.log("[AcceptRide] Push notification sent to rider", {
+        rideId,
+        riderId: ride.rider_id,
+      });
+    } catch (pushError) {
+      console.error("[AcceptRide] Failed to send push notification:", pushError);
     }
 
     return NextResponse.json({

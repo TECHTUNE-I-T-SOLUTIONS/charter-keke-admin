@@ -19,8 +19,11 @@ function verifyWebhookSignature(rawBody: string, signature: string, secret: stri
 }
 
 function extractIncomingMessage(body: any) {
+  // Termii "inbound" event uses different field names
+  // See Termii docs: https://termii.com/documentation
   const from = String(body?.from || body?.msisdn || body?.phone_number || body?.sender || "").trim()
   const message = String(body?.message || body?.sms || body?.text || body?.content || "").trim()
+  
   return { from, message }
 }
 
@@ -100,17 +103,19 @@ export async function POST(request: NextRequest) {
     switch (eventType) {
       case "delivery_report":
         // Message delivery status
-        console.log("[Termii] Delivery report:", body.message_id, body.status)
+        console.log("[Termii-Webhook] Delivery report:", body.message_id, body.status)
         break
 
+      case "inbound":
       case "incoming_sms":
         {
           const { from, message } = extractIncomingMessage(body)
-          console.log("[Termii] Incoming SMS from:", from, "Message:", message)
+          console.log("[Termii-Webhook] Incoming SMS from:", from, "Message:", message)
 
           const command = extractRideAcceptCommand(message)
 
           if (!command.isAccept || !command.rideId) {
+            console.log("[Termii-Webhook] No valid ACCEPT command found in message")
             return NextResponse.json({
               received: true,
               ignored: true,
@@ -118,14 +123,19 @@ export async function POST(request: NextRequest) {
             })
           }
 
+          console.log("[Termii-Webhook] ACCEPT command found, rideId:", command.rideId)
+
           const driverUser = await findDriverUserByPhone(from)
           if (!driverUser) {
+            console.error("[Termii-Webhook] Driver not found for phone:", from)
             return NextResponse.json({
               received: true,
               ignored: true,
               reason: "Driver not found for incoming phone number",
             })
           }
+
+          console.log("[Termii-Webhook] Driver found:", driverUser.id)
 
           const acceptance = await acceptRideFirstCome({
             rideId: command.rideId,
@@ -134,14 +144,19 @@ export async function POST(request: NextRequest) {
           })
 
           if (!acceptance.success && acceptance.status === 409) {
-            return NextResponse.json({
-              received: true,
-              accepted: false,
-              reason: "Ride already taken",
-            })
+            console.log("[Termii-Webhook] Ride already taken or unavailable")
+            return NextResponse.json(
+              {
+                received: true,
+                accepted: false,
+                reason: "Ride already taken",
+              },
+              { status: 409 }
+            )
           }
 
           if (!acceptance.success) {
+            console.error("[Termii-Webhook] Acceptance failed:", acceptance)
             return NextResponse.json(
               {
                 received: true,
@@ -152,6 +167,11 @@ export async function POST(request: NextRequest) {
               { status: acceptance.status }
             )
           }
+
+          console.log("[Termii-Webhook] ✅ Ride accepted successfully", {
+            rideId: command.rideId,
+            driverUserId: driverUser.id,
+          })
 
           return NextResponse.json({
             received: true,
@@ -164,7 +184,7 @@ export async function POST(request: NextRequest) {
         break
 
       default:
-        console.log("[Termii] Unhandled event type:", eventType)
+        console.log("[Termii-Webhook] Unhandled event type:", eventType)
     }
 
     return NextResponse.json({ received: true })

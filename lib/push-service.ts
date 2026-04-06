@@ -1,4 +1,5 @@
 import webpush from 'web-push';
+import { supabaseAdmin } from './supabase';
 
 // Configure web-push with VAPID keys on server startup
 export const initializePushNotifications = () => {
@@ -17,40 +18,149 @@ export const initializePushNotifications = () => {
 
 /**
  * Interface for push notification subscription
+ * Stores the device token for sending notifications via Expo
  */
 export interface PushSubscription {
   userId: string;
-  pushToken: string;
+  pushToken: string | null;
   subscribedAt: string;
-  platform: 'ios' | 'android' | 'web';
-  role?: 'driver' | 'rider' | 'admin' | 'user';
+  platform: 'ios' | 'android' | 'web' | 'unknown';
+  // New fields for Firebase/Expo error handling
+  status?: 'token_ready' | 'permission_granted_token_pending' | 'permission_denied' | 'unknown';
+  isPlaceholder?: boolean;
+  reason?: string | null;
+  tokenUpdatedAt?: string | null;
 }
 
 /**
- * In-memory storage for active push subscriptions
- * TODO: In production, move this to database (Supabase)
+ * In-memory cache for active push subscriptions
  */
 const activeSubscriptions = new Map<string, PushSubscription>();
 
 /**
- * Store a new push subscription
+ * Store a new push subscription in Supabase and cache
  */
-export const storePushSubscription = (subscription: PushSubscription) => {
+export const storePushSubscription = async (subscription: PushSubscription) => {
+  try {
+    if (supabaseAdmin) {
+      // Determine if this is a placeholder token
+      const isPlaceholder = subscription.pushToken?.startsWith('placeholder_') || subscription.isPlaceholder || false;
+      
+      // Determine token_updated_at: set if switching from placeholder to real token
+      let tokenUpdatedAt: string | null = subscription.tokenUpdatedAt || null;
+      if (!isPlaceholder && subscription.pushToken && !tokenUpdatedAt) {
+        tokenUpdatedAt = new Date().toISOString();
+      }
+
+      // Store in Supabase for persistence
+      const { data, error } = await supabaseAdmin
+        .from('push_subscriptions')
+        .upsert(
+          {
+            user_id: subscription.userId,
+            push_token: subscription.pushToken || null,
+            platform: subscription.platform,
+            subscribed_at: subscription.subscribedAt,
+            status: subscription.status || 'unknown',
+            is_placeholder: isPlaceholder,
+            reason: subscription.reason || null,
+            token_updated_at: tokenUpdatedAt,
+            is_active: true,
+          },
+          { onConflict: 'user_id,push_token' }
+        );
+
+      if (error) {
+        console.warn('⚠️ [PUSH] Failed to store subscription in database:', error.message);
+        // Fall back to in-memory storage
+      } else {
+        console.log('📡 [PUSH] Subscription stored in database for user:', subscription.userId, {
+          platform: subscription.platform,
+          status: subscription.status,
+          isPlaceholder,
+        });
+      }
+
+      return data ? data[0] : subscription;
+    }
+  } catch (error) {
+    console.warn('⚠️ [PUSH] Could not persist subscription:', error);
+  }
+
+  // Always keep in-memory cache
   activeSubscriptions.set(subscription.userId, subscription);
-  console.log('📡 [PUSH] Subscription stored for user:', subscription.userId);
+  console.log('📡 [PUSH] Subscription cached for user:', subscription.userId);
   return subscription;
 };
 
 /**
- * Get all subscriptions for a user
+ * Load subscriptions from database into memory cache
+ */
+export const loadSubscriptionsFromDatabase = async () => {
+  try {
+    if (!supabaseAdmin) {
+      console.warn('⚠️ [PUSH] Supabase not initialized, using in-memory cache only');
+      return;
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('push_subscriptions')
+      .select('user_id, push_token, platform, subscribed_at')
+      .eq('is_active', true);
+
+    if (error) {
+      console.warn('⚠️ [PUSH] Failed to load subscriptions from database:', error.message);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      data.forEach((sub: any) => {
+        activeSubscriptions.set(sub.user_id, {
+          userId: sub.user_id,
+          pushToken: sub.push_token,
+          platform: sub.platform,
+          subscribedAt: sub.subscribed_at,
+        });
+      });
+      console.log('📡 [PUSH] Loaded', data.length, 'subscriptions from database');
+    }
+  } catch (error) {
+    console.warn('⚠️ [PUSH] Error loading subscriptions:', error);
+  }
+};
+
+/**
+ * Get all subscriptions for a user (returns only active subscriptions)
  */
 export const getUserSubscriptions = (userId: string): PushSubscription[] => {
   const subscription = activeSubscriptions.get(userId);
-  return subscription ? [subscription] : [];
+  if (!subscription) return [];
+  
+  // Return subscription only if it has a valid token
+  if (subscription.pushToken) {
+    return [subscription];
+  }
+  return [];
+};
+
+/**
+ * Get active (non-placeholder) subscriptions for a user
+ * Only returns tokens that are ready to receive notifications
+ */
+export const getUserActiveSubscriptions = (userId: string): PushSubscription[] => {
+  const subscription = activeSubscriptions.get(userId);
+  if (!subscription) return [];
+  
+  // Return only if has valid token and is not placeholder
+  if (subscription.pushToken && !subscription.isPlaceholder) {
+    return [subscription];
+  }
+  return [];
 };
 
 /**
  * Send push notification to specific users
+ * Only sends to users with valid (non-placeholder) tokens
  */
 export const sendPushNotification = async (
   userIds: string[],
@@ -65,10 +175,23 @@ export const sendPushNotification = async (
   const results = [];
 
   for (const userId of userIds) {
-    const subscriptions = getUserSubscriptions(userId);
+    // Use active subscriptions only (filters out placeholder tokens)
+    const subscriptions = getUserActiveSubscriptions(userId);
+
+    if (subscriptions.length === 0) {
+      console.warn(`⚠️ [PUSH] No active subscriptions found for user: ${userId} (may be using placeholder token)`);
+      results.push({ userId, success: false, error: 'No active subscription' });
+      continue;
+    }
 
     for (const subscription of subscriptions) {
       try {
+        // Skip if no valid token
+        if (!subscription.pushToken) {
+          results.push({ userId, success: false, error: 'No token available' });
+          continue;
+        }
+
         const notificationPayload = {
           title: payload.title,
           body: payload.body,
@@ -97,8 +220,15 @@ export const sendPushNotification = async (
         console.log('✅ [PUSH] Notification sent to user:', userId, 'Platform:', subscription.platform);
         results.push({ userId, success: true });
       } catch (error: any) {
-        console.error('❌ [PUSH] Failed to send notification:', error.message);
+        console.error('❌ [PUSH] Failed to send notification to user:', userId, 'Error:', error.message);
         results.push({ userId, success: false, error: error.message });
+        
+        // Mark invalid tokens in database
+        if (error.message?.includes('ExponentPushToken') || error.message?.includes('Invalid')) {
+          console.log(`🔄 [PUSH] Marking token as invalid for user: ${userId}`);
+          // In production, you might want to deactivate this subscription
+          await removeSubscription(userId, subscription.pushToken).catch(() => {});
+        }
       }
     }
   }
@@ -108,6 +238,7 @@ export const sendPushNotification = async (
 
 /**
  * Send Expo notification (for mobile app)
+ * Handles errors gracefully and logs detailed information
  */
 const sendExpoNotification = async (
   expoPushToken: string,
@@ -119,6 +250,11 @@ const sendExpoNotification = async (
   }
 ) => {
   try {
+    // Skip placeholder tokens - they won't work
+    if (expoPushToken.startsWith('placeholder_')) {
+      throw new Error('Cannot send to placeholder token - Firebase/Google Play Services not available yet');
+    }
+
     const message = {
       to: expoPushToken,
       sound: 'default',
@@ -140,20 +276,28 @@ const sendExpoNotification = async (
     });
 
     const data = await response.json();
+    
+    // Handle Expo API errors
     if (data.errors) {
-      throw new Error(data.errors[0].message);
+      const errorMessage = data.errors[0]?.message || 'Unknown error';
+      throw new Error(`Expo API Error: ${errorMessage}`);
     }
 
-    console.log('✅ [PUSH] Expo notification sent successfully');
+    if (!response.ok) {
+      throw new Error(`Expo API returned ${response.status}: ${data.message || 'Unknown error'}`);
+    }
+
+    console.log('✅ [PUSH] Expo notification sent successfully to token:', expoPushToken.substring(0, 20) + '...');
     return data;
-  } catch (error) {
-    console.error('❌ [PUSH] Expo notification error:', error);
+  } catch (error: any) {
+    const errorMessage = error?.message || String(error);
+    console.error('❌ [PUSH] Expo notification error:', errorMessage);
     throw error;
   }
 };
 
 /**
- * Broadcast notification to all drivers
+ * Broadcast notification to all drivers with valid tokens
  */
 export const broadcastToDrivers = async (
   payload: {
@@ -165,17 +309,39 @@ export const broadcastToDrivers = async (
   excludeUserIds: string[] = []
 ) => {
   console.log('📢 [PUSH] Broadcasting to drivers, excluding:', excludeUserIds);
-  const driverIds = Array.from(activeSubscriptions.values())
-    .filter((subscription) => subscription.role === 'driver' && !excludeUserIds.includes(subscription.userId))
-    .map((subscription) => subscription.userId);
-  return sendPushNotification(driverIds, {
-    ...payload,
-    type: payload.type as any,
-  });
+  try {
+    if (!supabaseAdmin) {
+      console.warn('⚠️ [PUSH] Supabase not initialized');
+      return;
+    }
+
+    // Get all drivers who have valid (non-placeholder) push tokens
+    const { data: drivers, error } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('role', 'driver')
+      .not('id', 'in', `(${excludeUserIds.map(() => '?').join(',')})`)
+      .limit(10000);
+
+    if (error) {
+      console.warn('⚠️ [PUSH] Failed to fetch drivers:', error.message);
+      return;
+    }
+
+    const driverIds = (drivers || []).map((d: any) => d.id);
+    console.log(`📢 [PUSH] Found ${driverIds.length} drivers to notify`);
+    
+    return sendPushNotification(driverIds, {
+      ...payload,
+      type: payload.type as any,
+    });
+  } catch (error) {
+    console.error('❌ [PUSH] Error broadcasting to drivers:', error);
+  }
 };
 
 /**
- * Broadcast notification to all riders
+ * Broadcast notification to all riders with valid tokens
  */
 export const broadcastToRiders = async (
   payload: {
@@ -187,26 +353,224 @@ export const broadcastToRiders = async (
   excludeUserIds: string[] = []
 ) => {
   console.log('📢 [PUSH] Broadcasting to riders, excluding:', excludeUserIds);
-  const riderIds = Array.from(activeSubscriptions.values())
-    .filter((subscription) => {
-      const isRider = subscription.role === 'rider' || subscription.role === 'user';
-      return isRider && !excludeUserIds.includes(subscription.userId);
-    })
-    .map((subscription) => subscription.userId);
-  return sendPushNotification(riderIds, {
-    ...payload,
-    type: payload.type as any,
-  });
+  try {
+    if (!supabaseAdmin) {
+      console.warn('⚠️ [PUSH] Supabase not initialized');
+      return;
+    }
+
+    // Get all riders who have valid (non-placeholder) push tokens
+    const { data: riders, error } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .in('role', ['rider', 'passenger', 'user'])
+      .not('id', 'in', `(${excludeUserIds.map(() => '?').join(',')})`)
+      .limit(10000);
+
+    if (error) {
+      console.warn('⚠️ [PUSH] Failed to fetch riders:', error.message);
+      return;
+    }
+
+    const riderIds = (riders || []).map((r: any) => r.id);
+    console.log(`📢 [PUSH] Found ${riderIds.length} riders to notify`);
+    
+    return sendPushNotification(riderIds, {
+      ...payload,
+      type: payload.type as any,
+    });
+  } catch (error) {
+    console.error('❌ [PUSH] Error broadcasting to riders:', error);
+  }
+};
+
+/**
+ * Broadcast to all drivers WITH real tokens (filtering database)
+ * More reliable than in-memory cache for production
+ */
+export const broadcastToDriversWithValidTokens = async (
+  payload: {
+    title: string;
+    body: string;
+    data?: Record<string, any>;
+    type: string;
+  },
+  excludeUserIds: string[] = []
+) => {
+  console.log('📢 [PUSH] Broadcasting to drivers with VALID tokens only');
+  try {
+    if (!supabaseAdmin) {
+      console.warn('⚠️ [PUSH] Supabase not initialized');
+      return;
+    }
+
+    // Query users + subscriptions to get drivers with valid tokens
+    const { data: results, error } = await supabaseAdmin
+      .from('users')
+      .select(
+        `
+        id,
+        push_subscriptions!inner(
+          push_token,
+          is_placeholder,
+          is_active,
+          status
+        )
+        `
+      )
+      .eq('role', 'driver')
+      .eq('push_subscriptions.is_active', true)
+      .eq('push_subscriptions.is_placeholder', false) // Only REAL tokens
+      .neq('push_subscriptions.push_token', null);
+
+    if (error) {
+      console.warn('⚠️ [PUSH] Failed to fetch drivers with valid tokens:', error.message);
+      // Fallback to regular broadcast
+      return broadcastToDrivers(payload, excludeUserIds);
+    }
+
+    const driverIds = (results || [])
+      .map((d: any) => d.id)
+      .filter((id: string) => !excludeUserIds.includes(id));
+    
+    console.log(`📢 [PUSH] Found ${driverIds.length} drivers with valid tokens to notify`);
+    
+    if (driverIds.length === 0) {
+      console.warn('⚠️ [PUSH] No drivers with valid tokens found');
+      return [];
+    }
+
+    return sendPushNotification(driverIds, {
+      ...payload,
+      type: payload.type as any,
+    });
+  } catch (error) {
+    console.error('❌ [PUSH] Error broadcasting to drivers with valid tokens:', error);
+    // Fallback to regular broadcast
+    return broadcastToDrivers(payload, excludeUserIds);
+  }
+};
+
+/**
+ * Broadcast to all riders WITH real tokens (filtering database)
+ * More reliable than in-memory cache for production
+ */
+export const broadcastToRidersWithValidTokens = async (
+  payload: {
+    title: string;
+    body: string;
+    data?: Record<string, any>;
+    type: string;
+  },
+  excludeUserIds: string[] = []
+) => {
+  console.log('📢 [PUSH] Broadcasting to riders with VALID tokens only');
+  try {
+    if (!supabaseAdmin) {
+      console.warn('⚠️ [PUSH] Supabase not initialized');
+      return;
+    }
+
+    // Query users + subscriptions to get riders with valid tokens
+    const { data: results, error } = await supabaseAdmin
+      .from('users')
+      .select(
+        `
+        id,
+        push_subscriptions!inner(
+          push_token,
+          is_placeholder,
+          is_active,
+          status
+        )
+        `
+      )
+      .in('role', ['rider', 'passenger', 'user'])
+      .eq('push_subscriptions.is_active', true)
+      .eq('push_subscriptions.is_placeholder', false) // Only REAL tokens
+      .neq('push_subscriptions.push_token', null);
+
+    if (error) {
+      console.warn('⚠️ [PUSH] Failed to fetch riders with valid tokens:', error.message);
+      // Fallback to regular broadcast
+      return broadcastToRiders(payload, excludeUserIds);
+    }
+
+    const riderIds = (results || [])
+      .map((d: any) => d.id)
+      .filter((id: string) => !excludeUserIds.includes(id));
+    
+    console.log(`📢 [PUSH] Found ${riderIds.length} riders with valid tokens to notify`);
+    
+    if (riderIds.length === 0) {
+      console.warn('⚠️ [PUSH] No riders with valid tokens found');
+      return [];
+    }
+
+    return sendPushNotification(riderIds, {
+      ...payload,
+      type: payload.type as any,
+    });
+  } catch (error) {
+    console.error('❌ [PUSH] Error broadcasting to riders with valid tokens:', error);
+    // Fallback to regular broadcast
+    return broadcastToRiders(payload, excludeUserIds);
+  }
 };
 
 /**
  * Remove subscription (on logout or error)
  */
-export const removeSubscription = (userId: string) => {
+/**
+ * Remove a push subscription (optionally specific token, or all for user)
+ */
+export const removeSubscription = async (userId: string, pushToken?: string) => {
+  try {
+    if (supabaseAdmin) {
+      if (pushToken) {
+        // Remove only the specific token for this user
+        const { error } = await supabaseAdmin
+          .from('push_subscriptions')
+          .update({ is_active: false })
+          .eq('user_id', userId)
+          .eq('push_token', pushToken);
+
+        if (error) {
+          console.warn(
+            '⚠️ [PUSH] Failed to remove specific subscription from database:',
+            error.message
+          );
+        } else {
+          console.log(
+            '✅ [PUSH] Subscription deactivated for user:',
+            userId,
+            'token:',
+            pushToken.substring(0, 10) + '...'
+          );
+        }
+      } else {
+        // Remove all subscriptions for this user
+        const { error } = await supabaseAdmin
+          .from('push_subscriptions')
+          .update({ is_active: false })
+          .eq('user_id', userId);
+
+        if (error) {
+          console.warn('⚠️ [PUSH] Failed to remove subscription from database:', error.message);
+        } else {
+          console.log('✅ [PUSH] All subscriptions deactivated in database for user:', userId);
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ [PUSH] Error removing subscription:', error);
+  }
+
+  // Remove from in-memory cache
   const hadSubscription = activeSubscriptions.has(userId);
-  activeSubscriptions.delete(userId);
   if (hadSubscription) {
-    console.log('✅ [PUSH] Subscription removed for user:', userId);
+    activeSubscriptions.delete(userId);
+    console.log('✅ [PUSH] Subscription removed from cache for user:', userId);
   }
 };
 
@@ -218,7 +582,7 @@ export const getActiveSubscriptionsCount = () => {
 };
 
 /**
- * Get subscription status
+ * Get subscription status (in-memory cache)
  */
 export const getSubscriptionStatus = () => {
   return {
@@ -227,6 +591,104 @@ export const getSubscriptionStatus = () => {
       userId,
       platform: sub.platform,
       subscribedAt: sub.subscribedAt,
+      status: sub.status || 'unknown',
+      isPlaceholder: sub.isPlaceholder || false,
     })),
   };
+};
+
+/**
+ * Get database statistics on push subscriptions
+ * Returns counts by status and placeholder
+ */
+export const getPushSubscriptionStats = async () => {
+  try {
+    if (!supabaseAdmin) {
+      return null;
+    }
+
+    // Get counts by status
+    const { count: totalCount } = await supabaseAdmin
+      .from('push_subscriptions')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true);
+
+    // Get breakdown by status
+    const { data: stats } = await supabaseAdmin
+      .from('push_subscriptions')
+      .select('status, is_placeholder, COUNT(*) as count', { count: 'exact' })
+      .eq('is_active', true)
+      .group_by('status, is_placeholder');
+
+    return {
+      total: totalCount || 0,
+      byStatus: stats || [],
+      timestamp: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error('❌ [PUSH] Error getting subscription stats:', error);
+    return null;
+  }
+};
+
+/**
+ * Find users stuck on placeholder tokens (not upgraded in 24+ hours)
+ * Useful for monitoring and debugging
+ */
+export const findStuckPlaceholderTokens = async () => {
+  try {
+    if (!supabaseAdmin) {
+      return [];
+    }
+
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: stuck, error } = await supabaseAdmin
+      .from('push_subscriptions')
+      .select('user_id, push_token, platform, subscribed_at, reason')
+      .eq('is_placeholder', true)
+      .eq('is_active', true)
+      .lt('subscribed_at', twentyFourHoursAgo);
+
+    if (error) {
+      console.warn('⚠️ [PUSH] Error querying stuck tokens:', error.message);
+      return [];
+    }
+
+    return stuck || [];
+  } catch (error) {
+    console.error('❌ [PUSH] Error finding stuck placeholder tokens:', error);
+    return [];
+  }
+};
+
+/**
+ * Clean up old placeholder tokens (keep only those from last 24 hours)
+ */
+export const cleanupOldPlaceholderTokens = async () => {
+  try {
+    if (!supabaseAdmin) {
+      console.warn('⚠️ [PUSH] Supabase not initialized');
+      return { deleted: 0 };
+    }
+
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    const { count, error } = await supabaseAdmin
+      .from('push_subscriptions')
+      .delete()
+      .eq('is_placeholder', true)
+      .lt('subscribed_at', twentyFourHoursAgo);
+
+    if (error) {
+      console.warn('⚠️ [PUSH] Error cleaning up placeholder tokens:', error.message);
+      return { deleted: 0, error: error.message };
+    }
+
+    console.log('✅ [PUSH] Cleaned up', count, 'old placeholder tokens');
+    return { deleted: count || 0 };
+  } catch (error) {
+    console.error('❌ [PUSH] Error in cleanup:', error);
+    return { deleted: 0, error: String(error) };
+  }
 };

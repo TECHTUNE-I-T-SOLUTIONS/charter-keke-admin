@@ -4,6 +4,7 @@ import { getSessionFromRequest } from "@/lib/auth";
 import { notifyDriverAboutRide } from "@/lib/notifications";
 import { emitRideRequest, emitRideUpdate } from "@/lib/push-emitters";
 import { sendRideRequestSMS, toTermiiPhoneNumber } from "@/lib/termii";
+import { sendPushNotification } from "@/lib/push-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -133,6 +134,28 @@ export async function POST(request: NextRequest) {
           rideId: ride.id,
           drivers: drivers.length,
         });
+      }
+
+      // Send push notification to all drivers
+      try {
+        await sendPushNotification(driverUserIds, {
+          title: "🚗 New Ride Request",
+          body: `Pickup: ${pickup_description || pickup_zone}`,
+          type: "ride_request",
+          data: {
+            rideId: ride.id,
+            pickup: pickup_description || pickup_zone,
+            destination: destination_description || destination_zone,
+            fare: parsedFare,
+            distance: parsedDistance,
+          },
+        });
+        console.log("[RideDispatch] Push notification sent to drivers", {
+          rideId: ride.id,
+          driverCount: driverUserIds.length,
+        });
+      } catch (pushError) {
+        console.error("[RideDispatch] Failed to send push notifications:", pushError);
       }
 
       const smsTasks: Promise<any>[] = [];

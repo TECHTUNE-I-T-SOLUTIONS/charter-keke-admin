@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextRequest, NextResponse } from "next/server"
+import { sendPushNotification } from "@/lib/push-service"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -228,6 +229,44 @@ export async function POST(request: NextRequest) {
           paid_at: new Date().toISOString(),
         })
         .in("id", settlementIds)
+    }
+
+    // Get driver user ID for push notification
+    let driverUserId: string | null = null
+    if (driverId) {
+      const { data: driver } = await supabase
+        .from("drivers")
+        .select("user_id")
+        .eq("id", driverId)
+        .single()
+
+      driverUserId = driver?.user_id || null
+    }
+
+    // Send push notification to driver
+    if (driverUserId) {
+      try {
+        const amount = paymentData.amount ? (paymentData.amount / 100) : payment?.amount || 0
+        await sendPushNotification([driverUserId], {
+          title: "💰 Payment Received",
+          body: `Settlement of ₦${amount} has been confirmed`,
+          type: "payment_received",
+          data: {
+            reference,
+            amount,
+            settlementIds: settlementIds || [],
+            paymentDate: new Date().toISOString(),
+          },
+        })
+        console.log("[PaymentCallback] Push notification sent to driver", {
+          driverId,
+          reference,
+          amount,
+        })
+      } catch (pushError) {
+        console.error("[PaymentCallback] Failed to send push notification:", pushError)
+        // Don't fail the entire request if push notification fails
+      }
     }
 
     // Check if driver has any unpaid settlements

@@ -3,41 +3,75 @@ import { getSessionFromRequest } from "@/lib/auth";
 import {
   storePushSubscription,
   removeSubscription,
-  getSubscriptionStatus,
 } from "@/lib/push-service";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: NextRequest) {
   try {
+    // Get user from session/auth (supports both NextAuth and custom Bearer tokens)
     const session = await getSessionFromRequest(request);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized - please log in first" },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();
-    const { pushToken, platform } = body || {};
+    // Accept both pushToken and push_token (snake_case from mobile)
+    const pushToken = body.pushToken || body.push_token;
+    const platform = body.platform;
+    const status = body.status || 'unknown'; // token_ready, permission_granted_token_pending, permission_denied
+    const reason = body.reason || null; // Why placeholder/denied
+    const isPlaceholder = body.isPlaceholder || pushToken?.startsWith('placeholder_') || false;
 
-    if (!pushToken || !platform) {
+    if (!pushToken && status !== 'permission_denied') {
       return NextResponse.json(
-        { error: "pushToken and platform are required" },
+        { error: "push_token and platform are required (unless permission denied)" },
         { status: 400 }
       );
     }
 
-    const role = session.user.role === "driver"
-      ? "driver"
-      : session.user.role === "admin" || session.user.role === "super_admin"
-      ? "admin"
-      : "rider";
+    if (!platform && status !== 'permission_denied') {
+      return NextResponse.json(
+        { error: "platform is required" },
+        { status: 400 }
+      );
+    }
 
-    const subscription = storePushSubscription({
-      userId: session.user.id,
-      pushToken,
+    // Validate platform if provided
+    if (platform && !['ios', 'android', 'web'].includes(platform)) {
+      return NextResponse.json(
+        { error: "platform must be 'ios', 'android', or 'web'" },
+        { status: 400 }
+      );
+    }
+
+    // Log subscription details for debugging
+    console.log(`📡 [NOTIFICATIONS] Storing subscription for user ${session.user.id}:`, {
       platform,
-      role,
-      subscribedAt: new Date().toISOString(),
+      hasToken: !!pushToken,
+      status,
+      isPlaceholder,
+      reason,
     });
 
-    return NextResponse.json({ success: true, subscription });
+    // Store the subscription
+    const subscription = await storePushSubscription({
+      userId: session.user.id,
+      pushToken: pushToken || null,
+      platform: platform || 'unknown',
+      subscribedAt: new Date().toISOString(),
+      status,
+      isPlaceholder,
+      reason,
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      subscription,
+      message: "Successfully subscribed to push notifications"
+    });
   } catch (error) {
     console.error("Push subscribe error:", error);
     return NextResponse.json(
@@ -49,13 +83,30 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Get user from session/auth
     const session = await getSessionFromRequest(request);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized - please log in first" },
+        { status: 401 }
+      );
     }
 
-    removeSubscription(session.user.id);
-    return NextResponse.json({ success: true });
+    const body = await request.json().catch(() => ({}));
+    const push_token = body?.push_token;
+
+    // If push_token provided, remove only that token
+    // Otherwise remove all subscriptions for user
+    if (push_token) {
+      await removeSubscription(session.user.id, push_token);
+    } else {
+      await removeSubscription(session.user.id);
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      message: "Successfully unsubscribed from push notifications"
+    });
   } catch (error) {
     console.error("Push unsubscribe error:", error);
     return NextResponse.json(
@@ -67,16 +118,43 @@ export async function DELETE(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    // Get user from session/auth
     const session = await getSessionFromRequest(request);
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized - please log in first" },
+        { status: 401 }
+      );
     }
 
-    const status = getSubscriptionStatus();
+    // Query user's active subscriptions from database
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+    );
+
+    const { data: subscriptions, error } = await supabase
+      .from("push_subscriptions")
+      .select("id, push_token, platform, is_active, subscribed_at")
+      .eq("user_id", session.user.id)
+      .eq("is_active", true);
+
+    if (error) {
+      console.warn("Database query error:", error);
+      // Return empty array if query fails (user has no subscriptions)
+      return NextResponse.json({
+        success: true,
+        subscriptions: [],
+        isSubscribed: false,
+        count: 0,
+      });
+    }
+
     return NextResponse.json({
       success: true,
-      mine: session.user.id,
-      status,
+      subscriptions: subscriptions || [],
+      isSubscribed: (subscriptions?.length || 0) > 0,
+      count: subscriptions?.length || 0,
     });
   } catch (error) {
     console.error("Push status error:", error);
