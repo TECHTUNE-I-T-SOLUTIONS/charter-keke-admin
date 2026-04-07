@@ -46,35 +46,26 @@ export const storePushSubscription = async (subscription: PushSubscription) => {
       // Determine if this is a placeholder token
       const isPlaceholder = subscription.pushToken?.startsWith('placeholder_') || subscription.isPlaceholder || false;
       
-      // Determine token_updated_at: set if switching from placeholder to real token
-      let tokenUpdatedAt: string | null = subscription.tokenUpdatedAt || null;
-      if (!isPlaceholder && subscription.pushToken && !tokenUpdatedAt) {
-        tokenUpdatedAt = new Date().toISOString();
-      }
-
-      // Store in Supabase for persistence
+      // Only store fields that exist in the database schema
       const { data, error } = await supabaseAdmin
         .from('push_subscriptions')
         .upsert(
           {
             user_id: subscription.userId,
-            push_token: subscription.pushToken || null,
+            push_token: subscription.pushToken || `placeholder_${Date.now()}`,
             platform: subscription.platform,
             subscribed_at: subscription.subscribedAt,
-            status: subscription.status || 'unknown',
-            is_placeholder: isPlaceholder,
-            reason: subscription.reason || null,
-            token_updated_at: tokenUpdatedAt,
             is_active: true,
+            last_verified_at: new Date().toISOString(),
           },
           { onConflict: 'user_id,push_token' }
         );
 
       if (error) {
-        console.warn('⚠️ [PUSH] Failed to store subscription in database:', error.message);
+        console.error('⚠️ [PUSH] Failed to store subscription in database:', error.message);
         // Fall back to in-memory storage
       } else {
-        console.log('📡 [PUSH] Subscription stored in database for user:', subscription.userId, {
+        console.log('✅ [PUSH] Subscription stored in database for user:', subscription.userId, {
           platform: subscription.platform,
           status: subscription.status,
           isPlaceholder,
@@ -84,12 +75,12 @@ export const storePushSubscription = async (subscription: PushSubscription) => {
       return data ? data[0] : subscription;
     }
   } catch (error) {
-    console.warn('⚠️ [PUSH] Could not persist subscription:', error);
+    console.error('⚠️ [PUSH] Could not persist subscription:', error);
   }
 
   // Always keep in-memory cache
   activeSubscriptions.set(subscription.userId, subscription);
-  console.log('📡 [PUSH] Subscription cached for user:', subscription.userId);
+  console.log('✅ [PUSH] Subscription cached for user:', subscription.userId);
   return subscription;
 };
 
