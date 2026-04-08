@@ -559,6 +559,134 @@ ALTER TABLE ticket_messages REPLICA IDENTITY FULL;
 ALTER TABLE audit_logs REPLICA IDENTITY FULL;
 ALTER TABLE system_metrics REPLICA IDENTITY FULL;
 
+-- ============================================================================
+-- SECTION 12: CHAT SYSTEM
+-- ============================================================================
+
+-- 12.1 CHATS TABLE (Links rides to chat sessions)
+CREATE TABLE IF NOT EXISTS chats (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ride_id UUID NOT NULL UNIQUE REFERENCES rides(id) ON DELETE CASCADE,
+  rider_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  driver_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_chats_ride_id ON chats(ride_id);
+CREATE INDEX idx_chats_rider_id ON chats(rider_id);
+CREATE INDEX idx_chats_driver_id ON chats(driver_id);
+
+ALTER TABLE chats REPLICA IDENTITY FULL;
+
+-- 12.2 MESSAGES TABLE (Individual chat messages)
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT,
+  message_type VARCHAR(50) NOT NULL DEFAULT 'text' CHECK (message_type IN ('text', 'location')),
+  location_data JSONB,
+  sent_at TIMESTAMP DEFAULT NOW(),
+  read_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_messages_chat_id ON messages(chat_id);
+CREATE INDEX idx_messages_sender_id ON messages(sender_id);
+CREATE INDEX idx_messages_sent_at ON messages(sent_at DESC);
+
+ALTER TABLE messages REPLICA IDENTITY FULL;
+
+-- 12.3 Function to create notification for new message
+CREATE OR REPLACE FUNCTION notify_new_message()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_chat_record RECORD;
+  v_recipient_id UUID;
+  v_sender_name TEXT;
+  v_notification_title TEXT;
+  v_notification_message TEXT;
+BEGIN
+  -- Get chat details
+  SELECT * INTO v_chat_record FROM chats WHERE id = NEW.chat_id;
+
+  -- Determine recipient
+  IF NEW.sender_id = v_chat_record.rider_id THEN
+    v_recipient_id := v_chat_record.driver_id;
+  ELSE
+    v_recipient_id := v_chat_record.rider_id;
+  END IF;
+
+  -- Get sender name
+  SELECT CONCAT(first_name, ' ', last_name) INTO v_sender_name
+  FROM users
+  WHERE id = NEW.sender_id;
+
+  -- Create notification content
+  IF NEW.message_type = 'location' THEN
+    v_notification_title := 'Location Shared';
+    v_notification_message := v_sender_name || ' shared their location with you';
+  ELSE
+    v_notification_title := 'New Message';
+    v_notification_message := v_sender_name || ': ' || LEFT(NEW.content, 100);
+  END IF;
+
+  -- Insert notification
+  INSERT INTO notifications (
+    user_id,
+    title,
+    message,
+    type,
+    channel,
+    related_table,
+    related_id,
+    data
+  ) VALUES (
+    v_recipient_id,
+    v_notification_title,
+    v_notification_message,
+    'system',
+    'push',
+    'messages',
+    NEW.id,
+    jsonb_build_object(
+      'chat_id', NEW.chat_id,
+      'ride_id', v_chat_record.ride_id,
+      'sender_id', NEW.sender_id,
+      'message_type', NEW.message_type
+    )
+  );
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 12.4 Trigger for new message notifications
+CREATE TRIGGER trigger_notify_new_message
+  AFTER INSERT ON messages
+  FOR EACH ROW
+  EXECUTE FUNCTION notify_new_message();
+
+-- 12.5 Function to update chat updated_at
+CREATE OR REPLACE FUNCTION update_chat_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE chats
+  SET updated_at = now()
+  WHERE id = NEW.chat_id;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 12.6 Trigger to update chat timestamp on new message
+CREATE TRIGGER trigger_update_chat_timestamp
+  AFTER INSERT ON messages
+  FOR EACH ROW
+  EXECUTE FUNCTION update_chat_timestamp();
+
 -- Enable realtime via Supabase publication
 -- Note: You may also need to enable this via Supabase Dashboard under:
 -- Database > Publications > realtime_publication > Tables
