@@ -339,7 +339,9 @@ export default function RegisterPage() {
       formDataObj.append("dob", formData.dob)
       formDataObj.append("gender", formData.gender)
       formDataObj.append("password", formData.password)
-      formDataObj.append("role", role)
+      if (role) {
+        formDataObj.append("role", role)
+      }
 
       // Append profile picture if exists
       if (formData.profilePicture) {

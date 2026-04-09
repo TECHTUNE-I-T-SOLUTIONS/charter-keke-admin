@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     const result = await sendOTP({ to: phoneNumber })
 
-    if (result.pinId) {
+    if (typeof result === 'object' && result && 'pinId' in result && result.pinId) {
       return NextResponse.json({
         success: true,
         pinId: result.pinId,
@@ -19,7 +19,11 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({ error: result.message || "Failed to send OTP" }, { status: 400 })
+    const errorMessage = (typeof result === 'object' && result && 'message' in result && typeof result.message === 'string')
+      ? result.message
+      : "Failed to send OTP"
+
+    return NextResponse.json({ error: errorMessage }, { status: 400 })
   } catch (error) {
     console.error("[OTP] Send error:", error)
     return NextResponse.json({ error: "Failed to send OTP" }, { status: 500 })

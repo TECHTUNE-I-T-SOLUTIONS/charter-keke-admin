@@ -218,7 +218,7 @@ export const sendPushNotification = async (
         if (error.message?.includes('ExponentPushToken') || error.message?.includes('Invalid')) {
           console.log(`🔄 [PUSH] Marking token as invalid for user: ${userId}`);
           // In production, you might want to deactivate this subscription
-          await removeSubscription(userId, subscription.pushToken).catch(() => {});
+          await removeSubscription(userId, subscription.pushToken || '').catch(() => {});
         }
       }
     }
@@ -604,16 +604,24 @@ export const getPushSubscriptionStats = async () => {
       .select('*', { count: 'exact', head: true })
       .eq('is_active', true);
 
-    // Get breakdown by status
-    const { data: stats } = await supabaseAdmin
+    // Get breakdown by status - simplified approach
+    const { data: allSubs } = await supabaseAdmin
       .from('push_subscriptions')
-      .select('status, is_placeholder, COUNT(*) as count', { count: 'exact' })
-      .eq('is_active', true)
-      .group_by('status, is_placeholder');
+      .select('status, is_placeholder')
+      .eq('is_active', true);
+
+    const stats = allSubs?.reduce((acc, sub) => {
+      const key = `${sub.status}_${sub.is_placeholder}`;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>) || {};
 
     return {
       total: totalCount || 0,
-      byStatus: stats || [],
+      byStatus: Object.entries(stats).map(([key, count]) => {
+        const [status, isPlaceholder] = key.split('_');
+        return { status, is_placeholder: isPlaceholder === 'true', count };
+      }),
       timestamp: new Date().toISOString(),
     };
   } catch (error) {

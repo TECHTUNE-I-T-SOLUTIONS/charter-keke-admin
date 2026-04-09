@@ -46,6 +46,8 @@ function getDayRange(dateString: string) {
 }
 
 export async function GET(request: NextRequest) {
+  let dateString = new Date().toISOString().slice(0, 10); // Default value
+
   try {
     const session = await getSessionFromRequest(request)
 
@@ -59,7 +61,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const requestedDate = searchParams.get("date")
-    const dateString = requestedDate || new Date().toISOString().slice(0, 10)
+    dateString = requestedDate || new Date().toISOString().slice(0, 10)
 
     console.info(`[SettlementDaily] request from user=${session.user.id} date=${dateString} url=${request.url}`)
 

@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
         completed: daily.completed,
         pending: daily.pending,
         failed: daily.failed,
-        methods: Array.from(daily.methods.entries()).map(([method, count]) => ({
+        methods: Array.from(daily.methods.entries()).map(([method, count]: [string, any]) => ({
           method,
           count,
         })),

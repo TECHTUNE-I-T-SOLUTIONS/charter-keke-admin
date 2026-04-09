@@ -4,6 +4,9 @@ import { getSessionFromRequest } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Database connection not available" }, { status: 500 });
+    }
     const session = await getSessionFromRequest(request);
 
     if (!session?.user?.id) {

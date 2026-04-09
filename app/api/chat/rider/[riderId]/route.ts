@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getSessionFromRequest } from "@/lib/auth";
 
-export async function GET(request: NextRequest, { params }: { params: { riderId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ riderId: string }> }) {
+  const { riderId } = await params;
   try {
     const session = await getSessionFromRequest(request);
 

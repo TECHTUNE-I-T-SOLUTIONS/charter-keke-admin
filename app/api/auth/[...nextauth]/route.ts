@@ -54,7 +54,7 @@ const handler = NextAuth({
             email: user.email,
             firstName: user.first_name,
             lastName: user.last_name,
-            phone: user.phone_number,
+            phone_number: user.phone_number,
             role: user.role,
             status: user.status,
             image: user.profile_picture_url,

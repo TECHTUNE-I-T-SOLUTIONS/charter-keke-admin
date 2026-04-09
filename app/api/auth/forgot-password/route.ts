@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
 
     console.log(`🔑 [FORGOT-PASSWORD] Email: ${email}`);
 
+    if (!supabaseAdmin) {
+      return NextResponse.json({ error: "Database connection not available" }, { status: 500 });
+    }
+
     if (!email) {
       return NextResponse.json(
         { error: "Email is required" },
@@ -111,7 +115,7 @@ export async function POST(request: NextRequest) {
       const smsMessage = `🔑 Password Recovery\n\nYour OTP is: ${otpCode}\n\nUse this code to reset your password.\nValid for 10 minutes.\n\nDo not share this code.`;
       
       await sendSMS({
-        phone_number: user.phone_number,
+        to: user.phone_number,
         message: smsMessage,
         channel: "generic",
       });

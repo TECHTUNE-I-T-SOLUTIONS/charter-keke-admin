@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       const { verifyOTP } = await import("@/lib/termii")
       const result = await verifyOTP({ pinId, pin })
 
-      if (result.verified) {
+      if (typeof result === 'object' && result && 'verified' in result && result.verified) {
         return NextResponse.json({
           success: true,
           message: "OTP verified successfully",

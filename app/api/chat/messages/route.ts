@@ -46,7 +46,8 @@ export async function GET(request: NextRequest) {
         message_type,
         location_data,
         sent_at,
-        read_at,
+        read_by_rider,
+        read_by_driver,
         users!messages_sender_id_fkey (
           id,
           first_name,
@@ -62,22 +63,43 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Failed to fetch messages" }, { status: 500 });
     }
 
-    // Mark messages as read if user is not the sender
+    // Mark ALL messages as read for the current user viewing them
+    // (This includes their own messages since they're viewing them)
+    const isRider = chat.rider_id === session.user.id;
+    
+    // Find messages that need to be marked as read
     const unreadMessageIds = messages
-      .filter(msg => msg.sender_id !== session.user.id && !msg.read_at)
+      .filter(msg => {
+        // For rider: mark as read if not already read by rider
+        if (isRider) {
+          return !msg.read_by_rider;
+        }
+        // For driver: mark as read if not already read by driver
+        return !msg.read_by_driver;
+      })
       .map(msg => msg.id);
 
     if (unreadMessageIds.length > 0) {
-      // Determine if user is rider or driver
-      const isRider = chat.rider_id === session.user.id;
+      console.log('[MESSAGES] Marking messages as read:', {
+        isRider,
+        messageCount: unreadMessageIds.length,
+        userId: session.user.id,
+      });
+
       const updateData = isRider
         ? { read_by_rider: true }
         : { read_by_driver: true };
 
-      await supabaseAdmin!
+      const { error: updateError } = await supabaseAdmin!
         .from("messages")
         .update(updateData)
         .in('id', unreadMessageIds);
+
+      if (updateError) {
+        console.error('[MESSAGES] Error marking messages as read:', updateError);
+      } else {
+        console.log('[MESSAGES] Successfully marked messages as read');
+      }
     }
 
     return NextResponse.json({ messages: messages.reverse() }); // Reverse to show oldest first
@@ -151,7 +173,8 @@ export async function POST(request: NextRequest) {
         message_type,
         location_data,
         sent_at,
-        read_at,
+        read_by_rider,
+        read_by_driver,
         users!messages_sender_id_fkey (
           id,
           first_name,

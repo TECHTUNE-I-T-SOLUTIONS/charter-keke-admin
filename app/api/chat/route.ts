@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Ride ID required" }, { status: 400 });
     }
 
-    // Get chat for this ride
+    // Get chat for this ride with participant details
     const { data: chat, error: chatError } = await supabaseAdmin!
       .from("chats")
       .select(`
@@ -31,11 +31,37 @@ export async function GET(request: NextRequest) {
           id,
           rider_id,
           driver_id,
-          status
+          status,
+          pickup_zone,
+          destination_zone
         )
       `)
       .eq('ride_id', rideId)
       .single();
+
+    // Get rider and driver details separately
+    let riderData = null;
+    let driverData = null;
+
+    if (chat) {
+      if (chat.rider_id) {
+        const { data: rider } = await supabaseAdmin!
+          .from("users")
+          .select("id, first_name, last_name, profile_picture_url")
+          .eq("id", chat.rider_id)
+          .single();
+        riderData = rider;
+      }
+
+      if (chat.driver_id) {
+        const { data: driver } = await supabaseAdmin!
+          .from("users")
+          .select("id, first_name, last_name, profile_picture_url")
+          .eq("id", chat.driver_id)
+          .single();
+        driverData = driver;
+      }
+    }
 
     if (chatError && chatError.code !== 'PGRST116') { // PGRST116 is "not found"
       console.error('Chat fetch error:', chatError);
@@ -50,7 +76,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ chat });
+    return NextResponse.json({ 
+      chat: {
+        ...chat,
+        rider: riderData,
+        driver: driverData
+      }
+    });
   } catch (error) {
     console.error('Chat GET error:', error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -75,17 +107,41 @@ export async function POST(request: NextRequest) {
     // Check if ride exists and user is participant
     const { data: ride, error: rideError } = await supabaseAdmin!
       .from("rides")
-      .select('id, rider_id, driver_id, status')
+      .select(`
+        id, 
+        rider_id, 
+        driver_id, 
+        status,
+        drivers (
+          id,
+          user_id
+        )
+      `)
       .eq('id', rideId)
       .single();
 
     if (rideError || !ride) {
+      console.error('Ride fetch error:', rideError);
       return NextResponse.json({ error: "Ride not found" }, { status: 404 });
+    }
+
+    // Get the driver's user_id from the drivers table
+    let driverUserId = null;
+    if (ride.driver_id) {
+      const { data: driver, error: driverError } = await supabaseAdmin!
+        .from("drivers")
+        .select('user_id')
+        .eq('id', ride.driver_id)
+        .single();
+
+      if (!driverError && driver) {
+        driverUserId = driver.user_id;
+      }
     }
 
     // Check if user is rider or driver
     const isRider = ride.rider_id === session.user.id;
-    const isDriver = ride.driver_id === session.user.id;
+    const isDriver = driverUserId === session.user.id;
 
     if (!isRider && !isDriver) {
       return NextResponse.json({ error: "Not authorized for this ride" }, { status: 403 });
@@ -107,19 +163,60 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ chat: existingChat });
     }
 
-    // Create new chat
+    // Verify both rider and driver (users) exist before creating chat
+    if (ride.rider_id) {
+      const { data: rider, error: riderError } = await supabaseAdmin!
+        .from("users")
+        .select('id')
+        .eq('id', ride.rider_id)
+        .single();
+
+      if (riderError || !rider) {
+        return NextResponse.json({ 
+          error: "Rider not found in system" 
+        }, { status: 404 });
+      }
+    }
+
+    if (driverUserId) {
+      const { data: driver, error: driverError } = await supabaseAdmin!
+        .from("users")
+        .select('id')
+        .eq('id', driverUserId)
+        .single();
+
+      if (driverError || !driver) {
+        return NextResponse.json({ 
+          error: "Driver not found in system. Please ensure driver is accepting rides." 
+        }, { status: 404 });
+      }
+    } else {
+      return NextResponse.json({ 
+        error: "Chat only available after driver accepts the ride" 
+      }, { status: 400 });
+    }
+
+    // Create new chat with driver's user_id (not driver table id)
     const { data: chat, error: chatCreateError } = await supabaseAdmin!
       .from("chats")
       .insert([{
         ride_id: rideId,
         rider_id: ride.rider_id,
-        driver_id: ride.driver_id
+        driver_id: driverUserId  // Use driver's user_id, not driver table id
       }])
       .select()
       .single();
 
     if (chatCreateError) {
       console.error('Chat creation error:', chatCreateError);
+      
+      // More specific error messages
+      if (chatCreateError.code === '23503') {
+        return NextResponse.json({ 
+          error: "Cannot create chat: driver or rider not found in system" 
+        }, { status: 404 });
+      }
+      
       return NextResponse.json({ error: "Failed to create chat" }, { status: 500 });
     }
 
