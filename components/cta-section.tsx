@@ -8,7 +8,7 @@ export function CTASection() {
   return (
     <section className="py-24">
       <div className="container mx-auto px-4">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#1FABFCFF] dark:to-[#6483B9FF] p-12 md:p-16">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#AF6401] to-[#EE8906] dark:bg-gradient-to-r dark:from-[#C47003] dark:to-[#8D550B] p-12 md:p-16">
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
@@ -21,12 +21,12 @@ export function CTASection() {
 
             <h2 className="text-3xl md:text-5xl font-bold mb-6 text-balance">Ready to Save on Your Daily Commute?</h2>
             <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
-              Join Charter Keke today and reduce the stress of having to wait under the sun on queues and signup using your referral code!
+              Charter Keke today and reduce the stress of having to wait under the sun on queues and signup using your referral code!
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
               <Link href="/register">
-                <Button size="lg" variant="secondary" className="bg-white text-[#052659] hover:bg-white/90 group">
+                <Button size="lg" variant="secondary" className="bg-white text-[#693E06] hover:bg-white/90 group">
                   Sign Up Now
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>

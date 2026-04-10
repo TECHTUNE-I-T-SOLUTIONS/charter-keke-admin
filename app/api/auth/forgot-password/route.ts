@@ -1,147 +1,94 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { NextRequest, NextResponse } from "next/server"
+import crypto from "crypto"
+import { supabase } from "@/lib/supabase"
 
 /**
  * POST /api/auth/forgot-password
- * Initiate password recovery by sending OTP via SMS
- * 
- * Body:
- * - email (required): User's email address
- * 
- * Response:
- * - success: true
- * - message: "OTP sent to your registered phone number"
- * - phone: Last 4 digits of phone number
+ * Send password reset email to user
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email } = body;
-
-    console.log(`🔑 [FORGOT-PASSWORD] Email: ${email}`);
-
-    if (!supabaseAdmin) {
-      return NextResponse.json({ error: "Database connection not available" }, { status: 500 });
-    }
+    const body = await request.json()
+    const { email } = body
 
     if (!email) {
       return NextResponse.json(
         { error: "Email is required" },
         { status: 400 }
-      );
+      )
     }
 
     // Find user by email
-    const { data: user, error: userError } = await supabaseAdmin
+    const { data: user, error: userError } = await supabase
       .from("users")
-      .select("id, email, phone_number")
+      .select("id, email, status")
       .eq("email", email)
-      .single();
+      .single()
 
+    // Always return success for security (don't reveal if email exists or not)
     if (userError || !user) {
-      console.log(`ℹ️  [FORGOT-PASSWORD] User not found with email: ${email}`);
-      // Return generic message for security
       return NextResponse.json(
-        { 
-          success: true, 
-          message: "If an account exists with this email, you will receive an OTP within 60 seconds"
-        },
+        { success: true, message: "If this email is registered, you will receive a reset link" },
         { status: 200 }
-      );
+      )
     }
 
-    console.log(`✅ [FORGOT-PASSWORD] User found: ${user.id}`);
-
-    // Check if there's an active OTP for forgot_password
-    const { data: existingOTP, error: existError } = await supabaseAdmin
-      .from("otps")
-      .select("id, expires_at")
-      .eq("user_id", user.id)
-      .eq("type", "forgot_password")
-      .eq("is_verified", false)
-      .gte("expires_at", new Date().toISOString())
-      .single();
-
-    if (existingOTP && !existError) {
-      const expiryDate = new Date(existingOTP.expires_at);
-      const minutesLeft = Math.ceil((expiryDate.getTime() - Date.now()) / 60000);
-      console.log(`⏱️  [FORGOT-PASSWORD] Active OTP exists, expires in ${minutesLeft} minutes`);
-      
+    // Only allow active users
+    if (user.status !== "active") {
       return NextResponse.json(
-        {
-          success: true,
-          message: `If an account exists with this email, you will receive an OTP within 60 seconds`,
-        },
+        { success: true, message: "If this email is registered, you will receive a reset link" },
         { status: 200 }
-      );
+      )
     }
 
-    // Generate 6-digit OTP
-    const otpCode = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex")
+    const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex")
+    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
-    console.log(`🔐 [FORGOT-PASSWORD] Generated OTP for user: ${user.id}`);
-
-    // Save OTP to database
-    const { data: newOTP, error: insertError } = await supabaseAdmin
-      .from("otps")
-      .insert({
-        user_id: user.id,
-        phone_number: user.phone_number,
-        email: user.email,
-        code: otpCode,
-        type: "forgot_password",
-        is_verified: false,
-        attempts: 0,
-        expires_at: expiresAt.toISOString(),
+    // Store reset token in database
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({
+        password_reset_token: resetTokenHash,
+        password_reset_expiry: resetTokenExpiry.toISOString(),
       })
-      .select()
-      .single();
+      .eq("id", user.id)
 
-    if (insertError) {
-      console.error(`❌ [FORGOT-PASSWORD] Failed to save OTP:`, insertError);
+    if (updateError) {
+      console.error("Error updating reset token:", updateError)
       return NextResponse.json(
-        { error: "Failed to initiate password recovery" },
-        { status: 500 }
-      );
+        { success: true, message: "If this email is registered, you will receive a reset link" },
+        { status: 200 }
+      )
     }
 
-    console.log(`✅ [FORGOT-PASSWORD] OTP saved, ID: ${newOTP.id}`);
+    // TODO: Send email with reset link
+    // const resetLink = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${resetToken}`
+    // await sendPasswordResetEmail(email, resetLink)
 
-    // Send OTP via SMS
-    try {
-      const { sendSMS } = await import("@/lib/termii");
-      
-      const smsMessage = `🔑 Password Recovery\n\nYour OTP is: ${otpCode}\n\nUse this code to reset your password.\nValid for 10 minutes.\n\nDo not share this code.`;
-      
-      await sendSMS({
-        to: user.phone_number,
-        message: smsMessage,
-        channel: "generic",
-      });
-
-      console.log(`📱 [FORGOT-PASSWORD] SMS sent to: ${user.phone_number}`);
-    } catch (smsError) {
-      console.error(`⚠️  [FORGOT-PASSWORD] SMS failed but OTP saved:`, smsError);
+    console.log("Password reset token generated for user:", email)
+    console.log("Reset link would be sent to:", email)
+    // For development, log the reset token
+    if (process.env.NODE_ENV === "development") {
+      console.log("Reset token (dev only):", resetToken)
     }
-
-    // Return phone number masked for security
-    const maskedPhone = user.phone_number.slice(-4).padStart(user.phone_number.length, '*');
 
     return NextResponse.json(
-      {
-        success: true,
-        message: "OTP sent successfully",
-        phone: maskedPhone,
-        userId: user.id,
+      { 
+        success: true, 
+        message: "If this email is registered, you will receive a reset link" 
       },
       { status: 200 }
-    );
+    )
   } catch (error) {
-    console.error("❌ [FORGOT-PASSWORD] Error:", error);
+    console.error("Forgot password error:", error)
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+      { 
+        success: true,
+        message: "If this email is registered, you will receive a reset link" 
+      },
+      { status: 200 }
+    )
   }
 }

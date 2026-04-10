@@ -7,11 +7,11 @@ import Link from "next/link"
 const pricingOptions = [
   {
     title: "Standard Keke",
-    price: "₦700",
-    unit: "per seat",
-    total: "₦3,500 total",
+    price: "₦800 per km",
+    unit: "Charter",
+    total: "Calculated during booking",
     features: [
-      "Up to 5 passengers",
+      "Up to 3 passengers",
       "Comfortable keke ride",
       "Real-time tracking",
       "In-app messaging",
@@ -22,10 +22,10 @@ const pricingOptions = [
   },
   {
     title: "Premium Keke",
-    price: "₦600",
-    unit: "per seat",
-    total: "₦5,400 total",
-    features: ["Up to 9 passengers", "Spacious seating", "Real-time tracking", "In-app messaging", "Secure payments"],
+    price: "₦800 per km",
+    unit: "Charter",
+    total: "Calculated during booking",
+    features: ["Up to 4 passengers", "Spacious seating", "Real-time tracking", "In-app messaging", "Secure payments"],
     icon: Users,
     popular: false,
   },
@@ -38,7 +38,7 @@ export function PricingSection() {
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Simple,{" "}
-            <span className="bg-gradient-to-r from-[#052659] to-[#4353a4] bg-clip-text dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#CCD0E7FF] text-transparent">
+            <span className="bg-gradient-to-r from-[#6E3F01] to-[#E69935] bg-clip-text dark:bg-gradient-to-r dark:from-[#F0C081] dark:to-[#C7A273] text-transparent">
               Transparent
             </span>{" "}
             Pricing
@@ -59,13 +59,13 @@ export function PricingSection() {
               }`}
             >
               {option.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-[#052659] to-[#4353a4] text-white text-sm font-medium">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-[#6E3F01] to-[#E69935] text-white text-sm font-medium">
                   Most Popular
                 </div>
               )}
 
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#052659] to-[#4353a4] flex items-center justify-center text-white">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#6E3F01] to-[#E69935] flex items-center justify-center text-white">
                   <option.icon className="h-7 w-7" />
                 </div>
                 <div>
@@ -75,7 +75,7 @@ export function PricingSection() {
               </div>
 
               <div className="mb-8">
-                <span className="text-5xl font-bold">{option.price}</span>
+                <span className="text-5xl font-bold text-primary">{option.price}</span>
                 <span className="text-muted-foreground ml-2">{option.unit}</span>
               </div>
 
@@ -85,7 +85,7 @@ export function PricingSection() {
                     <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
                       <Check className="h-3 w-3 text-primary" />
                     </div>
-                    <span>{feature}</span>
+                    <span className="text-muted-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -93,7 +93,7 @@ export function PricingSection() {
               <Link href="/register">
                 <Button
                   className={`w-full ${
-                    option.popular ? "bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#9EA5B1FF] text-white dark:hover:text-white hover:opacity-90" : ""
+                    option.popular ? "bg-gradient-to-r from-[#6E3F01] to-[#E69935] dark:bg-gradient-to-r dark:from-[#F0C081] dark:to-[#C7A273] text-white dark:hover:text-white hover:opacity-90" : ""
                   }`}
                   variant={option.popular ? "default" : "outline"}
                   size="lg"

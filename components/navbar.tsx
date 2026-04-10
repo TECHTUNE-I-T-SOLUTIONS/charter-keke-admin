@@ -11,10 +11,10 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle 
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/how-it-works", label: "How It Works" },
+  { href: "/how-it-works", label: "Learn" },
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
-  { href: "/install", label: "Download App" },
+  { href: "/install", label: "App" },
   { href: "/contact", label: "Contact" },
 ]
 
@@ -41,12 +41,12 @@ export function Navbar() {
         scrolled ? "glass border-b border-border/50 shadow-lg" : "bg-transparent"
       }`}
     >
-      <nav className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <nav className="container mx-auto px-4 h-16 flex items-center justify-between max-w-full pr-8 pl-8">
         <Link href="/" className="flex items-center gap-2 group">
           <motion.div whileHover={{ rotate: 10 }} transition={{ type: "spring", stiffness: 300 }}>
             <Image src="/charter keke.png" alt="Charter Keke" width={40} height={40} className="rounded-lg" />
           </motion.div>
-          <span className="text-xl font-bold bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#F5F9FFFF] bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
+          <span className="text-xl font-bold bg-gradient-to-r from-[#AF6401] to-[#EE8906] dark:bg-gradient-to-r dark:from-[#FCE6C9] dark:to-[#F0D1A8] bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
             CHARTER KEKE
           </span>
         </Link>
@@ -62,7 +62,7 @@ export function Navbar() {
             >
               <Link
                 href={link.href}
-                className="text-[#052659] dark:text-[#C1E8FF] hover:text-foreground transition-colors duration-300 text-sm font-medium relative group"
+                className="text-[#FF9100] dark:text-[#C1E8FF] hover:text-foreground transition-colors duration-300 text-sm font-medium relative group"
               >
                 {link.label}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full" />
@@ -77,7 +77,7 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-full"
+              className="rounded-full text-[#FF9100] dark:text-[#C1E8FF] hover:text-foreground transition-colors duration-300"
             >
               <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -85,12 +85,12 @@ export function Navbar() {
             </Button>
           )}
           <Link href="/auth/login">
-            <Button variant="ghost" className="text-sm">
+            <Button variant="ghost" className="text-sm text-[#FF9100] dark:text-[#FFFFFF] hover:text-foreground transition-colors duration-300">
               Login
             </Button>
           </Link>
           <Link href="/auth/register">
-            <Button className="bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#37455AFF] dark:to-[#646D79FF] text-white hover:opacity-90 transition-opacity">
+            <Button className="bg-gradient-to-r from-[#AF6401] to-[#EE8906] dark:bg-gradient-to-r dark:from-[#C07C24] dark:to-[#8A673A] text-white hover:opacity-90 transition-opacity">
               Get Started
             </Button>
           </Link>
@@ -103,7 +103,7 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-full"
+              className="rounded-full text-[#FF9100] dark:text-[#FFFFFF] hover:text-foreground transition-colors duration-300"
             >
               <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -112,7 +112,7 @@ export function Navbar() {
 
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="text-[#FF9100] dark:text-[#FFFFFF] hover:text-foreground transition-colors duration-300">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Open menu</span>
               </Button>
@@ -132,7 +132,7 @@ export function Navbar() {
                     <SheetClose asChild>
                       <Link
                         href={link.href}
-                        className="text-lg font-medium hover:text-primary transition-colors flex items-center gap-2"
+                        className="text-lg font-medium text-[#FF9100] dark:text-[#FFFFFF] hover:text-primary transition-colors flex items-center gap-2"
                       >
                         {link.label}
                       </Link>
@@ -142,14 +142,14 @@ export function Navbar() {
                 <div className="flex flex-col gap-4 mt-4">
                   <SheetClose asChild>
                     <Link href="/auth/login">
-                      <Button variant="outline" className="w-full bg-[#C1E8FF] dark:bg-[#052659] text-black dark:text-white hover:opacity-90 transition-opacity">
+                      <Button variant="outline" className="w-full bg-[#FF9100] dark:bg-[#FF9100] text-black dark:text-white hover:opacity-90 transition-opacity">
                         Login
                       </Button>
                     </Link>
                   </SheetClose>
                   <SheetClose asChild>
                     <Link href="/auth/register">
-                      <Button className="w-full bg-gradient-to-r from-[#C1E8FF] to-[#919DAFFF] text-[#052659] dark:text-black hover:opacity-60 transition-opacity">
+                      <Button className="w-full bg-gradient-to-r from-[#AF6401] to-[#EE8906] dark:bg-gradient-to-r dark:from-[#C07C24] dark:to-[#8A673A] text-white hover:opacity-90 transition-opacity">
                         Get Started
                       </Button>
                     </Link>

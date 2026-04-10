@@ -86,21 +86,21 @@ export default function AppInstallPage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative py-12 md:py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#052659]/10 to-[#4353a4]/10" />
+      <section className="relative py-12 md:py-20 overflow-hidden max-w-full">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FF9203]/10 to-[#C57711]/10" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#052659]/10 mb-6">
-              <Smartphone className="h-4 w-4 text-[#052659] dark:text-[#1FABFCFF]" />
-              <span className="text-sm font-medium text-[#052659] dark:text-[#1FABFCFF]">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9203]/10 dark:bg-[#633B06]/20 mb-6">
+              <Smartphone className="h-4 w-4 text-[#814B05] dark:text-[#E4C9A5]" />
+              <span className="text-sm font-medium text-[#663C05] dark:text-[#FFE4C0]">
                 Download Charter Keke
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance text-[#FF9203] dark:text-[#FFE7C7]">
               Get the Charter Keke App
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-orange4600 dark:text-orange-100 mb-8 max-w-2xl mx-auto">
               Experience safe, affordable, and convenient keke rides on your terms. Available on
               Android and iOS platforms.
             </p>
@@ -109,12 +109,12 @@ export default function AppInstallPage() {
       </section>
 
       {/* Main Download Section */}
-      <section className="py-12 md:py-20">
+      <section className="py-12 md:py-20 max-w-full">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
             {/* Left: Download Info */}
             <div>
-              <h2 className="text-3xl font-bold mb-6">
+              <h2 className="text-3xl font-bold mb-6 text-[#FF9203] dark:text-[#FFE7C7]">
                 Download Charter Keke Today
               </h2>
 
@@ -131,12 +131,12 @@ export default function AppInstallPage() {
                 <>
                   <div className="mb-8">
                     <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      <span className="text-green-600 font-semibold">
+                      <CheckCircle className="h-5 w-5 text-orange-600 dark:text-orange-200" />
+                      <span className="text-orange-600 dark:text-orange-200 font-semibold">
                         Latest Version: v{latestRelease.version}
                       </span>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    <p className="text-orange-600 dark:text-orange-200 text-sm mb-4">
                       Updated:{' '}
                       {new Date(latestRelease.publishedAt).toLocaleDateString('en-US', {
                         year: 'numeric',
@@ -146,11 +146,11 @@ export default function AppInstallPage() {
                     </p>
 
                     {latestRelease.releaseNotes && (
-                      <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-                        <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-3">
+                      <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-6">
+                        <h3 className="font-semibold text-orange-900 dark:text-orange-200 mb-3">
                           What's New:
                         </h3>
-                        <div className="text-blue-800 dark:text-blue-300 text-sm leading-relaxed whitespace-pre-wrap">
+                        <div className="text-orange-800 dark:text-orange-300 text-sm leading-relaxed whitespace-pre-wrap">
                           {latestRelease.releaseNotes}
                         </div>
                       </div>
@@ -161,7 +161,9 @@ export default function AppInstallPage() {
 
               {/* Features */}
               <div className="space-y-4 mb-8">
-                <h3 className="font-semibold text-lg mb-4">Why Choose Charter Keke?</h3>
+                <h3 className="font-semibold text-lg mb-4 text-[#FF9203] dark:text-[#FFE7C7]">
+                  Why Choose Charter Keke?
+                </h3>
                 {[
                   'Book private, comfortable rides instantly',
                   'Transparent pricing with no hidden charges',
@@ -171,8 +173,8 @@ export default function AppInstallPage() {
                   'Seamless payment integration',
                 ].map((feature, index) => (
                   <div key={index} className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-700 dark:text-gray-300">{feature}</p>
+                    <CheckCircle className="h-5 w-5 text-orange-600 dark:text-orange-200 mt-0.5 flex-shrink-0" />
+                    <p className="text-orange-700 dark:text-orange-200">{feature}</p>
                   </div>
                 ))}
               </div>
@@ -184,7 +186,7 @@ export default function AppInstallPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Button size="lg" className="w-full bg-[#052659] hover:bg-[#041d40] text-white dark:bg-[#1FABFCFF] dark:hover:bg-[#1a9ad9]">
+                  <Button size="lg" className="w-full bg-[#FF9203] hover:bg-[#8D5308] text-white dark:bg-[#2C1F0F] dark:hover:bg-[#694C25]">
                     <Download className="mr-2 h-5 w-5" />
                     Download APK
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -192,7 +194,7 @@ export default function AppInstallPage() {
                 </a>
               )}
 
-              <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-4">
+              <p className="text-sm text-orange-600 dark:text-orange-100 text-center mt-4">
                 Or scan the QR code with your mobile device
               </p>
             </div>
@@ -200,9 +202,9 @@ export default function AppInstallPage() {
             {/* Right: QR Code & Visual */}
             <div className="flex flex-col items-center justify-center">
               {/* QR Code Card */}
-              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 w-full max-w-sm">
+              <div className="bg-white dark:bg-orange-900 rounded-2xl shadow-lg p-8 w-full max-w-sm">
                 <div className="flex flex-col items-center">
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6 mb-4">
+                  <div className="bg-orange-100 dark:bg-orange-800 rounded-xl p-6 mb-4">
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(appQRUrl)}`}
                       alt="Download Charter Keke App QR Code"
@@ -211,7 +213,7 @@ export default function AppInstallPage() {
                       className="rounded"
                     />
                   </div>
-                  <p className="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  <p className="text-center text-sm text-orange-600 dark:text-orange-100 mb-4">
                     Scan to download on any device
                   </p>
                 </div>
@@ -219,22 +221,24 @@ export default function AppInstallPage() {
 
               {/* System Requirements */}
               <div className="mt-8 w-full space-y-3">
-                <h3 className="font-semibold text-center">System Requirements</h3>
-                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <h3 className="font-semibold text-center text-[#FF9203] dark:text-[#FFE7C7]">
+                  System Requirements
+                </h3>
+                <div className="space-y-2 text-sm text-orange-600 dark:text-orange-100">
                   <p className="flex items-center gap-2">
-                    <Smartphone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <Smartphone className="w-4 h-4 text-orange-600 dark:text-orange-200" />
                     <span><strong>Android:</strong> Version 8.0 or higher</span>
                   </p>
                   <p className="flex items-center gap-2">
-                    <Apple className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <Apple className="w-4 h-4 text-orange-600 dark:text-orange-200" />
                     <span><strong>iOS:</strong> Version 14.0 or higher</span>
                   </p>
                   <p className="flex items-center gap-2">
-                    <HardDrive className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <HardDrive className="w-4 h-4 text-orange-600 dark:text-orange-200" />
                     <span><strong>Storage:</strong> At least 100 MB free space</span>
                   </p>
                   <p className="flex items-center gap-2">
-                    <Wifi className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <Wifi className="w-4 h-4 text-orange-600 dark:text-orange-200" />
                     <span><strong>Connection:</strong> Active internet required</span>
                   </p>
                 </div>
@@ -245,7 +249,7 @@ export default function AppInstallPage() {
       </section>
 
       {/* Installation Steps */}
-      <section className="py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="py-12 md:py-20 bg-orange-50 dark:bg-[#4E2D01]">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">
             Installation Guide
@@ -272,12 +276,12 @@ export default function AppInstallPage() {
                   'Open the app, create or log in to your account, and start booking your first ride!',
               },
             ].map((item, index) => (
-              <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-6 text-center">
-                <div className="w-12 h-12 bg-[#052659] dark:bg-[#1FABFCFF] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+              <div key={index} className="bg-white dark:bg-[#B167066C] rounded-xl p-6 text-center shadow-md hover:shadow-xl transition-shadow">
+                <div className="w-12 h-12 bg-[#FF9203] dark:bg-[#C27107] text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                   {item.step}
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-orange-600 dark:text-orange-100 text-sm">
                   {item.description}
                 </p>
               </div>
@@ -289,7 +293,7 @@ export default function AppInstallPage() {
       {/* Troubleshooting */}
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
+          <h2 className="text-3xl font-bold text-center mb-12 text-[#FF9203] dark:text-[#FFE7C7]">
             Troubleshooting
           </h2>
 
@@ -316,21 +320,21 @@ export default function AppInstallPage() {
                   'Try uninstalling and reinstalling the app. Make sure you have the latest version and sufficient storage space on your device. contact support if issues persist.',
               },
             ].map((item, index) => (
-              <div key={index} className="border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+              <div key={index} className="border border-orange-200 dark:border-orange-800 rounded-lg p-6 bg-orange-50 dark:bg-[#4E2D01] hover:bg-orange-100 dark:hover:bg-[#5E3A01] transition-colors">
                 <h3 className="font-semibold text-lg mb-2">{item.question}</h3>
-                <p className="text-gray-600 dark:text-gray-400">{item.answer}</p>
+                <p className="text-orange-600 dark:text-orange-100">{item.answer}</p>
               </div>
             ))}
 
-            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mt-8">
-              <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">
+            <div className="bg-orange-50 dark:bg-[#AC6303] border border-orange-200 dark:border-orange-800 rounded-lg p-6 mt-8">
+              <h3 className="font-semibold text-orange-900 dark:text-orange-200 mb-2">
                 Still need help?
               </h3>
-              <p className="text-blue-800 dark:text-blue-300 mb-4">
+              <p className="text-orange-600 dark:text-orange-100 mb-4">
                 Contact our support team for assistance with installation or any other issues.
               </p>
               <Link href="/help">
-                <Button variant="outline" className="border-blue-300 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900">
+                <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-900">
                   Contact Support
                 </Button>
               </Link>
@@ -340,7 +344,7 @@ export default function AppInstallPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#1FABFCFF] dark:to-[#6483B9FF]">
+      <section className="py-16 md:py-24 bg-gradient-to-r from-[#AF6401] to-[#FF9203] dark:bg-gradient-to-r dark:from-[#CF7704] dark:to-[#442803]">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto text-center text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -352,7 +356,7 @@ export default function AppInstallPage() {
             </p>
             {downloadLink && (
               <a href={downloadLink} download>
-                <Button size="lg" className="bg-white text-[#052659] hover:bg-white/90 dark:bg-white dark:text-[#1FABFCFF]">
+                <Button size="lg" className="bg-white text-[#271906] hover:bg-white/90 dark:bg-white dark:text-[#241401] dark:hover:bg-white/90">
                   Get the App Now
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>

@@ -178,7 +178,7 @@ export const DashboardSidebar = memo(function DashboardSidebarComponent() {
       <header className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-xl border-b border-primary/10">
         <div className="flex items-center justify-between p-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-[#052659] to-[#4353a4] rounded-lg flex items-center justify-center text-white font-bold text-lg">
+            <div className="w-8 h-8 bg-gradient-to-r from-[#AF6401] to-[#EE8906] rounded-lg flex items-center justify-center text-white font-bold text-lg">
               <Image src="/charter keke.png" alt="Charter Keke" width={32} height={32} className="rounded-lg" />
             </div>
             <span className="text-sm font-serif font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">

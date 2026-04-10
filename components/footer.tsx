@@ -46,18 +46,18 @@ export function Footer() {
   }
 
   return (
-    <footer className="bg-gradient-to-b from-background to-muted/50 border-t border-border">
-      <div className="container mx-auto px-4 py-16">
+    <footer className="bg-gradient-to-b from-background to-muted/50 border-t border-border pb-10">
+      <div className="container mx-auto px-4 py-16 max-w-full pr-8 pl-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12">
           {/* Brand Section */}
           <div className="lg:col-span-2 space-y-6">
             <Link href="/" className="flex items-center gap-2">
               <motion.div whileHover={{ rotate: 10 }} transition={{ type: "spring", stiffness: 300 }}>
-                <div className="w-12 h-12 bg-gradient-to-r from-[#052659] to-[#4353a4] rounded-lg flex items-center justify-center text-white font-bold text-2xl">
+                <div className="w-12 h-12 bg-gradient-to-r from-[#AF6401] to-[#EE8906] rounded-lg flex items-center justify-center text-white font-bold text-2xl">
                 <Image src="/charter keke.png" alt="Charter Keke" width={40} height={40} className="rounded-lg" />
                 </div>
               </motion.div>
-              <span className="text-xl font-bold bg-gradient-to-r from-[#052659] to-[#4353a4] dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#F5F9FFFF] bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
+              <span className="text-xl font-bold bg-gradient-to-r from-[#AF6401] to-[#EE8906] dark:bg-gradient-to-r dark:from-[#FCE6C9] dark:to-[#F0D1A8] bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
                 CHARTER KEKE
               </span>
             </Link>

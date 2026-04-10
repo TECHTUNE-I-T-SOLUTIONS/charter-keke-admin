@@ -73,10 +73,10 @@ export function AnimatedStepIndicator({
                   animate={{
                     boxShadow: isCurrent
                       ? [
-                          "0 0 0 0 rgba(59, 130, 246, 0.7)",
-                          "0 0 0 15px rgba(59, 130, 246, 0)",
+                          "0 0 0 0 rgba(245, 160, 34, 0.7)",
+                          "0 0 0 15px rgba(246, 171, 59, 0)",
                         ]
-                      : "0 0 0 0 rgba(59, 130, 246, 0)",
+                      : "0 0 0 0 rgba(236, 156, 8, 0)",
                   }}
                   transition={{
                     duration: 1.5,
@@ -99,9 +99,9 @@ export function AnimatedStepIndicator({
                     isCurrent
                       ? {
                           boxShadow: [
-                            "0 0 20px rgba(59, 130, 246, 0.5)",
-                            "0 0 40px rgba(59, 130, 246, 0.8)",
-                            "0 0 20px rgba(59, 130, 246, 0.5)",
+                            "0 0 20px rgba(246, 181, 59, 0.5)",
+                            "0 0 40px rgba(182, 133, 43, 0.8)",
+                            "0 0 20px rgba(231, 156, 16, 0.5)",
                           ],
                         }
                       : {}

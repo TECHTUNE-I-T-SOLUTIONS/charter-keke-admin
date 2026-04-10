@@ -32,7 +32,7 @@ export function HowItWorks() {
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             How{" "}
-            <span className="bg-gradient-to-r from-[#052659] to-[#4353a4] bg-clip-text dark:bg-gradient-to-r dark:from-[#C1E8FF] dark:to-[#CCD0E7FF] text-transparent">Charter Keke</span>{" "}
+            <span className="bg-gradient-to-r from-[#995804] to-[#573203] bg-clip-text dark:bg-gradient-to-r dark:from-[#DAA866] dark:to-[#EE9D33] text-transparent">Charter Keke</span>{" "}
             Works
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -45,14 +45,14 @@ export function HowItWorks() {
             <div key={step.title} className="relative group">
               {/* Connector line */}
               {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-12 left-1/2 w-full h-0.5 bg-gradient-to-r from-[#052659] to-[#4353a4] opacity-20" />
+                <div className="hidden lg:block absolute top-12 left-1/2 w-full h-0.5 bg-gradient-to-r from-[#995804] to-[#573203] opacity-20" />
               )}
 
               <div className="relative z-10 p-6 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#052659] to-[#4353a4] flex items-center justify-center mb-4 text-white text-lg font-bold overflow-hidden">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#995804] to-[#573203] flex items-center justify-center mb-4 text-white text-lg font-bold overflow-hidden">
                   {step.icon ? <step.icon className="h-6 w-6" /> : <Image src="/charter keke.png" alt="Charter Keke" width={48} height={48} />}
                 </div>
-                <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#052659] to-[#4353a4] flex items-center justify-center text-white font-bold text-sm">
+                <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-gradient-to-br from-[#995804] to-[#573203] flex items-center justify-center text-white font-bold text-sm">
                   {index + 1}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
