@@ -7,7 +7,7 @@ import Link from "next/link"
 const pricingOptions = [
   {
     title: "Standard Keke",
-    price: "₦800 per km",
+    price: "Varies/km",
     unit: "Charter",
     total: "Calculated during booking",
     features: [
@@ -22,7 +22,7 @@ const pricingOptions = [
   },
   {
     title: "Premium Keke",
-    price: "₦800 per km",
+    price: "Varies/km",
     unit: "Charter",
     total: "Calculated during booking",
     features: ["Up to 4 passengers", "Spacious seating", "Real-time tracking", "In-app messaging", "Secure payments"],
@@ -90,7 +90,7 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <Link href="/register">
+              <Link href="/auth/register">
                 <Button
                   className={`w-full ${
                     option.popular ? "bg-gradient-to-r from-[#6E3F01] to-[#E69935] dark:bg-gradient-to-r dark:from-[#F0C081] dark:to-[#C7A273] text-white dark:hover:text-white hover:opacity-90" : ""
@@ -108,7 +108,7 @@ export function PricingSection() {
         <div className="text-center mt-12">
           <p className="text-muted-foreground dark:text-gray-100">
             Have a referral code?{" "}
-            <Link href="/register" className="text-primary hover:underline dark:text-secondary/light">
+            <Link href="/auth/register" className="text-primary hover:underline dark:text-secondary/light">
               Get 5% off your first ride!
             </Link>
           </p>

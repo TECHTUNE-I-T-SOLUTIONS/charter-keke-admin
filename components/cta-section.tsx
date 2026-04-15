@@ -25,13 +25,13 @@ export function CTASection() {
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/register">
+              <Link href="/auth/register">
                 <Button size="lg" variant="secondary" className="bg-white text-[#693E06] hover:bg-white/90 group">
                   Sign Up Now
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/register?type=driver">
+              <Link href="/auth/register">
                 <Button
                   size="lg"
                   variant="outline"
