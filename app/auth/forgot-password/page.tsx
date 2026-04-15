@@ -1,179 +1,102 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { useState } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { toast } from "sonner"
-import { Mail, ArrowLeft, Loader2, KeyRound, CheckCircle2 } from "lucide-react"
-import { Particles } from "@/components/particles"
+import Link from 'next/link';
+import { ArrowLeft, CheckCircle, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!email) {
-      toast.error("Please enter your email address")
-      return
-    }
-
-    setIsSubmitting(true)
-
-    try {
-      const response = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to process request")
-      }
-
-      toast.success("Check Your Email", {
-        description: "If an account exists with this email, you'll receive password reset instructions.",
-      })
-      setSubmitted(true)
-    } catch (error) {
-      toast.error("Request Failed", {
-        description: error instanceof Error ? error.message : "An error occurred. Please try again.",
-      })
-      setIsSubmitting(false)
-    }
-  }
-
-  if (submitted) {
-    return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
-        <Particles />
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md z-10"
-        >
-          <Card className="bg-card/80 backdrop-blur-xl border-primary/20 shadow-2xl">
-            <CardContent className="pt-12 text-center space-y-4">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className="mx-auto bg-gradient-to-br from-green-500 to-green-600 rounded-full p-3 w-fit"
-              >
-                <CheckCircle2 className="w-6 h-6 text-white" />
-              </motion.div>
-
-              <div>
-                <h2 className="text-2xl font-serif font-bold">Email Sent</h2>
-                <p className="text-muted-foreground mt-2">
-                  If an account exists with this email address, you'll receive password reset instructions shortly.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
-                <p className="text-sm text-blue-800 dark:text-blue-200">
-                  ℹ️ <strong>Check your inbox and spam folder</strong> for the reset link. The link expires in 1 hour.
-                </p>
-              </div>
-
-              <Button asChild className="w-full h-11">
-                <Link href="/auth/login">Back to Login</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-    )
-  }
+  const baseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://charterkeke.vercel.app';
+  const appQRUrl = `${baseUrl}/install`;
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
-      <Particles />
+    <main className="min-h-screen bg-gradient-to-br from-[#FF9203]/5 to-[#C57711]/5 flex items-center justify-center py-8 md:py-12 px-4">
+      <div className="w-full max-w-2xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9203]/10 dark:bg-[#633B06]/20 mb-4">
+            <CheckCircle className="h-4 w-4 text-[#814B05] dark:text-[#E4C9A5]" />
+            <span className="text-sm font-medium text-[#663C05] dark:text-[#FFE4C0]">
+              Download Charter Keke
+            </span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#FF9203] dark:text-[#FFE7C7] mb-3">
+            Reset Your Password
+          </h1>
+          <p className="text-orange-600 dark:text-orange-200 text-sm md:text-base max-w-lg mx-auto">
+            Password reset is exclusively available through our mobile app for your security.
+          </p>
+        </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md z-10"
-      >
-        <Card className="bg-card/80 backdrop-blur-xl border-primary/20 shadow-2xl">
-          <CardHeader className="text-center space-y-3">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto bg-gradient-to-br from-primary to-primary/60 rounded-full p-3"
-            >
-              <KeyRound className="w-6 h-6 text-white" />
-            </motion.div>
-
-            <div>
-              <CardTitle className="text-2xl font-serif">Reset Your Password</CardTitle>
-              <CardDescription>Enter your email to receive reset instructions</CardDescription>
+        {/* Main Content Grid */}
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-center">
+          {/* Left: Info & CTA */}
+          <div className="space-y-6">
+            {/* Info */}
+            <div className="space-y-3">
+              <h2 className="font-semibold text-lg text-[#FF9203] dark:text-[#FFE7C7]">
+                Password Security
+              </h2>
+              {[
+                'Secure password reset process',
+                'Encrypted communication',
+                'Quick account recovery',
+                'Multi-factor authentication support',
+              ].map((feature, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <CheckCircle className="h-4 w-4 text-orange-600 dark:text-orange-200 mt-1 flex-shrink-0" />
+                  <p className="text-sm text-orange-700 dark:text-orange-200">{feature}</p>
+                </div>
+              ))}
             </div>
-          </CardHeader>
 
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isSubmitting}
-                  className="bg-background/50 h-11"
-                  required
+            {/* Download Button */}
+            <a 
+              href={(process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://charterkeke.vercel.app') + '/install'}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button size="lg" className="w-full bg-[#FF9203] hover:bg-[#E68900] text-white dark:bg-[#C27107] dark:hover:bg-[#8D5308]">
+                <Download className="mr-2 h-4 w-4" />
+                Download App
+                <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
+              </Button>
+            </a>
+
+            <p className="text-xs text-orange-600 dark:text-orange-100 text-center">
+              Or scan the QR code →
+            </p>
+          </div>
+
+          {/* Right: QR Code */}
+          <div className="flex justify-center">
+            <div className="bg-white dark:bg-[#2C1F0F] rounded-2xl shadow-lg p-4 md:p-6 w-full max-w-xs">
+              <div className="bg-orange-100 dark:bg-orange-800 rounded-lg p-4 flex justify-center">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(appQRUrl)}`}
+                  alt="Download Charter Keke QR Code"
+                  width={200}
+                  height={200}
+                  className="rounded"
                 />
               </div>
+              <p className="text-center text-xs text-orange-600 dark:text-orange-100 mt-3">
+                Scan to download
+              </p>
+            </div>
+          </div>
+        </div>
 
-              {/* Info */}
-              <div className="p-3 mb-2 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
-                <p className="text-xs text-blue-800 dark:text-blue-200">
-                  ℹ️ We'll send a secure reset link to your email address. The link will be valid for 1 hour.
-                </p>
-              </div>
-            </CardContent>
-
-            <CardFooter className="flex flex-col gap-3">
-              <Button type="submit" className="w-full h-11" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  "Send Reset Link"
-                )}
-              </Button>
-
-              <div className="text-center text-sm mb-2">
-                <Link href="/auth/login" className="text-primary hover:underline font-medium flex items-center justify-center gap-2">
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Login
-                </Link>
-              </div>
-            </CardFooter>
-          </form>
-        </Card>
-      </motion.div>
-    </div>
-  )
+        {/* Footer Link */}
+        <div className="mt-8 text-center">
+          <Link
+            href="/auth/login"
+            className="inline-flex items-center gap-2 text-xs md:text-sm text-orange-600 dark:text-orange-200 hover:text-orange-700 dark:hover:text-orange-100 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to login
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
 }

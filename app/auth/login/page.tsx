@@ -1,232 +1,102 @@
-"use client"
+'use client';
 
-import type React from "react"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { signIn } from "next-auth/react"
-import Link from "next/link"
-import Image from "next/image"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { toast } from "sonner"
-import { Eye, EyeOff, Mail, Phone, Lock, ArrowRight, Loader2 } from "lucide-react"
-import { Particles } from "@/components/particles"
+import Link from 'next/link';
+import { ArrowLeft, CheckCircle, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
-  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email")
-  const [emailOrPhone, setEmailOrPhone] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!emailOrPhone || !password) {
-      toast.error("Please fill in all fields")
-      return
-    }
-
-    setIsSubmitting(true)
-
-    try {
-      const credentials = {
-        password,
-        ...(loginMethod === "email" ? { email: emailOrPhone } : { phone: emailOrPhone }),
-      }
-
-      const result = await signIn("credentials", {
-        ...credentials,
-        redirect: false,
-      })
-
-      if (result?.error) {
-        toast.error("Login Failed", {
-          description: result.error || "Invalid credentials",
-        })
-        setIsSubmitting(false)
-      } else if (result?.ok) {
-        toast.success("Welcome back to Charter Keke!", {
-          description: "Redirecting to your dashboard...",
-        })
-        
-        // Get session to determine redirect
-        const session = await fetch("/api/auth/session").then(r => r.json())
-        setTimeout(() => {
-          const role = session?.user?.role || "user"
-          switch (role) {
-            case "admin":
-            case "super_admin":
-              router.push("/admin/dashboard")
-              break
-            case "driver":
-              router.push("/driver/dashboard")
-              break
-            default:
-              router.push("/user/dashboard")
-          }
-        }, 1000)
-      }
-    } catch (error) {
-      toast.error("Login Failed", {
-        description: "An error occurred. Please try again.",
-      })
-      setIsSubmitting(false)
-    }
-  }
+  const baseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://charterkeke.vercel.app';
+  const appQRUrl = `${baseUrl}/install`;
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
-      <Particles />
+    <main className="min-h-screen bg-gradient-to-br from-[#FF9203]/5 to-[#C57711]/5 flex items-center justify-center py-8 md:py-12 px-4">
+      <div className="w-full max-w-2xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9203]/10 dark:bg-[#633B06]/20 mb-4">
+            <CheckCircle className="h-4 w-4 text-[#814B05] dark:text-[#E4C9A5]" />
+            <span className="text-sm font-medium text-[#663C05] dark:text-[#FFE4C0]">
+              Download Charter Keke
+            </span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#FF9203] dark:text-[#FFE7C7] mb-3">
+            Login to Charter Keke
+          </h1>
+          <p className="text-orange-600 dark:text-orange-200 text-sm md:text-base max-w-lg mx-auto">
+            Seamless login, real-time tracking, and instant notifications are exclusively available in our mobile app.
+          </p>
+        </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md z-10"
-      >
-        <Card className="bg-card/80 backdrop-blur-xl border-primary/20 shadow-2xl">
-          <CardHeader className="text-center space-y-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto"
+        {/* Main Content Grid */}
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-center">
+          {/* Left: Features & CTA */}
+          <div className="space-y-6">
+            {/* Features */}
+            <div className="space-y-3">
+              <h2 className="font-semibold text-lg text-[#FF9203] dark:text-[#FFE7C7]">
+                Login Features
+              </h2>
+              {[
+                'One-tap login with biometric security',
+                'Real-time ride tracking',
+                'Instant push notifications',
+                'Emergency contact sharing',
+              ].map((feature, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <CheckCircle className="h-4 w-4 text-orange-600 dark:text-orange-200 mt-1 flex-shrink-0" />
+                  <p className="text-sm text-orange-700 dark:text-orange-200">{feature}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Download Button */}
+            <a 
+              href={(process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://charterkeke.vercel.app') + '/install'}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <Link href="/">
-                <Image src="/charter keke.png" alt="Charter Keke" width={80} height={80} className="rounded-xl drop-shadow-lg hover:scale-105 transition-transform mx-auto" />
-              </Link>
-            </motion.div>
-            <CardTitle className="text-2xl font-serif text-foreground">Charter Keke</CardTitle>
-            <CardDescription className="text-muted-foreground">Login to your account. Sign in to continue your journey with Charter Keke</CardDescription>
-          </CardHeader>
+              <Button size="lg" className="w-full bg-[#FF9203] hover:bg-[#E68900] text-white dark:bg-[#C27107] dark:hover:bg-[#8D5308]">
+                <Download className="mr-2 h-4 w-4" />
+                Download App
+                <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
+              </Button>
+            </a>
 
-          <CardContent>
-            <Tabs value={loginMethod} onValueChange={(v) => setLoginMethod(v as "email" | "phone")} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50">
-                <TabsTrigger
-                  value="email"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Email
-                </TabsTrigger>
-                <TabsTrigger
-                  value="phone"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  <Phone className="h-4 w-4 mr-2" />
-                  Phone
-                </TabsTrigger>
-              </TabsList>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <TabsContent value="email" className="mt-0 space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-foreground">
-                      Email Address
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={emailOrPhone}
-                        onChange={(e) => setEmailOrPhone(e.target.value)}
-                        className="pl-10 bg-background/50 border-primary/20 focus:border-primary"
-                      />
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="phone" className="mt-0 space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-foreground">
-                      Phone Number
-                    </Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="+234 808 319 1228"
-                        value={emailOrPhone}
-                        onChange={(e) => setEmailOrPhone(e.target.value)}
-                        className="pl-10 bg-background/50 border-primary/20 focus:border-primary"
-                      />
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-foreground">
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 bg-background/50 border-primary/20 focus:border-primary"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-sm">
-                  <Link href="/auth/forgot-password" className="text-primary hover:underline">
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity group"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    <>
-                      Sign In
-                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
-                </Button>
-              </form>
-            </Tabs>
-
-          </CardContent>
-
-          <CardFooter className="flex justify-center">
-            <p className="text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link href="/auth/register" className="text-primary font-medium hover:underline">
-                Sign up
-              </Link>
+            <p className="text-xs text-orange-600 dark:text-orange-100 text-center">
+              Or scan the QR code →
             </p>
-          </CardFooter>
-        </Card>
-      </motion.div>
-    </div>
-  )
+          </div>
+
+          {/* Right: QR Code */}
+          <div className="flex justify-center">
+            <div className="bg-white dark:bg-[#2C1F0F] rounded-2xl shadow-lg p-4 md:p-6 w-full max-w-xs">
+              <div className="bg-orange-100 dark:bg-orange-800 rounded-lg p-4 flex justify-center">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(appQRUrl)}`}
+                  alt="Download Charter Keke QR Code"
+                  width={200}
+                  height={200}
+                  className="rounded"
+                />
+              </div>
+              <p className="text-center text-xs text-orange-600 dark:text-orange-100 mt-3">
+                Scan to download
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Link */}
+        <div className="mt-8 text-center">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs md:text-sm text-orange-600 dark:text-orange-200 hover:text-orange-700 dark:hover:text-orange-100 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to home
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
 }
