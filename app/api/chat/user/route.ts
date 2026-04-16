@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
           ride: chat.rides,
           rider: riderData,
           driver: driverData,
-          lastMessage: lastMessage
+          last_message: lastMessage
             ? {
                 id: lastMessage.id,
                 content: lastMessage.content,

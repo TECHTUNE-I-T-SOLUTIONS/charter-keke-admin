@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     // Validate inputs
     if (!email || !password) {
       return NextResponse.json(
-        { verified: false, message: "Email and password are required" },
+        { verified: false, message: "Email and password are required, kindly logout and login again" },
         { status: 400 }
       )
     }
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     if (userError || !user) {
       return NextResponse.json(
-        { verified: false, message: "Email not found" },
+        { verified: false, message: "Email not found, kindly logout and login again or signup" },
         { status: 404 }
       )
     }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     if (!passwordMatch) {
       return NextResponse.json(
-        { verified: false, message: "Invalid password" },
+        { verified: false, message: "Invalid password, kindly logout and login again" },
         { status: 401 }
       )
     }

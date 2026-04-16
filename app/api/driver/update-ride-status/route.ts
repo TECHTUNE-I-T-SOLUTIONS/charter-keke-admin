@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getSessionFromRequest(request)
 
-    if (!session?.user?.id || session.user.role !== "driver") {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -30,13 +30,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Get driver
-    const { data: driver } = await supabase
+    const { data: driver, error: driverError } = await supabaseAdmin!
       .from("drivers")
       .select("id")
       .eq("user_id", session.user.id)
       .single()
 
-    if (!driver) {
+    if (driverError || !driver) {
+      console.error("[UpdateRideStatus] Driver not found:", driverError)
       return NextResponse.json(
         { error: "Driver profile not found" },
         { status: 404 }
@@ -44,18 +45,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Get ride
-    const { data: ride } = await supabase
+    const { data: ride, error: rideError } = await supabaseAdmin!
       .from("rides")
       .select("*")
       .eq("id", rideId)
       .single()
 
-    if (!ride) {
+    if (rideError || !ride) {
+      console.error("[UpdateRideStatus] Ride not found:", rideError)
       return NextResponse.json({ error: "Ride not found" }, { status: 404 })
     }
 
     // Verify driver is the one who accepted the ride
     if (ride.driver_id !== driver.id) {
+      console.error("[UpdateRideStatus] Driver not authorized for this ride", {
+        driverId: driver.id,
+        rideDriverId: ride.driver_id,
+      })
       return NextResponse.json(
         { error: "You are not assigned to this ride" },
         { status: 403 }
@@ -64,6 +70,10 @@ export async function POST(request: NextRequest) {
 
     // Verify ride status is valid for update
     if (status === "in_progress" && ride.status !== "accepted") {
+      console.error("[UpdateRideStatus] Invalid status transition", {
+        currentStatus: ride.status,
+        requestedStatus: status,
+      })
       return NextResponse.json(
         { error: "Ride must be accepted first" },
         { status: 409 }
@@ -71,26 +81,70 @@ export async function POST(request: NextRequest) {
     }
 
     if (status === "completed" && ride.status !== "in_progress") {
+      console.error("[UpdateRideStatus] Invalid status transition", {
+        currentStatus: ride.status,
+        requestedStatus: status,
+      })
       return NextResponse.json(
         { error: "Ride must be in progress" },
         { status: 409 }
       )
     }
 
-    // Update ride status
-    const updateData: any = { status }
+    // Ensure required fields exist for settlement calculation
     if (status === "completed") {
-      updateData.completed_at = new Date().toISOString()
+      // Set default values if not already set to ensure trigger can process settlement
+      const fare = ride.fare_amount || 0;
+      const platformFee = ride.platform_fee || Math.round(fare * 0.1); // 10% default
+      const driverEarnings = ride.driver_earnings || (fare - platformFee);
+      
+      console.log("[UpdateRideStatus] Ride completion settlement data", {
+        rideId,
+        fare,
+        platformFee,
+        driverEarnings,
+      });
     }
 
-    const { data: updatedRide, error } = await supabase
+    // Update ride status
+    const updateData: any = { 
+      status,
+      updated_at: new Date().toISOString(),
+    }
+    
+    if (status === "in_progress") {
+      updateData.pickup_time = new Date().toISOString()
+    } else if (status === "completed") {
+      const now = new Date().toISOString()
+      updateData.dropoff_time = now
+      updateData.completed_at = now  // For ride history/analytics (not used by settlement trigger)
+      
+      // Calculate duration if pickup_time exists
+      if (ride.pickup_time) {
+        const pickupTime = new Date(ride.pickup_time).getTime()
+        const dropoffTime = new Date(now).getTime()
+        const durationMinutes = Math.round((dropoffTime - pickupTime) / (1000 * 60))
+        updateData.duration_minutes = Math.max(0, durationMinutes)
+      }
+      
+      // Ensure settlement fields are set so trigger can use them (if any completion logic needed)
+      if (!ride.fare_amount) updateData.fare_amount = 0;
+      if (!ride.platform_fee) updateData.platform_fee = 0;
+      if (!ride.driver_earnings) updateData.driver_earnings = 0;
+      if (!ride.fare_amount) updateData.fare_amount = 0;
+      if (!ride.platform_fee) updateData.platform_fee = 0;
+      if (!ride.driver_earnings) updateData.driver_earnings = 0;
+    }
+
+    const { data: updatedRide, error: updateError } = await supabaseAdmin!
       .from("rides")
       .update(updateData)
       .eq("id", rideId)
       .select()
       .single()
 
-    if (error) {
+    if (updateError || !updatedRide) {
+      console.error("[UpdateRideStatus] Failed to update ride:", updateError)
       return NextResponse.json(
         { error: "Failed to update ride status" },
         { status: 500 }
