@@ -164,64 +164,115 @@ export const sendPushNotification = async (
   }
 ) => {
   const results = [];
+  
+  if (!userIds || userIds.length === 0) return results;
 
-  for (const userId of userIds) {
-    // Use active subscriptions only (filters out placeholder tokens)
-    const subscriptions = getUserActiveSubscriptions(userId);
-
-    if (subscriptions.length === 0) {
-      console.warn(`⚠️ [PUSH] No active subscriptions found for user: ${userId} (may be using placeholder token)`);
-      results.push({ userId, success: false, error: 'No active subscription' });
-      continue;
+  try {
+    if (!supabaseAdmin) {
+      console.warn('⚠️ [PUSH] Supabase not initialized');
+      return userIds.map(userId => ({ userId, success: false, error: 'Supabase not initialized' }));
     }
 
-    for (const subscription of subscriptions) {
-      try {
-        // Skip if no valid token
-        if (!subscription.pushToken) {
-          results.push({ userId, success: false, error: 'No token available' });
-          continue;
-        }
+    // Fetch active non-placeholder subscriptions directly from the database
+    const { data: subscriptionsData, error } = await supabaseAdmin
+      .from('push_subscriptions')
+      .select('*')
+      .in('user_id', userIds)
+      .eq('is_active', true)
+      .eq('is_placeholder', false)
+      .not('push_token', 'is', null);
 
-        const notificationPayload = {
-          title: payload.title,
-          body: payload.body,
-          data: {
-            type: payload.type,
-            timestamp: new Date().toISOString(),
-            ...payload.data,
-          },
-        };
+    if (error) {
+      console.error('❌ [PUSH] Failed to fetch subscriptions from database:', error.message);
+      return userIds.map(userId => ({ userId, success: false, error: 'Database error' }));
+    }
 
-        // For mobile app (Expo)
-        if (subscription.platform === 'ios' || subscription.platform === 'android') {
-          await sendExpoNotification(subscription.pushToken, {
-            ...notificationPayload,
-            categoryId: payload.categoryId,
+    // Group subscriptions by userId
+    const subsByUserId = new Map<string, any[]>();
+    for (const sub of subscriptionsData || []) {
+      if (!subsByUserId.has(sub.user_id)) {
+        subsByUserId.set(sub.user_id, []);
+      }
+      subsByUserId.get(sub.user_id)!.push(sub);
+    }
+
+    for (const userId of userIds) {
+      const subscriptions = subsByUserId.get(userId) || [];
+
+      // Also check memory cache just in case we have fresh subscriptions not yet flushed, though DB should be source of truth
+      const memorySubs = getUserActiveSubscriptions(userId);
+      const allSubs = [...subscriptions];
+      
+      // Add memory subs if not already present
+      for (const mSub of memorySubs) {
+        if (!allSubs.some(s => s.push_token === mSub.pushToken || s.pushToken === mSub.pushToken)) {
+          allSubs.push({
+            user_id: userId,
+            push_token: mSub.pushToken,
+            platform: mSub.platform
           });
         }
-        // For web
-        else if (subscription.platform === 'web') {
-          await webpush.sendNotification(
-            JSON.parse(subscription.pushToken),
-            JSON.stringify(notificationPayload)
-          );
-        }
+      }
 
-        console.log('✅ [PUSH] Notification sent to user:', userId, 'Platform:', subscription.platform);
-        results.push({ userId, success: true });
-      } catch (error: any) {
-        console.error('❌ [PUSH] Failed to send notification to user:', userId, 'Error:', error.message);
-        results.push({ userId, success: false, error: error.message });
-        
-        // Mark invalid tokens in database
-        if (error.message?.includes('ExponentPushToken') || error.message?.includes('Invalid')) {
-          console.log(`🔄 [PUSH] Marking token as invalid for user: ${userId}`);
-          // In production, you might want to deactivate this subscription
-          await removeSubscription(userId, subscription.pushToken || '').catch(() => {});
+      if (allSubs.length === 0) {
+        console.warn(`⚠️ [PUSH] No active subscriptions found for user: ${userId} (may be using placeholder token)`);
+        results.push({ userId, success: false, error: 'No active subscription' });
+        continue;
+      }
+
+      for (const subscription of allSubs) {
+        try {
+          const pushToken = subscription.push_token || subscription.pushToken;
+          
+          // Skip if no valid token
+          if (!pushToken) {
+            results.push({ userId, success: false, error: 'No token available' });
+            continue;
+          }
+
+          const notificationPayload = {
+            title: payload.title,
+            body: payload.body,
+            data: {
+              type: payload.type,
+              timestamp: new Date().toISOString(),
+              ...payload.data,
+            },
+          };
+
+          // For mobile app (Expo)
+          if (subscription.platform === 'ios' || subscription.platform === 'android') {
+            await sendExpoNotification(pushToken, {
+              ...notificationPayload,
+              categoryId: payload.categoryId,
+            });
+          }
+          // For web
+          else if (subscription.platform === 'web') {
+            await webpush.sendNotification(
+              JSON.parse(pushToken),
+              JSON.stringify(notificationPayload)
+            );
+          }
+
+          console.log('✅ [PUSH] Notification sent to user:', userId, 'Platform:', subscription.platform);
+          results.push({ userId, success: true });
+        } catch (error: any) {
+          console.error('❌ [PUSH] Failed to send notification to user:', userId, 'Error:', error.message);
+          results.push({ userId, success: false, error: error.message });
+          
+          // Mark invalid tokens in database
+          if (error.message?.includes('ExponentPushToken') || error.message?.includes('Invalid')) {
+            console.log(`🔄 [PUSH] Marking token as invalid for user: ${userId}`);
+            const pushToken = subscription.push_token || subscription.pushToken;
+            // In production, you might want to deactivate this subscription
+            await removeSubscription(userId, pushToken || '').catch(() => {});
+          }
         }
       }
     }
+  } catch (error) {
+    console.error('❌ [PUSH] Error in sendPushNotification:', error);
   }
 
   return results;

@@ -4,6 +4,7 @@ import { getSessionFromRequest } from "@/lib/auth"
 import { notifyDriverAboutRide } from "@/lib/notifications"
 import { emitRideRequest, emitRideUpdate } from "@/lib/push-emitters"
 import { sendRideRequestSMS, toTermiiPhoneNumber } from "@/lib/termii"
+import { sendPushNotification } from "@/lib/push-service"
 
 export async function POST(request: NextRequest) {
   try {
@@ -164,6 +165,28 @@ export async function POST(request: NextRequest) {
     // Additional SMS + in-app dispatch logs/notifications
     if (drivers && drivers.length > 0) {
       const driverUserIds = drivers.map((driver: any) => driver.user_id)
+
+      // Send targeted push notification to these online drivers
+      try {
+        await sendPushNotification(driverUserIds, {
+          title: "🚗 New Ride Request",
+          body: `Pickup: ${pickupZone}`,
+          type: "ride_request",
+          data: {
+            rideId: ride.id,
+            pickup: pickupZone,
+            destination: destinationZone,
+            fare: Number(final_fare_amount || 0),
+            distance: Number(estimated_distance || 0),
+          },
+        });
+        console.log("[RideDispatch] Targeted push notification sent to drivers", {
+          rideId: ride.id,
+          driverCount: driverUserIds.length,
+        });
+      } catch (pushError) {
+        console.error("[RideDispatch] Failed to send targeted push notifications:", pushError);
+      }
 
       console.log("[RideDispatch] Fetching phone numbers for online drivers", {
         rideId: ride.id,
