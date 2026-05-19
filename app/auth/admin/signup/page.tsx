@@ -30,6 +30,7 @@ export default function AdminSignupPage() {
     emergencyPhone: "",
     // Admin fields
     adminLevel: "support",
+    department: "general",
     reason: "",
   })
   const [showPassword, setShowPassword] = useState(false)
@@ -113,6 +114,10 @@ export default function AdminSignupPage() {
           toast.error("Admin level is required")
           return false
         }
+        if (!formData.department) {
+          toast.error("Department is required")
+          return false
+        }
         if (!formData.reason.trim()) {
           toast.error("Please provide reason for admin access")
           return false
@@ -162,6 +167,7 @@ export default function AdminSignupPage() {
           emergencyContact: formData.emergencyContact,
           emergencyPhone: formData.emergencyPhone,
           adminLevel: formData.adminLevel,
+          department: formData.department,
           reason: formData.reason,
         }),
       })
@@ -555,6 +561,32 @@ export default function AdminSignupPage() {
                       <option value="super">Super Admin (System Access)</option>
                     </select>
                     <p className="text-xs text-muted-foreground">Select the admin level appropriate for your role</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="department">Department *</Label>
+                    <select
+                      id="department"
+                      name="department"
+                      title="Select your department"
+                      value={formData.department}
+                      onChange={handleInputChange}
+                      disabled={isSubmitting}
+                      className="w-full h-10 px-3 rounded-md border border-input bg-background/50 text-foreground text-sm"
+                      required
+                    >
+                      <option value="general">General</option>
+                      <option value="support">Customer Support</option>
+                      <option value="billing">Billing</option>
+                      <option value="operations">Operations</option>
+                      <option value="rider_management">Rider Management</option>
+                      <option value="trust_safety">Trust and Safety</option>
+                      <option value="technical">Technical Support</option>
+                      <option value="engineering">Engineering</option>
+                      <option value="product">Product and Systems</option>
+                      <option value="finance">Finance</option>
+                    </select>
+                    <p className="text-xs text-muted-foreground">Departments drive CRM routing and queue access.</p>
                   </div>
 
                   <div className="space-y-2">

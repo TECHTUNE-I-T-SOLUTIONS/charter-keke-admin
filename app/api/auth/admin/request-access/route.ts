@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
 import { supabase } from "@/lib/supabase"
+import { CRM_DEPARTMENTS, type CrmDepartmentKey } from "@/lib/crm"
 
 /**
  * POST /api/auth/admin/request-access
@@ -22,6 +23,7 @@ export async function POST(request: NextRequest) {
       emergencyContact,
       emergencyPhone,
       adminLevel = "support",
+      department = "general",
       reason,
     } = body
 
@@ -53,6 +55,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    const requestedDepartment = String(department || "general")
+    const normalizedDepartment: CrmDepartmentKey =
+      CRM_DEPARTMENTS.some((entry) => entry.key === requestedDepartment)
+        ? (requestedDepartment as CrmDepartmentKey)
+        : "general"
 
     // Check if email already exists
     const { data: existingUser } = await supabase
@@ -123,10 +131,12 @@ export async function POST(request: NextRequest) {
         {
           user_id: newUser.id,
           admin_level: adminLevel,
+          department: normalizedDepartment,
           permissions: {
             request_reason: reason,
             request_date: new Date().toISOString(),
             status: "pending_review",
+            department: normalizedDepartment,
           },
         },
       ])
@@ -151,6 +161,7 @@ export async function POST(request: NextRequest) {
         data: {
           userId: newUser.id,
           adminId: adminRecord.id,
+          department: normalizedDepartment,
         },
       },
       { status: 201 }

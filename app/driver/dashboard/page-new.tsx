@@ -394,7 +394,7 @@ function DriverDashboardContent() {
 
 export default function DriverDashboard() {
   return (
-    <ProtectedRoute requiredRole="driver">
+    <ProtectedRoute allowedRoles={["driver"]}>
       <DriverDashboardContent />
     </ProtectedRoute>
   )

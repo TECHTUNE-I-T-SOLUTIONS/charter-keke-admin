@@ -67,7 +67,7 @@ export default function DriverPaymentsPage() {
     const fetchPaymentStatus = async () => {
       try {
         const response = await fetch(
-          `/api/driver/payment-status?driver_id=${session.user.id}`
+          `/api/driver/payment-status?driver_id=${(session?.user as any)?.id}`
         )
         const data = await response.json()
 
@@ -105,7 +105,7 @@ export default function DriverPaymentsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          driverId: session?.user.id,
+          driverId: (session?.user as any)?.id,
           settlementIds: selectedSettlements,
           amount,
         }),

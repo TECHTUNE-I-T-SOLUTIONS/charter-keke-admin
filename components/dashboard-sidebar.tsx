@@ -3,12 +3,14 @@
 import type React from "react"
 
 import { useState, useMemo, useCallback, memo } from "react"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useAuth, type UserRole } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useTheme } from "next-themes"
 import {
   Home,
   Car,
@@ -26,6 +28,9 @@ import {
   CreditCard,
   MessageSquare,
   MapPin,
+  ClipboardList,
+  Sun,
+  Moon
 } from "lucide-react"
 
 interface NavItem {
@@ -64,6 +69,7 @@ const adminNavItems: NavItem[] = [
   { label: "Payments", href: "/admin/payments", icon: <CreditCard className="h-5 w-5" /> },
   { label: "Monitor", href: "/admin/monitor", icon: <BarChart3 className="h-5 w-5" /> },
   { label: "Messages", href: "/admin/messages", icon: <MessageSquare className="h-5 w-5" /> },
+  { label: "CRM", href: "/admin/crm", icon: <ClipboardList className="h-5 w-5" /> },
   { label: "Security", href: "/admin/security", icon: <Shield className="h-5 w-5" /> },
   { label: "Settings", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ]
@@ -79,12 +85,22 @@ function getNavItems(role: UserRole): NavItem[] {
   }
 }
 
+
+
 // Memoized sidebar content component
 const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { user: any; pathname: string; setIsMobileOpen: (open: boolean) => void; onLogout?: () => void }) => {
+  const { theme, setTheme } = useTheme()
   const navItems = useMemo(() => getNavItems(user.role), [user.role])
 
+  const { data: session } = useSession()
+  const [avatarUrl] = useState("")
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    (session?.user as any)?.firstName || session?.user?.name || "Admin"
+  )}&background=FF9101&color=000`
+  
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-background">
       {/* Logo */}
       <div className="p-4 border-b border-primary/10">
         <Link href="/" className="flex items-center gap-2">
@@ -99,8 +115,13 @@ const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { us
       <div className="p-4 border-b border-primary/10">
         <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5">
           <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-medium">
-            {user.firstName[0]}
-            {user.lastName[0]}
+            <Image
+              src={avatarUrl || (session?.user as any)?.image || fallbackAvatar}
+              alt="Admin avatar"
+              width={42}
+              height={42}
+              className="h-[42px] w-[42px] rounded-full border-2 border-primary object-cover"
+            />
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-medium text-foreground truncate">
@@ -123,7 +144,7 @@ const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { us
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
                 isActive
-                  ? "bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-lg shadow-primary/25"
+                  ? "bg-gradient-to-r from-orange-500 to-orange-700 text-white shadow-lg shadow-primary/25"
                   : "text-muted-foreground hover:bg-primary/10 hover:text-foreground",
               )}
             >
@@ -135,7 +156,16 @@ const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { us
       </nav>
 
       {/* Logout Button */}
-      <div className="p-4 border-t border-primary/10">
+      <div className="p-4 border-t border-primary/10 space-y-2">
+        <Button
+          variant="outline"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="w-full justify-start gap-3 border-primary/10 text-muted-foreground hover:bg-primary/5 hover:text-foreground bg-transparent h-10"
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4 text-amber-500" /> : <Moon className="h-4 w-4 text-slate-800 dark:text-slate-200" />}
+          <span className="text-sm font-medium">Toggle Theme</span>
+        </Button>
+
         <Button
           variant="outline"
           className="w-full justify-start gap-3 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive bg-transparent"

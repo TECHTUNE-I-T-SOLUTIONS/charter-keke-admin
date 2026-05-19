@@ -78,7 +78,8 @@ export async function GET(
       );
     }
 
-    console.log(`[Drivers API] Successfully fetched driver: ${driver.users?.first_name} ${driver.users?.last_name}`);
+    const driverUsers = driver.users as any;
+    console.log(`[Drivers API] Successfully fetched driver: ${driverUsers?.first_name} ${driverUsers?.last_name}`);
 
     // Return driver data with users info included
     return NextResponse.json({
@@ -91,14 +92,14 @@ export async function GET(
       average_rating: driver.average_rating,
       total_rides_completed: driver.total_rides_completed,
       verified: driver.verified,
-      users: driver.users ? {
-        id: driver.users.id,
-        first_name: driver.users.first_name,
-        last_name: driver.users.last_name,
-        phone_number: driver.users.phone_number,
-        profile_picture_url: driver.users.profile_picture_url,
-        email: driver.users.email,
-        role: driver.users.role,
+      users: driverUsers ? {
+        id: driverUsers.id,
+        first_name: driverUsers.first_name,
+        last_name: driverUsers.last_name,
+        phone_number: driverUsers.phone_number,
+        profile_picture_url: driverUsers.profile_picture_url,
+        email: driverUsers.email,
+        role: driverUsers.role,
       } : null,
     });
 

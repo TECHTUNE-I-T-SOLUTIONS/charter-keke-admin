@@ -165,7 +165,7 @@ Stack: ${error.stack || "Not available"}`}
         {/* Floating Elements */}
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, linear: true }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className="absolute -top-32 -right-32 opacity-10 pointer-events-none"
         >
           <div className="w-64 h-64 rounded-full border-2 border-red-500/30" />

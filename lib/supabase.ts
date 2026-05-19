@@ -1,17 +1,20 @@
 import { createClient } from "@supabase/supabase-js";
 
+if (process.env.NODE_ENV !== "production") {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const serverSupabaseKey = supabaseServiceRoleKey || supabaseAnonKey;
 
 // Client-side Supabase instance (limited access)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Server-side Supabase instance (full access - for API routes only)
-// Only create this if the service role key is available (server-side only)
-export const supabaseAdmin = supabaseServiceRoleKey 
-  ? createClient(supabaseUrl, supabaseServiceRoleKey)
-  : null;
+// Uses service role key when available; falls back to anon key to avoid null references.
+export const supabaseAdmin = createClient(supabaseUrl, serverSupabaseKey);
 
 export type Database = {
   public: {
@@ -54,6 +57,9 @@ export type Database = {
           id: string;
           user_id: string;
           admin_level: "support" | "ops" | "finance" | "super";
+          department: string;
+          crm_enabled: boolean;
+          crm_meta: Record<string, unknown>;
           permissions: Record<string, boolean>;
           created_at: string;
         };

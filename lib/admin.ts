@@ -57,9 +57,9 @@ export async function checkAdminAccess(userId: string, permission?: string): Pro
 
     // Default permissions based on admin level
     const defaultPermissions: Record<string, string[]> = {
-      support: ["view_users", "view_rides", "view_payments"],
-      ops: ["view_users", "view_rides", "suspend_users", "view_drivers"],
-      finance: ["view_payments", "view_drivers", "process_payouts"],
+      support: ["view_users", "view_rides", "view_payments", "manage_crm_tickets", "manage_crm_notes"],
+      ops: ["view_users", "view_rides", "suspend_users", "view_drivers", "manage_crm_departments", "manage_crm_routing"],
+      finance: ["view_payments", "view_drivers", "process_payouts", "view_crm_billing", "manage_crm_email_accounts"],
       super: ["*"], // Super admin has all permissions
     }
 

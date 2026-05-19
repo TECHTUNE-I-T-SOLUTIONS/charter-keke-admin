@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { supabaseAdmin } from "@/lib/supabase"
+
+async function queryWithRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
+  let lastError: unknown
+  for (let attempt = 0; attempt < retries; attempt += 1) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error
+    }
+  }
+  throw lastError
+}
 
 /**
  * GET /api/admin/stats
@@ -8,34 +20,36 @@ import { supabase } from "@/lib/supabase"
 export async function GET(request: NextRequest) {
   try {
     // Fetch total users by status
-    const { data: users, error: usersError } = await supabase
-      .from("users")
-      .select("id, role, status", { count: "exact" })
+    const { data: users, error: usersError } = await queryWithRetry(async () =>
+      await supabaseAdmin
+        .from("users")
+        .select("id, role, status", { count: "exact" })
+    )
 
     // Fetch total drivers
-    const { data: drivers, error: driversError } = await supabase
+    const { data: drivers, error: driversError } = await supabaseAdmin
       .from("drivers")
       .select("id, verified", { count: "exact" })
 
     // Fetch active rides
-    const { data: rides, error: ridesError } = await supabase
+    const { data: rides, error: ridesError } = await supabaseAdmin
       .from("rides")
       .select("id, status, fare_amount", { count: "exact" })
       .eq("status", "in_progress")
 
     // Fetch revenue from accepted, in_progress, and completed rides
-    const { data: revenueRides, error: revenueError } = await supabase
+    const { data: revenueRides, error: revenueError } = await supabaseAdmin
       .from("rides")
       .select("fare_amount, platform_fee, status")
       .in("status", ["accepted", "in_progress", "completed"])
 
     // Fetch completed and cancelled rides for stats
-    const { count: completedCount } = await supabase
+    const { count: completedCount } = await supabaseAdmin
       .from("rides")
       .select("*", { count: "exact", head: true })
       .eq("status", "completed")
 
-    const { count: cancelledCount } = await supabase
+    const { count: cancelledCount } = await supabaseAdmin
       .from("rides")
       .select("*", { count: "exact", head: true })
       .eq("status", "cancelled")
@@ -50,22 +64,22 @@ export async function GET(request: NextRequest) {
 
     // Calculate stats
     const totalUsers = users?.length || 0
-    const activeUsers = users?.filter((u) => u.status === "active").length || 0
-    const pendingUsers = users?.filter((u) => u.status === "pending").length || 0
-    const suspendedUsers = users?.filter((u) => u.status === "suspended").length || 0
+    const activeUsers = users?.filter((u: any) => u.status === "active").length || 0
+    const pendingUsers = users?.filter((u: any) => u.status === "pending").length || 0
+    const suspendedUsers = users?.filter((u: any) => u.status === "suspended").length || 0
 
     const totalDrivers = drivers?.length || 0
-    const verifiedDrivers = drivers?.filter((d) => d.verified).length || 0
+    const verifiedDrivers = drivers?.filter((d: any) => d.verified).length || 0
 
     const activeRides = rides?.length || 0
 
     // Calculate total revenue from accepted, in_progress, and completed rides
-    const totalRevenue = revenueRides?.reduce((sum, ride) => {
+    const totalRevenue = revenueRides?.reduce((sum: number, ride: any) => {
       const fare = ride.fare_amount ? parseFloat(ride.fare_amount.toString()) : 0
       return sum + fare
     }, 0) || 0
 
-    const totalPlatformFees = revenueRides?.reduce((sum, ride) => {
+    const totalPlatformFees = revenueRides?.reduce((sum: number, ride: any) => {
       const fee = ride.platform_fee ? parseFloat(ride.platform_fee.toString()) : 0
       return sum + fee
     }, 0) || 0

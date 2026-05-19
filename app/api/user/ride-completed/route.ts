@@ -63,12 +63,14 @@ export async function POST(request: NextRequest) {
       .eq("user_id", session.user.id)
       .single()
 
+    const driverUsers = driverProfile?.users as any;
+
     return NextResponse.json({
       ride: updatedRide,
       driver_details: {
-        name: `${driverProfile?.users?.first_name} ${driverProfile?.users?.last_name}`,
-        phone: driverProfile?.users?.phone_number,
-        profile_picture: driverProfile?.users?.profile_picture_url,
+        name: `${driverUsers?.first_name || ""} ${driverUsers?.last_name || ""}`.trim() || "Driver",
+        phone: driverUsers?.phone_number,
+        profile_picture: driverUsers?.profile_picture_url,
         bank_name: driverBankDetails?.bank_name,
         bank_account: driverBankDetails?.bank_account_number,
         amount_to_pay: ride.fare_amount,

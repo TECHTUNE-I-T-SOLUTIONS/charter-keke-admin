@@ -163,7 +163,7 @@ export const sendPushNotification = async (
     type: 'ride_request' | 'ride_accepted' | 'ride_update' | 'support_message' | 'payment_received';
   }
 ) => {
-  const results = [];
+  const results: Array<{ userId: string; success: boolean; error?: string }> = [];
   
   if (!userIds || userIds.length === 0) return results;
 
