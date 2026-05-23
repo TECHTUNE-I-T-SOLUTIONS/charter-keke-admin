@@ -70,14 +70,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find APK asset (Android)
-    const apkAsset = release.assets.find((asset) =>
-      asset.name.endsWith('.apk')
-    );
+    // Find platform assets
+    const apkAsset = release.assets.find((asset) => asset.name.endsWith('.apk'));
+    const iosAsset = release.assets.find((asset) => asset.name.endsWith('.ipa'));
 
-    if (!apkAsset) {
+    if (!apkAsset && !iosAsset) {
       return NextResponse.json(
-        { error: 'No APK found for this release' },
+        { error: 'No mobile app assets found for this release' },
         { status: 404 }
       );
     }
@@ -87,13 +86,27 @@ export async function GET(request: NextRequest) {
                        process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
                        'http://localhost:3000';
     
-    const downloadUrl = `${apiBaseUrl}/api/mobile/download-apk?release=${release.tag_name}&asset=${apkAsset.id}`;
+    const androidDownloadUrl = apkAsset
+      ? `${apiBaseUrl}/api/mobile/download-apk?release=${release.tag_name}&asset=${apkAsset.id}`
+      : null;
+    const iosDownloadUrl = iosAsset
+      ? `${apiBaseUrl}/api/mobile/download-apk?release=${release.tag_name}&asset=${iosAsset.id}`
+      : null;
 
     const versionInfo = {
       version: release.tag_name.replace(/^v/, ''),
       buildNumber: parseInt(release.tag_name.split('.').pop() || '0'),
       releaseDate: release.published_at,
-      downloadUrl: downloadUrl,
+      downloadUrl: androidDownloadUrl || iosDownloadUrl,
+      androidDownloadUrl,
+      iosDownloadUrl,
+      assets: release.assets
+        .filter((asset) => asset.name.endsWith('.apk') || asset.name.endsWith('.ipa'))
+        .map((asset) => ({
+          id: asset.id,
+          name: asset.name,
+          downloadUrl: `${apiBaseUrl}/api/mobile/download-apk?release=${release.tag_name}&asset=${asset.id}`,
+        })),
       releaseNotes: release.body,
       features: extractFeatures(release.body),
       isRequired: false,

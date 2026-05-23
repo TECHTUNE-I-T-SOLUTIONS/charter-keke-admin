@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Download, Smartphone, CheckCircle, Apple, HardDrive, Wifi } from 'lucide-react';
+import { ArrowRight, Download, Smartphone, CheckCircle, Apple, HardDrive, Wifi, SmartphoneNfc, TabletSmartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
@@ -63,22 +63,14 @@ export default function AppInstallPage() {
     fetchLatestRelease();
   }, []);
 
-  const getDownloadLink = () => {
-    if (!latestRelease) return null;
-
-    const apkAsset = latestRelease.assets.find((a) => a.name.endsWith('.apk'));
-    const iosAsset = latestRelease.assets.find((a) => a.name.endsWith('.ipa'));
-    const assetToDownload = apkAsset || iosAsset;
-
-    if (!assetToDownload) return null;
-
-    // Use our API proxy endpoint for direct downloads
-    // This way the download doesn't require GitHub access and works in all regions
-    const downloadUrl = `/api/app/download/${latestRelease.version}/${assetToDownload.name}`;
-    return downloadUrl;
-  };
-
-  const downloadLink = getDownloadLink();
+  const androidAsset = latestRelease?.assets.find((a) => a.name.endsWith('.apk')) || null;
+  const iosAsset = latestRelease?.assets.find((a) => a.name.endsWith('.ipa')) || null;
+  const androidDownloadLink = androidAsset
+    ? `/api/app/download/${latestRelease?.version}/${androidAsset.name}`
+    : null;
+  const iosDownloadLink = iosAsset
+    ? `/api/app/download/${latestRelease?.version}/${iosAsset.name}`
+    : null;
   const appQRUrl = 'https://charterkeke.vercel.app/app/install';
 
   return (
@@ -179,19 +171,37 @@ export default function AppInstallPage() {
                 ))}
               </div>
 
-              {/* Download Button */}
-              {downloadLink && latestRelease && (
-                <a 
-                  href={downloadLink} 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button size="lg" className="w-full bg-[#FF9203] hover:bg-[#8D5308] text-white dark:bg-[#2C1F0F] dark:hover:bg-[#694C25]">
-                    <Download className="mr-2 h-5 w-5" />
-                    Download APK
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </a>
+              {/* Download Buttons */}
+              {latestRelease && (androidDownloadLink || iosDownloadLink) && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {androidDownloadLink && (
+                    <a
+                      href={androidDownloadLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button size="lg" className="w-full bg-[#FF9203] hover:bg-[#8D5308] text-white dark:bg-[#2C1F0F] dark:hover:bg-[#694C25]">
+                        <SmartphoneNfc className="mr-2 h-5 w-5" />
+                        Download Android APK
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </a>
+                  )}
+
+                  {iosDownloadLink && (
+                    <a
+                      href={iosDownloadLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button size="lg" variant="outline" className="w-full border-[#FF9203] text-[#C57711] hover:bg-[#FF9203]/10 dark:border-[#FFE7C7] dark:text-[#FFE7C7] dark:hover:bg-[#FFE7C7]/10">
+                        <TabletSmartphone className="mr-2 h-5 w-5" />
+                        Download iOS IPA
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </a>
+                  )}
+                </div>
               )}
 
               <p className="text-sm text-orange-600 dark:text-orange-100 text-center mt-4">
@@ -261,7 +271,7 @@ export default function AppInstallPage() {
                 step: '1',
                 title: 'Download',
                 description:
-                  'Click the download button above or scan the QR code with your phone to download the APK file.',
+                    'Click the Android or iOS download button above, or scan the QR code with your phone to open the install page.',
               },
               {
                 step: '2',
@@ -302,7 +312,7 @@ export default function AppInstallPage() {
               {
                 question: 'The app won\'t install on my device',
                 answer:
-                  'Make sure your device meets the minimum system requirements (Android 8.0+ or iOS 14.0+) and has at least 100 MB of free storage space. You may also need to enable installation from unknown sources in your device settings.',
+                  'Make sure your device meets the minimum system requirements (Android 8.0+ or iOS 14.0+) and has at least 100 MB of free storage space. Android users may need to enable installation from unknown sources in device settings.',
               },
               {
                 question: 'How do I update the app?',
@@ -354,14 +364,26 @@ export default function AppInstallPage() {
               Download Charter Keke today and join thousands of satisfied riders enjoying safe,
               affordable transportation.
             </p>
-            {downloadLink && (
-              <a href={downloadLink} download>
-                <Button size="lg" className="bg-white text-[#271906] hover:bg-white/90 dark:bg-white dark:text-[#241401] dark:hover:bg-white/90">
-                  Get the App Now
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </a>
-            )}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {androidDownloadLink && (
+                <a href={androidDownloadLink} target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" className="bg-white text-[#271906] hover:bg-white/90 dark:bg-white dark:text-[#241401] dark:hover:bg-white/90">
+                    <SmartphoneNfc className="mr-2 h-4 w-4" />
+                    Get Android APK
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </a>
+              )}
+              {iosDownloadLink && (
+                <a href={iosDownloadLink} target="_blank" rel="noopener noreferrer">
+                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 dark:border-white dark:text-white dark:hover:bg-white/10">
+                    <TabletSmartphone className="mr-2 h-4 w-4" />
+                    Get iOS IPA
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </section>
