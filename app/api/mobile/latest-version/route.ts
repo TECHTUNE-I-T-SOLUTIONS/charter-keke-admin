@@ -28,6 +28,10 @@ interface GitHubRelease {
   }>;
 }
 
+function createDownloadUrl(version: string, filename: string): string {
+  return `/api/app/download/${encodeURIComponent(version)}/${encodeURIComponent(filename)}`;
+}
+
 export async function GET(request: NextRequest) {
   try {
     if (!GITHUB_TOKEN) {
@@ -82,15 +86,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Create direct download URL using our proxy endpoint
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 
-                       process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-                       'http://localhost:3000';
-    
+    const version = release.tag_name.replace(/^v/, '');
+
     const androidDownloadUrl = apkAsset
-      ? `${apiBaseUrl}/api/mobile/download-apk?release=${release.tag_name}&asset=${apkAsset.id}`
+      ? createDownloadUrl(version, apkAsset.name)
       : null;
     const iosDownloadUrl = iosAsset
-      ? `${apiBaseUrl}/api/mobile/download-apk?release=${release.tag_name}&asset=${iosAsset.id}`
+      ? createDownloadUrl(version, iosAsset.name)
       : null;
 
     const versionInfo = {
@@ -105,7 +107,7 @@ export async function GET(request: NextRequest) {
         .map((asset) => ({
           id: asset.id,
           name: asset.name,
-          downloadUrl: `${apiBaseUrl}/api/mobile/download-apk?release=${release.tag_name}&asset=${asset.id}`,
+          downloadUrl: createDownloadUrl(version, asset.name),
         })),
       releaseNotes: release.body,
       features: extractFeatures(release.body),

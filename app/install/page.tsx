@@ -13,6 +13,7 @@ interface AppRelease {
   releaseNotes: string;
   publishedAt: string;
   assets: Array<{
+    id?: number;
     name: string;
     downloadUrl: string;
   }>;
@@ -65,12 +66,8 @@ export default function AppInstallPage() {
 
   const androidAsset = latestRelease?.assets.find((a) => a.name.endsWith('.apk')) || null;
   const iosAsset = latestRelease?.assets.find((a) => a.name.endsWith('.ipa')) || null;
-  const androidDownloadLink = androidAsset
-    ? `/api/app/download/${latestRelease?.version}/${androidAsset.name}`
-    : null;
-  const iosDownloadLink = iosAsset
-    ? `/api/app/download/${latestRelease?.version}/${iosAsset.name}`
-    : null;
+  const androidDownloadLink = androidAsset?.downloadUrl || null;
+  const iosDownloadLink = iosAsset?.downloadUrl || null;
   const appQRUrl = 'https://charterkeke.vercel.app/app/install';
 
   return (

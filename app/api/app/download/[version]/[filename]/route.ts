@@ -13,6 +13,25 @@ const GITHUB_REPO = 'TECHTUNE-I-T-SOLUTIONS/charterkeke-mobile';
 const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases`;
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
+function getContentType(filename: string): string {
+  const lower = filename.toLowerCase();
+
+  if (lower.endsWith('.apk')) {
+    return 'application/vnd.android.package-archive';
+  }
+
+  if (lower.endsWith('.ipa')) {
+    return 'application/octet-stream';
+  }
+
+  return 'application/octet-stream';
+}
+
+function getContentDisposition(filename: string): string {
+  const safeFilename = filename.replace(/"/g, '\\"');
+  return `attachment; filename="${safeFilename}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
+}
+
 interface GitHubAsset {
   id: number;
   name: string;
@@ -105,16 +124,23 @@ export async function GET(
       );
     }
 
-    const contentType = assetResponse.headers.get('content-type') || 'application/octet-stream';
+    const contentType = getContentType(asset.name);
     const contentLength = assetResponse.headers.get('content-length') || asset.size.toString();
-    const body = await assetResponse.arrayBuffer();
+    const body = assetResponse.body;
+
+    if (!body) {
+      return NextResponse.json(
+        { error: 'Empty download stream' },
+        { status: 502 }
+      );
+    }
 
     return new NextResponse(body, {
       status: 200,
       headers: {
         'Content-Type': contentType,
         'Content-Length': contentLength,
-        'Content-Disposition': `attachment; filename="${asset.name}"`,
+        'Content-Disposition': getContentDisposition(asset.name),
         'Cache-Control': 'no-store',
         'X-Download-Source': 'github-proxy',
       },

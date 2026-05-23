@@ -28,6 +28,10 @@ interface GitHubRelease {
   }>;
 }
 
+function createDownloadUrl(version: string, filename: string): string {
+  return `/api/app/download/${encodeURIComponent(version)}/${encodeURIComponent(filename)}`;
+}
+
 /**
  * Extract release notes from GitHub release body
  * Removes installation instructions and other boilerplate
@@ -117,7 +121,7 @@ export async function GET(request: NextRequest) {
         assets: release.assets.map((asset) => ({
           id: asset.id,
           name: asset.name,
-          downloadUrl: asset.browser_download_url,
+          downloadUrl: createDownloadUrl(release.tag_name.replace(/^v/, ''), asset.name),
           downloadCount: asset.download_count,
         })),
       }));
