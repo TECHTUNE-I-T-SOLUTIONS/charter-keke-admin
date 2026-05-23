@@ -3,6 +3,17 @@ import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import { uploadFileWithServiceRole } from "@/lib/upload-file";
 
+function errorResponse(status: number, error: string, meta?: Record<string, unknown>) {
+  return NextResponse.json(
+    {
+      success: false,
+      error,
+      ...meta,
+    },
+    { status }
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -39,26 +50,30 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!firstName || !lastName || !email || !phone || !password) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      console.warn("Signup validation failed: missing required fields", {
+        firstName: !!firstName,
+        lastName: !!lastName,
+        email: !!email,
+        phone: !!phone,
+        password: !!password,
+      });
+      return errorResponse(400, "Missing required fields");
     }
 
     if (password.length < 8) {
-      return NextResponse.json(
-        { error: "Password must be at least 8 characters" },
-        { status: 400 }
-      );
+      console.warn("Signup validation failed: password too short", {
+        email,
+        phone,
+        passwordLength: password.length,
+      });
+      return errorResponse(400, "Password must be at least 8 characters");
     }
 
     // Validate role
     const validRoles = ["user", "driver", "admin"];
     if (!validRoles.includes(role)) {
-      return NextResponse.json(
-        { error: "Invalid role" },
-        { status: 400 }
-      );
+      console.warn("Signup validation failed: invalid role", { email, phone, role });
+      return errorResponse(400, "Invalid role");
     }
 
     // Check if user already exists
@@ -69,10 +84,8 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "Email or phone number already exists" },
-        { status: 400 }
-      );
+      console.warn("Signup validation failed: user already exists", { email, phone });
+      return errorResponse(400, "Email or phone number already exists");
     }
 
     // Hash password
@@ -212,10 +225,11 @@ export async function POST(request: NextRequest) {
 
     if (createError) {
       console.error("Create user error:", createError);
-      return NextResponse.json(
-        { error: "Failed to create user" },
-        { status: 500 }
-      );
+      return errorResponse(500, createError.message || "Failed to create user", {
+        code: createError.code,
+        details: createError.details,
+        hint: createError.hint,
+      });
     }
 
     // If the client supplied a referral code (someone referred this signup),
@@ -346,9 +360,9 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("Signup error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+    return errorResponse(
+      500,
+      error instanceof Error ? error.message : "Internal server error"
     );
   }
 }
