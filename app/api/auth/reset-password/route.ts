@@ -3,6 +3,17 @@ import crypto from "crypto"
 import bcrypt from "bcryptjs"
 import { supabase } from "@/lib/supabase"
 
+function errorResponse(status: number, error: string, meta?: Record<string, unknown>) {
+  return NextResponse.json(
+    {
+      success: false,
+      error,
+      ...meta,
+    },
+    { status }
+  )
+}
+
 /**
  * POST /api/auth/reset-password
  * Reset password using valid token
@@ -10,20 +21,27 @@ import { supabase } from "@/lib/supabase"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { token, password } = body
+    const token = body.token || body.resetToken || body.passwordResetToken
+    const password = body.password || body.newPassword || body.new_password
+
+    console.log("🔑 [RESET-PASSWORD] Incoming request", {
+      hasToken: !!token,
+      hasPassword: !!password,
+      keys: Object.keys(body || {}),
+    })
 
     if (!token || !password) {
-      return NextResponse.json(
-        { error: "Token and password are required" },
-        { status: 400 }
-      )
+      console.warn("❌ [RESET-PASSWORD] Missing token or password", {
+        hasToken: !!token,
+        hasPassword: !!password,
+        bodyKeys: Object.keys(body || {}),
+      })
+      return errorResponse(400, "Token and password are required")
     }
 
     if (password.length < 8) {
-      return NextResponse.json(
-        { error: "Password must be at least 8 characters" },
-        { status: 400 }
-      )
+      console.warn("❌ [RESET-PASSWORD] Password too short", { tokenPresent: !!token, passwordLength: password.length })
+      return errorResponse(400, "Password must be at least 8 characters")
     }
 
     // Hash the token to compare with stored hash
@@ -37,10 +55,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (fetchError || !user) {
-      return NextResponse.json(
-        { error: "Invalid token" },
-        { status: 400 }
-      )
+      console.warn("❌ [RESET-PASSWORD] Invalid token", {
+        tokenHash,
+        fetchError: fetchError?.message,
+      })
+      return errorResponse(400, "Invalid token")
     }
 
     // Check if token has expired
@@ -48,10 +67,13 @@ export async function POST(request: NextRequest) {
     const currentTime = Date.now()
 
     if (currentTime > expiryTime) {
-      return NextResponse.json(
-        { error: "Token has expired" },
-        { status: 400 }
-      )
+      console.warn("❌ [RESET-PASSWORD] Token has expired", {
+        userId: user.id,
+        email: user.email,
+        expiryTime,
+        currentTime,
+      })
+      return errorResponse(400, "Token has expired")
     }
 
     // Hash the new password
@@ -70,10 +92,11 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       console.error("Password update error:", updateError)
-      return NextResponse.json(
-        { error: "Failed to update password" },
-        { status: 500 }
-      )
+      return errorResponse(500, updateError.message || "Failed to update password", {
+        code: updateError.code,
+        details: updateError.details,
+        hint: updateError.hint,
+      })
     }
 
     return NextResponse.json(
@@ -82,9 +105,9 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error("Reset password error:", error)
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+    return errorResponse(
+      500,
+      error instanceof Error ? error.message : "Internal server error"
     )
   }
 }

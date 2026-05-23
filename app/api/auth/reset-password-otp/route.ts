@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 
+function errorResponse(status: number, error: string, meta?: Record<string, unknown>) {
+  return NextResponse.json(
+    {
+      success: false,
+      error,
+      ...meta,
+    },
+    { status }
+  );
+}
+
 /**
  * POST /api/auth/reset-password-with-otp
  * Reset password after successfully verifying OTP
@@ -18,22 +29,35 @@ import bcrypt from "bcryptjs";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, phone_number, newPassword } = body;
+    const email = body.email || body.email_address;
+    const phone_number = body.phone_number || body.phoneNumber || body.phone;
+    const newPassword = body.newPassword || body.password || body.new_password;
 
     console.log(`🔑 [RESET-PASSWORD-OTP] Email: ${email || 'N/A'}, Phone: ${phone_number || 'N/A'}`);
+    console.log("🔑 [RESET-PASSWORD-OTP] Incoming request", {
+      hasEmail: !!email,
+      hasPhone: !!phone_number,
+      hasNewPassword: !!newPassword,
+      keys: Object.keys(body || {}),
+    });
 
     if ((!email && !phone_number) || !newPassword) {
-      return NextResponse.json(
-        { error: "Email or phone number and new password are required" },
-        { status: 400 }
-      );
+      console.warn("❌ [RESET-PASSWORD-OTP] Missing required fields", {
+        hasEmail: !!email,
+        hasPhone: !!phone_number,
+        hasNewPassword: !!newPassword,
+        bodyKeys: Object.keys(body || {}),
+      });
+      return errorResponse(400, "Email or phone number and new password are required");
     }
 
     if (newPassword.length < 8) {
-      return NextResponse.json(
-        { error: "Password must be at least 8 characters" },
-        { status: 400 }
-      );
+      console.warn("❌ [RESET-PASSWORD-OTP] Password too short", {
+        email: email || null,
+        phone_number: phone_number || null,
+        passwordLength: newPassword.length,
+      });
+      return errorResponse(400, "Password must be at least 8 characters");
     }
 
     // Find user
@@ -47,10 +71,7 @@ export async function POST(request: NextRequest) {
 
     if (userError || !user) {
       console.error(`❌ [RESET-PASSWORD-OTP] User not found`);
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return errorResponse(404, "User not found");
     }
 
     // Verify that a forgot_password OTP was recently verified for this user
@@ -66,10 +87,7 @@ export async function POST(request: NextRequest) {
 
     if (otpError || !verifiedOTP) {
       console.error(`❌ [RESET-PASSWORD-OTP] No verified OTP found`);
-      return NextResponse.json(
-        { error: "OTP verification required. Please verify your OTP first." },
-        { status: 400 }
-      );
+      return errorResponse(400, "OTP verification required. Please verify your OTP first.");
     }
 
     // Check that OTP was verified recently (within last 30 minutes)
@@ -79,10 +97,7 @@ export async function POST(request: NextRequest) {
 
     if (timeSinceVerification > thirtyMinutes) {
       console.error(`❌ [RESET-PASSWORD-OTP] OTP verification expired`);
-      return NextResponse.json(
-        { error: "OTP verification expired. Please request a new OTP." },
-        { status: 400 }
-      );
+      return errorResponse(400, "OTP verification expired. Please request a new OTP.");
     }
 
     console.log(`✅ [RESET-PASSWORD-OTP] Valid OTP verification found`);
@@ -98,10 +113,11 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       console.error(`❌ [RESET-PASSWORD-OTP] Password update failed:`, updateError);
-      return NextResponse.json(
-        { error: "Failed to update password" },
-        { status: 500 }
-      );
+      return errorResponse(500, updateError.message || "Failed to update password", {
+        code: updateError.code,
+        details: updateError.details,
+        hint: updateError.hint,
+      });
     }
 
     console.log(`✅ [RESET-PASSWORD-OTP] Password updated successfully for user: ${user.id}`);
@@ -121,9 +137,9 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("❌ [RESET-PASSWORD-OTP] Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+    return errorResponse(
+      500,
+      error instanceof Error ? error.message : "Internal server error"
     );
   }
 }
