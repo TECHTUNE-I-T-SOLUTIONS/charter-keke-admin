@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
+import { sendPushNotification } from "@/lib/push-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -202,6 +203,21 @@ export async function POST(request: NextRequest) {
       user: userData,
       message: "Login successful"
     };
+
+    try {
+      await sendPushNotification([user.id], {
+        title: "Security Alert",
+        body: `New login detected for your ${user.role} account.`,
+        type: "security_alert",
+        data: {
+          action: "user_login_notification",
+          loginMethod: email ? "email" : "phone",
+          role: user.role,
+        },
+      });
+    } catch (pushError) {
+      console.warn("⚠️ [LOGIN] Push notification failed after login:", pushError);
+    }
     
     console.log("📤 [LOGIN] Response being sent:", {
       hasToken: !!responsePayload.token,

@@ -1,102 +1,250 @@
 'use client';
 
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle, Download } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft, Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { AuthDownloadCard } from '@/components/auth-download-card';
+import { toast } from 'sonner';
 
-export default function ResetPasswordPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://charterkeke.vercel.app';
-  const appQRUrl = `${baseUrl}/install`;
+function ResetPasswordContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+  const email = searchParams.get('email');
+  const phoneNumber = searchParams.get('phone_number') || searchParams.get('phone');
+  const method = searchParams.get('method');
+
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isValidating, setIsValidating] = useState(!!token);
+  const [isValid, setIsValid] = useState(!token);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const validateToken = async () => {
+      if (!token) return;
+
+      try {
+        const response = await fetch(`/api/auth/validate-reset-token?token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+
+        if (!response.ok || !data.valid) {
+          throw new Error(data.error || 'Invalid or expired token');
+        }
+
+        setIsValid(true);
+      } catch (error) {
+        setIsValid(false);
+        toast.error('Reset link invalid', {
+          description: error instanceof Error ? error.message : 'Please request a new password reset link.',
+        });
+      } finally {
+        setIsValidating(false);
+      }
+    };
+
+    validateToken();
+  }, [token]);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!password || !confirmPassword) {
+      toast.error('Please fill in both password fields.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters long.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(token ? '/api/auth/reset-password' : '/api/auth/reset-password-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          token
+            ? { token, password }
+            : email
+              ? { email, newPassword: password, method }
+              : { phone_number: phoneNumber, newPassword: password, method }
+        ),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to reset password');
+      }
+
+      toast.success('Password updated', {
+        description: 'You can now sign in with your new password.',
+      });
+
+      setTimeout(() => router.push('/auth/login'), 1800);
+    } catch (error) {
+      toast.error('Reset failed', {
+        description: error instanceof Error ? error.message : 'Please try again.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isValidating) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FF9203]/5 via-white to-[#C57711]/10 px-4">
+        <Card className="w-full max-w-md border-orange-200/70 shadow-2xl shadow-orange-200/20 dark:border-orange-900/40">
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground">Validating reset link...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (token && !isValid) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-[#FF9203]/5 via-white to-[#C57711]/10 px-4 py-8 md:py-12 flex items-center justify-center">
+        <Card className="w-full max-w-md border-orange-200/70 shadow-2xl shadow-orange-200/20 dark:border-orange-900/40">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 inline-flex rounded-full bg-red-100 p-3 text-red-600 dark:bg-red-950/30 dark:text-red-300">
+              <ShieldCheck className="h-6 w-6" />
+            </div>
+            <CardTitle>Reset link invalid</CardTitle>
+            <CardDescription>Your password reset link is invalid or expired. Request a new one.</CardDescription>
+          </CardHeader>
+          <CardFooter className="flex flex-col gap-3">
+            <Button asChild className="w-full bg-[#FF9203] text-white hover:bg-[#E68900]">
+              <Link href="/auth/forgot-password">Request new link</Link>
+            </Button>
+            <Link href="/auth/login" className="inline-flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-4 w-4" />
+              Back to login
+            </Link>
+          </CardFooter>
+        </Card>
+      </main>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#FF9203]/5 to-[#C57711]/5 flex items-center justify-center py-8 md:py-12 px-4">
-      <div className="w-full max-w-2xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF9203]/10 dark:bg-[#633B06]/20 mb-4">
-            <CheckCircle className="h-4 w-4 text-[#814B05] dark:text-[#E4C9A5]" />
-            <span className="text-sm font-medium text-[#663C05] dark:text-[#FFE4C0]">
-              Download Charter Keke
-            </span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-[#FF9203] dark:text-[#FFE7C7] mb-3">
-            Update Password Securely
-          </h1>
-          <p className="text-orange-600 dark:text-orange-200 text-sm md:text-base max-w-lg mx-auto">
-            For your security, password updates are exclusively handled through our mobile app.
-          </p>
-        </div>
+    <main className="min-h-screen bg-gradient-to-br from-[#FF9203]/5 via-white to-[#C57711]/10 px-4 py-8 md:py-12">
+      <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[1.1fr_.9fr]">
+        <Card className="border-orange-200/70 shadow-2xl shadow-orange-200/20 dark:border-orange-900/40">
+          <CardHeader className="space-y-4 text-center sm:text-left">
+            <div className="inline-flex items-center gap-2 self-center sm:self-start rounded-full bg-[#FF9203]/10 px-4 py-2 text-sm font-semibold text-[#8D5308] dark:bg-[#633B06]/20 dark:text-[#FFE4C0]">
+              <ShieldCheck className="h-4 w-4" />
+              Secure password reset
+            </div>
+            <div>
+              <CardTitle className="text-3xl font-bold text-[#7A4603] dark:text-[#FFE7C7]">Set a new password</CardTitle>
+              <CardDescription className="mt-2 text-base text-orange-700/80 dark:text-orange-100/80">
+                {token
+                  ? 'Use the link from your email to reset your password.'
+                  : 'You verified your OTP successfully. Now choose a new password for your account.'}
+              </CardDescription>
+            </div>
+          </CardHeader>
 
-        {/* Main Content Grid */}
-        <div className="grid md:grid-cols-2 gap-6 md:gap-8 items-center">
-          {/* Left: Info & CTA */}
-          <div className="space-y-6">
-            {/* Info */}
-            <div className="space-y-3">
-              <h2 className="font-semibold text-lg text-[#FF9203] dark:text-[#FFE7C7]">
-                Enhanced Security
-              </h2>
-              {[
-                'Protected password changes',
-                'Biometric verification',
-                'Session management',
-                'Real-time account security',
-              ].map((feature, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <CheckCircle className="h-4 w-4 text-orange-600 dark:text-orange-200 mt-1 flex-shrink-0" />
-                  <p className="text-sm text-orange-700 dark:text-orange-200">{feature}</p>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="password">New password</Label>
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    className="h-12 pl-10 pr-10"
+                    autoComplete="new-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((value) => !value)}
+                    className="absolute right-3 top-3.5 text-muted-foreground hover:text-foreground"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
-              ))}
-            </div>
-
-            {/* Download Button */}
-            <a 
-              href={(process.env.NEXT_PUBLIC_APP_BASE_URL || 'https://charterkeke.vercel.app') + '/install'}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button size="lg" className="w-full bg-[#FF9203] hover:bg-[#E68900] text-white dark:bg-[#C27107] dark:hover:bg-[#8D5308]">
-                <Download className="mr-2 h-4 w-4" />
-                Download App
-                <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
-              </Button>
-            </a>
-
-            <p className="text-xs text-orange-600 dark:text-orange-100 text-center">
-              Or scan the QR code →
-            </p>
-          </div>
-
-          {/* Right: QR Code */}
-          <div className="flex justify-center">
-            <div className="bg-white dark:bg-[#2C1F0F] rounded-2xl shadow-lg p-4 md:p-6 w-full max-w-xs">
-              <div className="bg-orange-100 dark:bg-orange-800 rounded-lg p-4 flex justify-center">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(appQRUrl)}`}
-                  alt="Download Charter Keke QR Code"
-                  width={200}
-                  height={200}
-                  className="rounded"
-                />
               </div>
-              <p className="text-center text-xs text-orange-600 dark:text-orange-100 mt-3">
-                Scan to download
-              </p>
-            </div>
-          </div>
-        </div>
 
-        {/* Footer Link */}
-        <div className="mt-8 text-center">
-          <Link
-            href="/auth/login"
-            className="inline-flex items-center gap-2 text-xs md:text-sm text-orange-600 dark:text-orange-200 hover:text-orange-700 dark:hover:text-orange-100 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to login
-          </Link>
-        </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm password</Label>
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    className="h-12 pl-10 pr-10"
+                    autoComplete="new-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((value) => !value)}
+                    className="absolute right-3 top-3.5 text-muted-foreground hover:text-foreground"
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-orange-200 bg-orange-50/70 p-4 text-sm text-orange-900 dark:border-orange-900/40 dark:bg-orange-950/20 dark:text-orange-100">
+                Choose a strong password you haven’t used before. This keeps your web and mobile account secure.
+              </div>
+
+              <Button type="submit" className="h-12 w-full bg-[#FF9203] text-white hover:bg-[#E68900]" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Update password'}
+              </Button>
+            </form>
+          </CardContent>
+
+          <CardFooter className="flex flex-col gap-3 border-t px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <Link href="/auth/login" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-4 w-4" />
+              Back to login
+            </Link>
+            <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+              Home
+            </Link>
+          </CardFooter>
+        </Card>
+
+        <AuthDownloadCard
+          title="Keep using the app"
+          description="After resetting your password, open the app to continue with live ride tracking and instant notifications."
+        />
       </div>
     </main>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

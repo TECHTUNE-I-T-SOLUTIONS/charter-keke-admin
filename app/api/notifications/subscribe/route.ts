@@ -21,18 +21,16 @@ export async function POST(request: NextRequest) {
     // Accept both pushToken and push_token (snake_case from mobile)
     const pushToken = body.pushToken || body.push_token;
     const platform = body.platform;
-    const status = body.status || 'unknown'; // token_ready, permission_granted_token_pending, permission_denied
-    const reason = body.reason || null; // Why placeholder/denied
-    const isPlaceholder = body.isPlaceholder || pushToken?.startsWith('placeholder_') || false;
+    const status = body.status || 'unknown';
 
-    if (!pushToken && status !== 'permission_denied') {
+    if (!pushToken) {
       return NextResponse.json(
-        { error: "push_token and platform are required (unless permission denied)" },
+        { error: "pushToken is required" },
         { status: 400 }
       );
     }
 
-    if (!platform && status !== 'permission_denied') {
+    if (!platform) {
       return NextResponse.json(
         { error: "platform is required" },
         { status: 400 }
@@ -52,19 +50,15 @@ export async function POST(request: NextRequest) {
       platform,
       hasToken: !!pushToken,
       status,
-      isPlaceholder,
-      reason,
     });
 
     // Store the subscription
     const subscription = await storePushSubscription({
       userId: session.user.id,
-      pushToken: pushToken || null,
-      platform: platform || 'unknown',
+      pushToken,
+      platform,
       subscribedAt: new Date().toISOString(),
       status,
-      isPlaceholder,
-      reason,
     });
 
     return NextResponse.json({ 

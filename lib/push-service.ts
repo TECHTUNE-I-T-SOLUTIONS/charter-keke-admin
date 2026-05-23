@@ -33,26 +33,37 @@ export interface PushSubscription {
 }
 
 /**
- * In-memory cache for active push subscriptions
+ * In-memory cache for active push subscriptions.
+ * A single user may have multiple devices, so each user maps to an array.
  */
-const activeSubscriptions = new Map<string, PushSubscription>();
+const activeSubscriptions = new Map<string, PushSubscription[]>();
+
+const upsertCachedSubscription = (subscription: PushSubscription) => {
+  const current = activeSubscriptions.get(subscription.userId) || [];
+  const next = current.filter((item) => item.pushToken !== subscription.pushToken);
+  next.push(subscription);
+  activeSubscriptions.set(subscription.userId, next);
+};
+
+const readCachedSubscriptions = (userId: string) => activeSubscriptions.get(userId) || [];
 
 /**
  * Store a new push subscription in Supabase and cache
  */
 export const storePushSubscription = async (subscription: PushSubscription) => {
   try {
+    if (!subscription.pushToken) {
+      console.warn('⚠️ [PUSH] Refusing to store subscription without a push token for user:', subscription.userId);
+      return null;
+    }
+
     if (supabaseAdmin) {
-      // Determine if this is a placeholder token
-      const isPlaceholder = subscription.pushToken?.startsWith('placeholder_') || subscription.isPlaceholder || false;
-      
-      // Only store fields that exist in the database schema
       const { data, error } = await supabaseAdmin
         .from('push_subscriptions')
         .upsert(
           {
             user_id: subscription.userId,
-            push_token: subscription.pushToken || `placeholder_${Date.now()}`,
+            push_token: subscription.pushToken,
             platform: subscription.platform,
             subscribed_at: subscription.subscribedAt,
             is_active: true,
@@ -68,10 +79,10 @@ export const storePushSubscription = async (subscription: PushSubscription) => {
         console.log('✅ [PUSH] Subscription stored in database for user:', subscription.userId, {
           platform: subscription.platform,
           status: subscription.status,
-          isPlaceholder,
         });
       }
 
+      upsertCachedSubscription(subscription);
       return data ? data[0] : subscription;
     }
   } catch (error) {
@@ -79,7 +90,7 @@ export const storePushSubscription = async (subscription: PushSubscription) => {
   }
 
   // Always keep in-memory cache
-  activeSubscriptions.set(subscription.userId, subscription);
+  upsertCachedSubscription(subscription);
   console.log('✅ [PUSH] Subscription cached for user:', subscription.userId);
   return subscription;
 };
@@ -106,7 +117,7 @@ export const loadSubscriptionsFromDatabase = async () => {
 
     if (data && data.length > 0) {
       data.forEach((sub: any) => {
-        activeSubscriptions.set(sub.user_id, {
+        upsertCachedSubscription({
           userId: sub.user_id,
           pushToken: sub.push_token,
           platform: sub.platform,
@@ -124,14 +135,7 @@ export const loadSubscriptionsFromDatabase = async () => {
  * Get all subscriptions for a user (returns only active subscriptions)
  */
 export const getUserSubscriptions = (userId: string): PushSubscription[] => {
-  const subscription = activeSubscriptions.get(userId);
-  if (!subscription) return [];
-  
-  // Return subscription only if it has a valid token
-  if (subscription.pushToken) {
-    return [subscription];
-  }
-  return [];
+  return readCachedSubscriptions(userId).filter((subscription) => !!subscription.pushToken);
 };
 
 /**
@@ -139,14 +143,7 @@ export const getUserSubscriptions = (userId: string): PushSubscription[] => {
  * Only returns tokens that are ready to receive notifications
  */
 export const getUserActiveSubscriptions = (userId: string): PushSubscription[] => {
-  const subscription = activeSubscriptions.get(userId);
-  if (!subscription) return [];
-  
-  // Return only if has valid token and is not placeholder
-  if (subscription.pushToken && !subscription.isPlaceholder) {
-    return [subscription];
-  }
-  return [];
+  return readCachedSubscriptions(userId).filter((subscription) => !!subscription.pushToken);
 };
 
 /**
@@ -160,7 +157,7 @@ export const sendPushNotification = async (
     body: string;
     data?: Record<string, any>;
     categoryId?: string;
-    type: 'ride_request' | 'ride_accepted' | 'ride_update' | 'support_message' | 'payment_received';
+    type: 'ride_request' | 'ride_accepted' | 'ride_update' | 'ride_cancelled' | 'support_message' | 'payment_received' | 'security_alert';
   }
 ) => {
   const results: Array<{ userId: string; success: boolean; error?: string }> = [];
@@ -179,7 +176,6 @@ export const sendPushNotification = async (
       .select('*')
       .in('user_id', userIds)
       .eq('is_active', true)
-      .eq('is_placeholder', false)
       .not('push_token', 'is', null);
 
     if (error) {
@@ -240,7 +236,7 @@ export const sendPushNotification = async (
             },
           };
 
-          // For mobile app (Expo)
+          // For mobile app (Expo push tokens returned by the app)
           if (subscription.platform === 'ios' || subscription.platform === 'android') {
             await sendExpoNotification(pushToken, {
               ...notificationPayload,
@@ -292,11 +288,6 @@ const sendExpoNotification = async (
   }
 ) => {
   try {
-    // Skip placeholder tokens - they won't work
-    if (expoPushToken.startsWith('placeholder_')) {
-      throw new Error('Cannot send to placeholder token - Firebase/Google Play Services not available yet');
-    }
-
     const message = {
       to: expoPushToken,
       sound: 'default',
@@ -362,7 +353,6 @@ export const broadcastToDrivers = async (
       .from('users')
       .select('id')
       .eq('role', 'driver')
-      .not('id', 'in', `(${excludeUserIds.map(() => '?').join(',')})`)
       .limit(10000);
 
     if (error) {
@@ -370,7 +360,9 @@ export const broadcastToDrivers = async (
       return;
     }
 
-    const driverIds = (drivers || []).map((d: any) => d.id);
+    const driverIds = (drivers || [])
+      .map((d: any) => d.id)
+      .filter((id: string) => !excludeUserIds.includes(id));
     console.log(`📢 [PUSH] Found ${driverIds.length} drivers to notify`);
     
     return sendPushNotification(driverIds, {
@@ -406,7 +398,6 @@ export const broadcastToRiders = async (
       .from('users')
       .select('id')
       .in('role', ['rider', 'passenger', 'user'])
-      .not('id', 'in', `(${excludeUserIds.map(() => '?').join(',')})`)
       .limit(10000);
 
     if (error) {
@@ -414,7 +405,9 @@ export const broadcastToRiders = async (
       return;
     }
 
-    const riderIds = (riders || []).map((r: any) => r.id);
+    const riderIds = (riders || [])
+      .map((r: any) => r.id)
+      .filter((id: string) => !excludeUserIds.includes(id));
     console.log(`📢 [PUSH] Found ${riderIds.length} riders to notify`);
     
     return sendPushNotification(riderIds, {
@@ -454,7 +447,6 @@ export const broadcastToDriversWithValidTokens = async (
         id,
         push_subscriptions!inner(
           push_token,
-          is_placeholder,
           is_active,
           status
         )
@@ -462,7 +454,6 @@ export const broadcastToDriversWithValidTokens = async (
       )
       .eq('role', 'driver')
       .eq('push_subscriptions.is_active', true)
-      .eq('push_subscriptions.is_placeholder', false) // Only REAL tokens
       .neq('push_subscriptions.push_token', null);
 
     if (error) {
@@ -521,7 +512,6 @@ export const broadcastToRidersWithValidTokens = async (
         id,
         push_subscriptions!inner(
           push_token,
-          is_placeholder,
           is_active,
           status
         )
@@ -529,7 +519,6 @@ export const broadcastToRidersWithValidTokens = async (
       )
       .in('role', ['rider', 'passenger', 'user'])
       .eq('push_subscriptions.is_active', true)
-      .eq('push_subscriptions.is_placeholder', false) // Only REAL tokens
       .neq('push_subscriptions.push_token', null);
 
     if (error) {
@@ -609,8 +598,16 @@ export const removeSubscription = async (userId: string, pushToken?: string) => 
   }
 
   // Remove from in-memory cache
-  const hadSubscription = activeSubscriptions.has(userId);
-  if (hadSubscription) {
+  const current = activeSubscriptions.get(userId) || [];
+  if (pushToken) {
+    const next = current.filter((subscription) => subscription.pushToken !== pushToken);
+    if (next.length > 0) {
+      activeSubscriptions.set(userId, next);
+    } else {
+      activeSubscriptions.delete(userId);
+    }
+    console.log('✅ [PUSH] Subscription removed from cache for user:', userId);
+  } else if (activeSubscriptions.has(userId)) {
     activeSubscriptions.delete(userId);
     console.log('✅ [PUSH] Subscription removed from cache for user:', userId);
   }
@@ -620,22 +617,25 @@ export const removeSubscription = async (userId: string, pushToken?: string) => 
  * Get all active subscriptions count
  */
 export const getActiveSubscriptionsCount = () => {
-  return activeSubscriptions.size;
+  return Array.from(activeSubscriptions.values()).reduce((count, subscriptions) => count + subscriptions.length, 0);
 };
 
 /**
  * Get subscription status (in-memory cache)
  */
 export const getSubscriptionStatus = () => {
-  return {
-    activeSubscriptions: activeSubscriptions.size,
-    subscriptionsList: Array.from(activeSubscriptions.entries()).map(([userId, sub]) => ({
+  const subscriptionsList = Array.from(activeSubscriptions.entries()).flatMap(([userId, subscriptions]) =>
+    subscriptions.map((subscription) => ({
       userId,
-      platform: sub.platform,
-      subscribedAt: sub.subscribedAt,
-      status: sub.status || 'unknown',
-      isPlaceholder: sub.isPlaceholder || false,
-    })),
+      platform: subscription.platform,
+      subscribedAt: subscription.subscribedAt,
+      status: subscription.status || 'unknown',
+    }))
+  );
+
+  return {
+    activeSubscriptions: getActiveSubscriptionsCount(),
+    subscriptionsList,
   };
 };
 
@@ -655,23 +655,21 @@ export const getPushSubscriptionStats = async () => {
       .select('*', { count: 'exact', head: true })
       .eq('is_active', true);
 
-    // Get breakdown by status - simplified approach
     const { data: allSubs } = await supabaseAdmin
       .from('push_subscriptions')
-      .select('status, is_placeholder')
+      .select('platform')
       .eq('is_active', true);
 
     const stats = allSubs?.reduce((acc, sub) => {
-      const key = `${sub.status}_${sub.is_placeholder}`;
+      const key = sub.platform || 'unknown';
       acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {} as Record<string, number>) || {};
 
     return {
       total: totalCount || 0,
-      byStatus: Object.entries(stats).map(([key, count]) => {
-        const [status, isPlaceholder] = key.split('_');
-        return { status, is_placeholder: isPlaceholder === 'true', count };
+      byPlatform: Object.entries(stats).map(([platform, count]) => {
+        return { platform, count };
       }),
       timestamp: new Date().toISOString(),
     };
@@ -687,25 +685,7 @@ export const getPushSubscriptionStats = async () => {
  */
 export const findStuckPlaceholderTokens = async () => {
   try {
-    if (!supabaseAdmin) {
-      return [];
-    }
-
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-
-    const { data: stuck, error } = await supabaseAdmin
-      .from('push_subscriptions')
-      .select('user_id, push_token, platform, subscribed_at, reason')
-      .eq('is_placeholder', true)
-      .eq('is_active', true)
-      .lt('subscribed_at', twentyFourHoursAgo);
-
-    if (error) {
-      console.warn('⚠️ [PUSH] Error querying stuck tokens:', error.message);
-      return [];
-    }
-
-    return stuck || [];
+    return [];
   } catch (error) {
     console.error('❌ [PUSH] Error finding stuck placeholder tokens:', error);
     return [];
@@ -717,26 +697,7 @@ export const findStuckPlaceholderTokens = async () => {
  */
 export const cleanupOldPlaceholderTokens = async () => {
   try {
-    if (!supabaseAdmin) {
-      console.warn('⚠️ [PUSH] Supabase not initialized');
-      return { deleted: 0 };
-    }
-
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-
-    const { count, error } = await supabaseAdmin
-      .from('push_subscriptions')
-      .delete()
-      .eq('is_placeholder', true)
-      .lt('subscribed_at', twentyFourHoursAgo);
-
-    if (error) {
-      console.warn('⚠️ [PUSH] Error cleaning up placeholder tokens:', error.message);
-      return { deleted: 0, error: error.message };
-    }
-
-    console.log('✅ [PUSH] Cleaned up', count, 'old placeholder tokens');
-    return { deleted: count || 0 };
+    return { deleted: 0 };
   } catch (error) {
     console.error('❌ [PUSH] Error in cleanup:', error);
     return { deleted: 0, error: String(error) };

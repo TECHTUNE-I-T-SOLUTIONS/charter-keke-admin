@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
 import { supabase } from "@/lib/supabase"
+import { Resend } from "resend"
+
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 /**
  * POST /api/auth/forgot-password
@@ -9,21 +12,22 @@ import { supabase } from "@/lib/supabase"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email } = body
+    const { email, phone_number } = body
 
-    if (!email) {
+    if (!email && !phone_number) {
       return NextResponse.json(
-        { error: "Email is required" },
+        { error: "Email or phone number is required" },
         { status: 400 }
       )
     }
 
-    // Find user by email
-    const { data: user, error: userError } = await supabase
+    const query = supabase
       .from("users")
-      .select("id, email, status")
-      .eq("email", email)
-      .single()
+      .select("id, email, phone_number, status")
+
+    const { data: user, error: userError } = await (email
+      ? query.eq("email", email).single()
+      : query.eq("phone_number", phone_number).single())
 
     // Always return success for security (don't reveal if email exists or not)
     if (userError || !user) {
@@ -63,13 +67,33 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TODO: Send email with reset link
-    // const resetLink = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${resetToken}`
-    // await sendPasswordResetEmail(email, resetLink)
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_BASE_URL || "https://charterkeke.vercel.app"
+    const resetLink = `${baseUrl}/auth/reset-password?token=${resetToken}`
 
-    console.log("Password reset token generated for user:", email)
-    console.log("Reset link would be sent to:", email)
-    // For development, log the reset token
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL || "Charter Keke <noreply@charterkeke.com>",
+          to: user.email,
+          subject: "Reset your Charter Keke password",
+          html: `
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+              <h1>Reset your password</h1>
+              <p>We received a request to reset the password for your Charter Keke account.</p>
+              <p><a href="${resetLink}" style="display:inline-block;padding:12px 18px;background:#FF9203;color:#fff;text-decoration:none;border-radius:8px;">Reset password</a></p>
+              <p>If the button does not work, copy this link into your browser:</p>
+              <p>${resetLink}</p>
+              <p>This link expires in 1 hour.</p>
+            </div>
+          `,
+        })
+      } catch (emailError) {
+        console.error("Password reset email send failed:", emailError)
+      }
+    }
+
+    console.log("Password reset token generated for user:", user.email)
+    console.log("Reset link:", resetLink)
     if (process.env.NODE_ENV === "development") {
       console.log("Reset token (dev only):", resetToken)
     }
@@ -77,7 +101,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         success: true, 
-        message: "If this email is registered, you will receive a reset link" 
+        message: "If this account is registered, you will receive a reset link" 
       },
       { status: 200 }
     )
@@ -86,7 +110,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         success: true,
-        message: "If this email is registered, you will receive a reset link" 
+        message: "If this account is registered, you will receive a reset link" 
       },
       { status: 200 }
     )

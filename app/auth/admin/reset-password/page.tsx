@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { Suspense, useState, useEffect } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -12,32 +12,31 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "sonner"
 import { Eye, EyeOff, Lock, ArrowRight, Loader2, Shield, AlertCircle, CheckCircle2 } from "lucide-react"
 import { Particles } from "@/components/particles"
+import { AuthDownloadCard } from "@/components/auth-download-card"
 
 function AdminResetPasswordContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const token = searchParams.get("token")
+  const email = searchParams.get("email")
+  const phoneNumber = searchParams.get("phone_number") || searchParams.get("phone")
+  const method = searchParams.get("method")
 
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isValidating, setIsValidating] = useState(true)
-  const [isValidToken, setIsValidToken] = useState(false)
+  const [isValidating, setIsValidating] = useState(!!token)
+  const [isValidToken, setIsValidToken] = useState(!token)
   const [submitted, setSubmitted] = useState(false)
 
-  // Validate token on mount
   useEffect(() => {
     const validateToken = async () => {
-      if (!token) {
-        setIsValidToken(false)
-        setIsValidating(false)
-        return
-      }
+      if (!token) return
 
       try {
-        const response = await fetch(`/api/auth/admin/validate-reset-token?token=${token}`)
+        const response = await fetch(`/api/auth/admin/validate-reset-token?token=${encodeURIComponent(token)}`)
         const data = await response.json()
 
         if (response.ok && data.valid) {
@@ -82,13 +81,16 @@ function AdminResetPasswordContent() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch("/api/auth/admin/reset-password", {
+      const response = await fetch(token ? "/api/auth/admin/reset-password" : "/api/auth/reset-password-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token,
-          password,
-        }),
+        body: JSON.stringify(
+          token
+            ? { token, password }
+            : email
+              ? { email, newPassword: password, method }
+              : { phone_number: phoneNumber, newPassword: password, method }
+        ),
       })
 
       const data = await response.json()
@@ -117,44 +119,28 @@ function AdminResetPasswordContent() {
     return (
       <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
         <Particles />
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="z-10"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="z-10">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </motion.div>
       </div>
     )
   }
 
-  if (!isValidToken) {
+  if (token && !isValidToken) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
         <Particles />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md z-10"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md z-10">
           <Card className="bg-card/80 backdrop-blur-xl border-primary/20 shadow-2xl">
             <CardContent className="pt-12 text-center space-y-4">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className="mx-auto bg-gradient-to-br from-red-500 to-red-600 rounded-full p-3 w-fit"
-              >
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring", stiffness: 200 }} className="mx-auto bg-gradient-to-br from-red-500 to-red-600 rounded-full p-3 w-fit">
                 <AlertCircle className="w-6 h-6 text-white" />
               </motion.div>
 
               <div>
                 <h2 className="text-2xl font-serif font-bold">Invalid Link</h2>
-                <p className="text-muted-foreground mt-2">
-                  This password reset link is invalid or has expired. Please request a new one.
-                </p>
+                <p className="text-muted-foreground mt-2">This password reset link is invalid or has expired. Please request a new one.</p>
               </div>
 
               <Button asChild className="w-full h-11">
@@ -175,31 +161,19 @@ function AdminResetPasswordContent() {
 
   if (submitted) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
         <Particles />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md z-10"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md z-10">
           <Card className="bg-card/80 backdrop-blur-xl border-primary/20 shadow-2xl">
             <CardContent className="pt-12 text-center space-y-4">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className="mx-auto bg-gradient-to-br from-green-500 to-green-600 rounded-full p-3 w-fit"
-              >
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring", stiffness: 200 }} className="mx-auto bg-gradient-to-br from-green-500 to-green-600 rounded-full p-3 w-fit">
                 <CheckCircle2 className="w-6 h-6 text-white" />
               </motion.div>
 
               <div>
                 <h2 className="text-2xl font-serif font-bold">Password Reset Complete</h2>
-                <p className="text-muted-foreground mt-2">
-                  Your password has been successfully updated. Redirecting to login...
-                </p>
+                <p className="text-muted-foreground mt-2">Your password has been successfully updated. Redirecting to login...</p>
               </div>
             </CardContent>
           </Card>
@@ -209,35 +183,26 @@ function AdminResetPasswordContent() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
       <Particles />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md z-10"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md z-10">
         <Card className="bg-card/80 backdrop-blur-xl border-primary/20 shadow-2xl">
           <CardHeader className="text-center space-y-3">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto bg-gradient-to-br from-primary to-primary/60 rounded-full p-3"
-            >
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: "spring", stiffness: 200 }} className="mx-auto bg-gradient-to-br from-primary to-primary/60 rounded-full p-3">
               <Shield className="w-6 h-6 text-white" />
             </motion.div>
 
             <div>
               <CardTitle className="text-2xl font-serif">Set New Password</CardTitle>
-              <CardDescription>Create a strong password for your admin account</CardDescription>
+              <CardDescription>
+                {token ? "Create a strong password for your admin account" : "You verified your OTP successfully. Set a new admin password now."}
+              </CardDescription>
             </div>
           </CardHeader>
 
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
-              {/* New Password */}
               <div className="space-y-2">
                 <Label htmlFor="password" className="flex items-center gap-2">
                   <Lock className="h-4 w-4" />
@@ -254,18 +219,12 @@ function AdminResetPasswordContent() {
                     className="bg-background/50 h-11 pr-10"
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                    disabled={isSubmitting}
-                  >
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground" disabled={isSubmitting}>
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
 
-              {/* Confirm Password */}
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <div className="relative">
@@ -279,18 +238,12 @@ function AdminResetPasswordContent() {
                     className="bg-background/50 h-11 pr-10"
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                    disabled={isSubmitting}
-                  >
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground" disabled={isSubmitting}>
                     {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
 
-              {/* Security note */}
               <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
                 <p className="text-xs text-amber-800 dark:text-amber-200">
                   🔒 <strong>Security:</strong> Use a strong, unique password. Avoid common words or patterns.
@@ -300,17 +253,8 @@ function AdminResetPasswordContent() {
 
             <CardFooter className="flex flex-col gap-3">
               <Button type="submit" className="w-full h-11" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Resetting...
-                  </>
-                ) : (
-                  <>
-                    Reset Password
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </>
-                )}
+                {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                {isSubmitting ? "Resetting..." : <><span>Reset Password</span><ArrowRight className="h-4 w-4 ml-2" /></>}
               </Button>
 
               <div className="text-center text-sm">
@@ -321,6 +265,10 @@ function AdminResetPasswordContent() {
             </CardFooter>
           </form>
         </Card>
+
+        <div className="mt-6 hidden lg:block">
+          <AuthDownloadCard title="Download the app" description="Keep admin notifications and app access handy on mobile too." />
+        </div>
       </motion.div>
     </div>
   )

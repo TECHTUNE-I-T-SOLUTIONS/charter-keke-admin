@@ -27,12 +27,15 @@ export async function POST(request: NextRequest) {
     const bankName = formData.get("bankName") as string;
     const bankAccountNumber = formData.get("bankAccountNumber") as string;
     const emergencyContact = formData.get("emergencyContact") as string;
+    const operatingZones = ((formData.get("operatingZones") as string) || "").trim();
 
     // Admin fields
     const adminLevel = (formData.get("adminLevel") as string) || "support";
 
     // File uploads
     const profilePictureFile = formData.get("profilePicture") as File | null;
+    const vehiclePictureFile = formData.get("vehiclePicture") as File | null;
+    const licensePictureFile = formData.get("licensePicture") as File | null;
 
     // Validate input
     if (!firstName || !lastName || !email || !phone || !password) {
@@ -103,6 +106,54 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    let vehiclePictureUrl: string | null = null;
+    if (vehiclePictureFile && vehiclePictureFile.size > 0) {
+      try {
+        const buffer = Buffer.from(await vehiclePictureFile.arrayBuffer());
+        const timestamp = Date.now();
+        const filePath = `${email}/${timestamp}-vehicle.${vehiclePictureFile.name.split(".").pop()}`;
+
+        const uploadResult = await uploadFileWithServiceRole(
+          "vehicle-pictures",
+          filePath,
+          buffer,
+          vehiclePictureFile.type
+        );
+
+        vehiclePictureUrl = uploadResult.url;
+      } catch (uploadError) {
+        console.error("Vehicle picture upload error:", uploadError);
+        return NextResponse.json(
+          { error: "Vehicle picture upload failed. Please try again." },
+          { status: 502 }
+        );
+      }
+    }
+
+    let licensePictureUrl: string | null = null;
+    if (licensePictureFile && licensePictureFile.size > 0) {
+      try {
+        const buffer = Buffer.from(await licensePictureFile.arrayBuffer());
+        const timestamp = Date.now();
+        const filePath = `${email}/${timestamp}-license.${licensePictureFile.name.split(".").pop()}`;
+
+        const uploadResult = await uploadFileWithServiceRole(
+          "license-documents",
+          filePath,
+          buffer,
+          licensePictureFile.type
+        );
+
+        licensePictureUrl = uploadResult.url;
+      } catch (uploadError) {
+        console.error("License picture upload error:", uploadError);
+        return NextResponse.json(
+          { error: "License picture upload failed. Please try again." },
+          { status: 502 }
+        );
+      }
+    }
+
     // Read optional referral code submitted by the client (referrer code)
     const incomingReferralCode = (formData.get("referralCode") as string) || '';
 
@@ -124,6 +175,19 @@ export async function POST(request: NextRequest) {
       home_address: homeAddress || null,
       work_address: workAddress || null,
     };
+
+    if (role === "driver") {
+      createPayload.vehicle_type = vehicleType || null;
+      createPayload.plate_number = plateNumber || null;
+      createPayload.union_name = unionName || null;
+      createPayload.operating_zones = operatingZones
+        ? operatingZones.split(",").map((zone) => zone.trim()).filter(Boolean)
+        : null;
+      createPayload.bank_name = bankName || null;
+      createPayload.bank_account_number = bankAccountNumber || null;
+      createPayload.vehicle_picture_url = vehiclePictureUrl;
+      createPayload.license_picture_url = licensePictureUrl;
+    }
 
     let { data: newUser, error: createError } = await supabase
       .from("users")
@@ -222,7 +286,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Create role-specific records
-    // Note: Driver and Rider profiles are created via dedicated endpoints (/api/drivers, /api/riders)
+    if (role === "driver") {
+      const driverEmergencyContact = emergencyContact || emergencyContactName || emergencyContactPhone || null;
+
+      const { error: driverError } = await supabase.from("drivers").insert({
+        user_id: newUser.id,
+        vehicle_type: vehicleType || null,
+        plate_number: plateNumber || null,
+        union_name: unionName || null,
+        operating_zones: operatingZones
+          ? operatingZones.split(",").map((zone) => zone.trim()).filter(Boolean)
+          : [],
+        bank_name: bankName || null,
+        bank_account_number: bankAccountNumber || null,
+        emergency_contact: driverEmergencyContact,
+        vehicle_picture_url: vehiclePictureUrl,
+        license_picture_url: licensePictureUrl,
+        verified: false,
+      });
+
+      if (driverError) {
+        console.error("Driver record creation error:", driverError);
+      }
+    }
+
     if (role === "admin") {
       const { error: adminError } = await supabase.from("admins").insert({
         user_id: newUser.id,

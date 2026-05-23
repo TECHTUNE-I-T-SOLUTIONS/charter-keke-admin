@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       await sendPushNotification([userId], {
         title: "🔒 Logged Out",
         body: "You have been logged out of your account.",
-        type: "ride_update",
+        type: "security_alert",
         data: {
           action: "user_logout_notification",
         },

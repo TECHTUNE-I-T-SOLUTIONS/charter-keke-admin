@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const subscription = storePushSubscription({
+    const subscription = await storePushSubscription({
       userId,
       pushToken,
       subscribedAt: new Date().toISOString(),
@@ -88,7 +88,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    removeSubscription(userId);
+    await removeSubscription(userId);
 
     console.log("✅ [API] User unsubscribed:", userId);
 

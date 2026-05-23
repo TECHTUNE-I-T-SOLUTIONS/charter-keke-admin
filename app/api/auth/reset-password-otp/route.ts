@@ -18,13 +18,13 @@ import bcrypt from "bcryptjs";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, newPassword } = body;
+    const { email, phone_number, newPassword } = body;
 
-    console.log(`🔑 [RESET-PASSWORD-OTP] Email: ${email}`);
+    console.log(`🔑 [RESET-PASSWORD-OTP] Email: ${email || 'N/A'}, Phone: ${phone_number || 'N/A'}`);
 
-    if (!email || !newPassword) {
+    if ((!email && !phone_number) || !newPassword) {
       return NextResponse.json(
-        { error: "Email and new password are required" },
+        { error: "Email or phone number and new password are required" },
         { status: 400 }
       );
     }
@@ -37,11 +37,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user
-    const { data: user, error: userError } = await supabaseAdmin
+    const userQuery = supabaseAdmin
       .from("users")
-      .select("id, email")
-      .eq("email", email)
-      .single();
+      .select("id, email, phone_number")
+
+    const { data: user, error: userError } = await (email
+      ? userQuery.eq("email", email).single()
+      : userQuery.eq("phone_number", phone_number).single());
 
     if (userError || !user) {
       console.error(`❌ [RESET-PASSWORD-OTP] User not found`);

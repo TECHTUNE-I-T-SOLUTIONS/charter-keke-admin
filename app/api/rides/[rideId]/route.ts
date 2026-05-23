@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getSessionFromRequest } from "@/lib/auth"
 import { supabaseAdmin } from "@/lib/supabase"
+import { sendPushNotification } from "@/lib/push-service"
 
 interface RouteParams {
   params: Promise<{ rideId: string }>
@@ -68,7 +69,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const { data: existingRide, error: fetchError } = await supabaseAdmin!
       .from("rides")
-      .select("id, rider_id, status")
+      .select("id, rider_id, assigned_driver_id, status")
       .eq("id", rideId)
       .single()
 
@@ -105,6 +106,26 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       if (updateError) {
         console.error("[Rides/:id][PUT] cancel error:", updateError)
         return NextResponse.json({ error: "Failed to cancel ride" }, { status: 500 })
+      }
+
+      const cancellationTargets = [existingRide.rider_id]
+      if (existingRide.assigned_driver_id && existingRide.assigned_driver_id !== existingRide.rider_id) {
+        cancellationTargets.push(existingRide.assigned_driver_id)
+      }
+
+      try {
+        await sendPushNotification(cancellationTargets, {
+          title: "Ride Cancelled",
+          body: cancellationReason || "The ride has been cancelled.",
+          type: "ride_cancelled",
+          data: {
+            rideId,
+            cancellationReason: cancellationReason || "User cancelled",
+            action: "ride_cancelled_notification",
+          },
+        })
+      } catch (pushError) {
+        console.warn("[Rides/:id][PUT] cancellation push failed:", pushError)
       }
 
       return NextResponse.json({ success: true, ride: updatedRide })

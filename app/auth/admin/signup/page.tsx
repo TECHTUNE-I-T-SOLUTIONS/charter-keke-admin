@@ -6,6 +6,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
+import { AuthDownloadCard } from "@/components/auth-download-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -660,6 +661,13 @@ export default function AdminSignupPage() {
           </form>
         </Card>
       </motion.div>
+
+      <div className="hidden lg:block fixed bottom-4 right-4 z-10 w-full max-w-sm">
+        <AuthDownloadCard
+          title="Admin on the go"
+          description="Install the app to keep access to notifications and ride updates wherever you are."
+        />
+      </div>
     </div>
   )
 }
