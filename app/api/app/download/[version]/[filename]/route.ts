@@ -5,7 +5,8 @@ import { NextRequest, NextResponse } from 'next/server';
  * 
  * Unified app download endpoint for website
  * Handles Android APK and iOS IPA downloads
- * Redirects to GitHub releases with proper headers
+ * Streams artifacts from GitHub releases using the server token so users
+ * never leave the website download flow.
  */
 
 const GITHUB_REPO = 'TECHTUNE-I-T-SOLUTIONS/charterkeke-mobile';
@@ -80,10 +81,44 @@ export async function GET(
       );
     }
 
-    // Add tracking header and redirect to GitHub
-    console.log(`📥 [DOWNLOAD] Serving ${filename} for version ${version}`);
-    
-    return NextResponse.redirect(asset.browser_download_url, 302);
+    console.log(`📥 [DOWNLOAD] Streaming ${filename} for version ${version}`);
+
+    const assetResponse = await fetch(
+      `https://api.github.com/repos/${GITHUB_REPO}/releases/assets/${asset.id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/octet-stream',
+          'Authorization': `token ${GITHUB_TOKEN}`,
+          'User-Agent': 'Charter-Keke-Download-Server',
+        },
+      }
+    );
+
+    if (!assetResponse.ok) {
+      console.error(
+        `Failed to fetch asset ${asset.id} (${filename}): ${assetResponse.status}`
+      );
+      return NextResponse.json(
+        { error: 'Unable to download file' },
+        { status: 502 }
+      );
+    }
+
+    const contentType = assetResponse.headers.get('content-type') || 'application/octet-stream';
+    const contentLength = assetResponse.headers.get('content-length') || asset.size.toString();
+    const body = await assetResponse.arrayBuffer();
+
+    return new NextResponse(body, {
+      status: 200,
+      headers: {
+        'Content-Type': contentType,
+        'Content-Length': contentLength,
+        'Content-Disposition': `attachment; filename="${asset.name}"`,
+        'Cache-Control': 'no-store',
+        'X-Download-Source': 'github-proxy',
+      },
+    });
   } catch (error) {
     console.error('[GET /api/app/download] Error:', error);
     return NextResponse.json(
