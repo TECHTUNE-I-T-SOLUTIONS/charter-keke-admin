@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
 import bcrypt from "bcryptjs"
-import { supabase } from "@/lib/supabase"
+import { supabase, supabaseAdmin } from "@/lib/supabase"
 
 function errorResponse(status: number, error: string, meta?: Record<string, unknown>) {
   return NextResponse.json(
@@ -23,25 +23,120 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const token = body.token || body.resetToken || body.passwordResetToken
     const password = body.password || body.newPassword || body.new_password
+    const email = body.email || body.email_address
+    const phoneNumber = body.phone_number || body.phoneNumber || body.phone
 
     console.log("🔑 [RESET-PASSWORD] Incoming request", {
       hasToken: !!token,
       hasPassword: !!password,
+      hasEmail: !!email,
+      hasPhone: !!phoneNumber,
       keys: Object.keys(body || {}),
     })
 
-    if (!token || !password) {
-      console.warn("❌ [RESET-PASSWORD] Missing token or password", {
+    if (!password) {
+      console.warn("❌ [RESET-PASSWORD] Missing password", {
         hasToken: !!token,
-        hasPassword: !!password,
+        hasEmail: !!email,
+        hasPhone: !!phoneNumber,
         bodyKeys: Object.keys(body || {}),
       })
-      return errorResponse(400, "Token and password are required")
+      return errorResponse(400, "Password is required")
     }
 
     if (password.length < 8) {
       console.warn("❌ [RESET-PASSWORD] Password too short", { tokenPresent: !!token, passwordLength: password.length })
       return errorResponse(400, "Password must be at least 8 characters")
+    }
+
+    // Backward-compatible path for older mobile clients:
+    // they submit email/phone + newPassword to /auth/reset-password after OTP verification.
+    if (!token && (email || phoneNumber)) {
+      console.log("🔁 [RESET-PASSWORD] Falling back to OTP-based reset flow")
+
+      const userQuery = supabaseAdmin
+        .from("users")
+        .select("id, email, phone_number")
+
+      const { data: otpUser, error: otpUserError } = await (email
+        ? userQuery.eq("email", email).single()
+        : userQuery.eq("phone_number", phoneNumber).single())
+
+      if (otpUserError || !otpUser) {
+        console.warn("❌ [RESET-PASSWORD] OTP fallback user not found", {
+          email: email || null,
+          phoneNumber: phoneNumber || null,
+        })
+        return errorResponse(404, "User not found")
+      }
+
+      const { data: verifiedOtp, error: verifiedOtpError } = await supabaseAdmin
+        .from("otps")
+        .select("id, verified_at")
+        .eq("user_id", otpUser.id)
+        .eq("type", "forgot_password")
+        .eq("is_verified", true)
+        .order("verified_at", { ascending: false })
+        .limit(1)
+        .single()
+
+      if (verifiedOtpError || !verifiedOtp) {
+        console.warn("❌ [RESET-PASSWORD] OTP fallback verification missing", {
+          userId: otpUser.id,
+        })
+        return errorResponse(400, "OTP verification required. Please verify your OTP first.")
+      }
+
+      const verifiedTime = new Date(verifiedOtp.verified_at).getTime()
+      const thirtyMinutes = 30 * 60 * 1000
+      if (Date.now() - verifiedTime > thirtyMinutes) {
+        console.warn("❌ [RESET-PASSWORD] OTP fallback verification expired", {
+          userId: otpUser.id,
+          verifiedAt: verifiedOtp.verified_at,
+        })
+        return errorResponse(400, "OTP verification expired. Please request a new OTP.")
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10)
+      const { error: otpUpdateError } = await supabaseAdmin
+        .from("users")
+        .update({
+          password_hash: hashedPassword,
+          password_reset_token: null,
+          password_reset_expiry: null,
+          updated_at: new Date(),
+        })
+        .eq("id", otpUser.id)
+
+      if (otpUpdateError) {
+        console.error("❌ [RESET-PASSWORD] OTP fallback password update failed:", otpUpdateError)
+        return errorResponse(500, otpUpdateError.message || "Failed to update password", {
+          code: otpUpdateError.code,
+          details: otpUpdateError.details,
+          hint: otpUpdateError.hint,
+        })
+      }
+
+      await supabaseAdmin
+        .from("otps")
+        .delete()
+        .eq("id", verifiedOtp.id)
+
+      return NextResponse.json(
+        { success: true, message: "Password reset successfully" },
+        { status: 200 }
+      )
+    }
+
+    if (!token) {
+      console.warn("❌ [RESET-PASSWORD] Missing token or password", {
+        hasToken: !!token,
+        hasPassword: !!password,
+        hasEmail: !!email,
+        hasPhone: !!phoneNumber,
+        bodyKeys: Object.keys(body || {}),
+      })
+      return errorResponse(400, "Token and password are required")
     }
 
     // Hash the token to compare with stored hash
