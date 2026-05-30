@@ -1,19 +1,13 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Playfair_Display } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Providers } from "./providers"
 import "./globals.css"
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-})
-
 export const metadata: Metadata = {
-  title: "Charter Keke - Affordable Keke Rides in Lagos",
+  title: "Charter Keke Admin",
   description:
-    "Fast and affordable keke rides across Debari, Shomolu, and Yaba in Lagos, Nigeria. Book your ride in seconds.",
+    "Operations, CRM, driver moderation, ride monitoring, and mobile app intelligence for Charter Keke.",
   keywords: ["keke rides", "tricycle", "Lagos", "Nigeria", "affordable transport", "ride sharing"],
   authors: [{ name: "Charter Keke Team" }],
   icons: {
@@ -21,16 +15,16 @@ export const metadata: Metadata = {
     apple: "/charter keke.png",
   },
   openGraph: {
-    title: "Charter Keke - Affordable Keke Rides in Lagos",
-    description: "Fast and affordable keke rides across Debari, Shomolu, and Yaba. Book your ride in seconds.",
+    title: "Charter Keke Admin",
+    description: "Operations and customer support dashboard for Charter Keke.",
     type: "website",
   },
 }
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#b8507b" },
-    { media: "(prefers-color-scheme: dark)", color: "#4353a4" },
+    { media: "(prefers-color-scheme: light)", color: "#f28c00" },
+    { media: "(prefers-color-scheme: dark)", color: "#111111" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -44,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${playfair.className} font-serif antialiased`} suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <Providers>
           {children}
         </Providers>

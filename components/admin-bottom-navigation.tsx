@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { Home, Users, Car, MapPin, CreditCard, BarChart3, Settings, MessageSquare } from "lucide-react"
+import { Home, Car, MapPin, BarChart3, Radar } from "lucide-react"
 
 interface NavItem {
   label: string
@@ -13,10 +13,10 @@ interface NavItem {
 
 const adminNavItems: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <Home className="h-5 w-5" /> },
-  { label: "Rides", href: "/admin/rides", icon: <MapPin className="h-5 w-5" /> },
-  { label: "Drivers", href: "/admin/drivers", icon: <Car className="h-5 w-5" /> },
-  { label: "Users", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
-  { label: "More", href: "/admin/payments", icon: <BarChart3 className="h-5 w-5" /> },
+  { label: "Ops", href: "/admin/operations", icon: <Radar className="h-5 w-5" /> },
+  { label: "Demand", href: "/admin/locations", icon: <MapPin className="h-5 w-5" /> },
+  { label: "Drivers", href: "/admin/driver-intelligence", icon: <Car className="h-5 w-5" /> },
+  { label: "More", href: "/admin/moderation", icon: <BarChart3 className="h-5 w-5" /> },
 ]
 
 export function AdminBottomNavigation() {

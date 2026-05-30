@@ -1,142 +1,88 @@
-# Charter Keke - Tricycle Ride-Sharing Platform
+# Charter Keke Admin
 
-## 🛺 Project Overview
+Admin, CRM, operations intelligence, and moderation dashboard for Charter Keke.
 
-**Charter Keke** is a modern, production-ready tricycle (keke) ride-sharing platform built for the Lagos metropolitan area, starting with the Debari-Shomolu-Yaba corridor pilot.
+This repository is the admin-only split from the main Charter Keke application. It keeps the operational API routes needed by admins while focusing the UI on platform monitoring, support, driver oversight, payments, and mobile app intelligence.
 
-### Core Features
+## Main Areas
 
-- 👥 **Unified User Management** - Riders, drivers, and admins on one platform
-- 🔐 **Secure Authentication** - NextAuth with bcrypt password hashing
-- 🗺️ **Zone-Based Dispatch** - Intelligent driver matching by operating zones
-- 💰 **Wallet System** - Ledger-grade transaction tracking
-- 🔔 **Real-Time Notifications** - In-app, SMS, email, and push notifications
-- 👨‍💼 **Admin Dashboard** - Full system control with granular permissions
-- 📊 **Complete Audit Trail** - All actions tracked and logged
-- 🔄 **Graceful Fallback** - Works without external dependencies
+- Admin dashboard and system overview
+- CRM inbox, departments, email sync, logs, notes, and ticket workflows
+- Operations intelligence for bookings, acceptance, cancellations, revenue, and risk
+- Location intelligence for pickup demand, destination demand, and route corridors
+- Driver intelligence for activity, completion, acceptance, verification, and review queues
+- Mobile traffic monitoring through push subscriptions and ride activity trends
+- Moderation center for pending drivers, overdue remittances, and support load
+- Payments, settlements, ride monitoring, users, security, and settings
 
----
+## Admin Pages
 
-## 🏗️ Architecture Overview
+- `/admin/dashboard`
+- `/admin/operations`
+- `/admin/locations`
+- `/admin/driver-intelligence`
+- `/admin/mobile-traffic`
+- `/admin/moderation`
+- `/admin/drivers`
+- `/admin/rides`
+- `/admin/payments`
+- `/admin/users`
+- `/admin/monitor`
+- `/admin/messages`
+- `/admin/crm`
+- `/admin/security`
+- `/admin/settings`
 
-### Technology Stack
+## Stack
 
-| Component | Technology |
-|-----------|-----------|
-| Frontend | Next.js 16, React 19, Tailwind CSS |
-| Backend | Next.js API Routes |
-| Database | Supabase (PostgreSQL) |
-| Auth | NextAuth.js 5 |
-| Notifications | Supabase Triggers + Termii |
-| Caching | Redis (optional) |
+| Area | Technology |
+| --- | --- |
+| App | Next.js 16, React 19 |
+| Styling | Tailwind CSS, Radix UI |
+| Charts | Recharts |
+| Auth | NextAuth |
+| Database | Supabase PostgreSQL |
 | Payments | Paystack |
+| Notifications | Expo/Web Push, Termii SMS |
+| Hosting | Vercel |
 
----
+## Setup
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm or npm
-- Supabase account
-- Termii account (for SMS)
-- Resend account (for email)
-
-### Quick Setup
-
-1. **Install dependencies**
-   ```bash
-2. **Configure environment**
-   ```bash
-   cp .env.example .env.local
-   # Fill in all required values
-   ```
-
-3. **Set up database**
-   - Create Supabase project
-   - Run `lib/db-schema.sql` in SQL editor
-   - Create initial admin user
-
-4. **Run development server**
-   ```bash
-   pnpm dev
-   ```
-
-5. **Access the app**
-   - Web: http://localhost:3000
-   - API: http://localhost:3000/api
-
-See [QUICK_SETUP.md](./QUICK_SETUP.md) for detailed instructions.
-
----
-
-## 📁 Project Structure
-
-```
-charter-keke/
-├── app/
-│   ├── api/                   # All API routes
-│   ├── auth/                  # Authentication pages
-│   ├── user/                  # User dashboard
-│   ├── driver/                # Driver dashboard
-│   └── admin/                 # Admin dashboard
-├── components/                # Reusable components
-├── lib/                       # Core utilities
-│   ├── auth.ts                # NextAuth config
-│   ├── supabase.ts            # Database client
-│   ├── notifications.ts       # Notification utilities
-│   └── db-schema.sql          # Database schema
-├── types/                     # TypeScript types
-├── SYSTEM_DOCUMENTATION.md    # Architecture docs
-├── QUICK_SETUP.md             # Setup guide
-└── .env.example               # Environment template
+```bash
+pnpm install
+cp .env.example .env.local
+pnpm dev
 ```
 
----
+Open `http://localhost:3000/admin/dashboard`.
 
-## 🔒 Security
+## Required Environment
 
-- Passwords hashed with bcryptjs
-- JWT-based sessions
-- Server-side role enforcement
-- Immutable audit trails
-- Never trust client-side claims
+Use the same Supabase and service integrations as the main backend unless you intentionally deploy a separate admin backend.
 
----
+Key variables:
 
-## 📚 Documentation
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL`
+- `PAYSTACK_SECRET_KEY`
+- `TERMII_API_KEY`
+- `VAPID_PUBLIC_KEY`
+- `VAPID_PRIVATE_KEY`
 
-- **[QUICK_SETUP.md](./QUICK_SETUP.md)** - Step-by-step setup guide
-- **[SYSTEM_DOCUMENTATION.md](./SYSTEM_DOCUMENTATION.md)** - Complete system architecture
-- **[.env.example](./.env.example)** - Environment variables reference
+## Validation
 
----
+```bash
+pnpm exec tsc --noEmit --incremental false
+pnpm run build
+```
 
-## 🐛 Troubleshooting
+## Repository
 
-See [SYSTEM_DOCUMENTATION.md](./SYSTEM_DOCUMENTATION.md#10-maintenance--operations) for troubleshooting guides.
+GitHub: `TECHTUNE-I-T-SOLUTIONS/charter-keke-admin`
 
----
+## License
 
-## 💼 Team & Roles
-
-| Role | Responsibility |
-|------|-----------------|
-| Founder / Product Lead | Vision, ecosystem intelligence |
-| Technical Partner | Architecture, code implementation |
-| Co-Founder / Field Lead | Ground operations, driver relations |
-
----
-
-## 📄 License
-
-Proprietary - Unauthorized copying or use is prohibited.
-
----
-
-**Charter Keke** — Fast, affordable, and reliable tricycle rides across Lagos.
-
-Last Updated: December 23, 2025
-Version: 2.0.0 (MVP)
-
+Proprietary. Unauthorized copying, redistribution, or use is prohibited.

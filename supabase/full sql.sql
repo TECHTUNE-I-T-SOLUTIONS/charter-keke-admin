@@ -380,6 +380,19 @@ CREATE TABLE public.rides (
   CONSTRAINT rides_remitted_by_payment_fkey FOREIGN KEY (remitted_by_payment_id) REFERENCES public.driver_payments(id),
   CONSTRAINT rides_rider_id_fkey FOREIGN KEY (rider_id) REFERENCES public.users(id)
 );
+CREATE TABLE public.search_locations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  place_id text NOT NULL UNIQUE,
+  name text NOT NULL,
+  formatted_address text NOT NULL,
+  latitude double precision NOT NULL,
+  longitude double precision NOT NULL,
+  search_keywords text NOT NULL DEFAULT ''::text,
+  usage_count integer NOT NULL DEFAULT 0,
+  last_used_at timestamp with time zone NOT NULL DEFAULT now(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT search_locations_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.support_tickets (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,

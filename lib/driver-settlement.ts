@@ -12,7 +12,7 @@ export interface DriverSettlementSummary {
   paymentDueDate: string
 }
 
-const PLATFORM_FEE_RATE = 0.15
+export const PLATFORM_FEE_RATE = 0.15
 
 function startOfDay(date: Date) {
   const copy = new Date(date)

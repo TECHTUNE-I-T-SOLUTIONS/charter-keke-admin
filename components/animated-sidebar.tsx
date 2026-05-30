@@ -27,6 +27,10 @@ import {
   CreditCard,
   MessageSquare,
   MapPin,
+  ClipboardList,
+  LineChart,
+  Map,
+  Radar,
   ChevronLeft,
   ChevronRight,
   Activity,
@@ -63,20 +67,27 @@ const driverNavItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <Home className="h-5 w-5" /> },
-  { label: "Users", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
+  { label: "Operations", href: "/admin/operations", icon: <Radar className="h-5 w-5" /> },
+  { label: "Demand Map", href: "/admin/locations", icon: <Map className="h-5 w-5" /> },
+  { label: "Driver Intel", href: "/admin/driver-intelligence", icon: <LineChart className="h-5 w-5" /> },
+  { label: "Mobile Traffic", href: "/admin/mobile-traffic", icon: <Activity className="h-5 w-5" /> },
   { label: "Drivers", href: "/admin/drivers", icon: <Car className="h-5 w-5" /> },
   { label: "Rides", href: "/admin/rides", icon: <MapPin className="h-5 w-5" /> },
-  { label: "Analytics", href: "/admin/analytics", icon: <BarChart3 className="h-5 w-5" /> },
   { label: "Payments", href: "/admin/payments", icon: <CreditCard className="h-5 w-5" /> },
+  { label: "Moderation", href: "/admin/moderation", icon: <Shield className="h-5 w-5" /> },
+  { label: "Users", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
+  { label: "Analytics", href: "/admin/analytics", icon: <BarChart3 className="h-5 w-5" /> },
   { label: "Monitor", href: "/admin/monitor", icon: <Activity className="h-5 w-5" /> },
   { label: "Messages", href: "/admin/messages", icon: <MessageSquare className="h-5 w-5" /> },
+  { label: "CRM", href: "/admin/crm", icon: <ClipboardList className="h-5 w-5" /> },
   { label: "Security", href: "/admin/security", icon: <Shield className="h-5 w-5" /> },
   { label: "Settings", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ]
 
-function getNavItems(role: UserRole): NavItem[] {
+function getNavItems(role: UserRole | string): NavItem[] {
   switch (role) {
     case "admin":
+    case "super_admin":
       return adminNavItems
     case "driver":
       return driverNavItems
@@ -187,7 +198,7 @@ export function AnimatedSidebar() {
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto scrollbar-thin">
         <TooltipProvider delayDuration={0}>
           {navItems.map((item) => {
-            const isActive = pathname === item.href
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
             return (
               <Tooltip key={item.href}>
                 <TooltipTrigger asChild>
@@ -197,7 +208,7 @@ export function AnimatedSidebar() {
                         "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group cursor-pointer",
                         isCollapsed && !isMobile && "justify-center px-3",
                         isActive
-                          ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25"
+                          ? "bg-primary text-primary-foreground shadow-sm"
                           : "text-muted-foreground hover:bg-primary/10 hover:text-foreground",
                       )}
                     >
