@@ -1,0 +1,5578 @@
+{
+  "metrics": {
+    "pgbouncer_up": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 1
+      }
+    ],
+    "node_memory_KernelStack_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 4046848
+      }
+    ],
+    "node_disk_reads_merged_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 10119773
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 19787
+      }
+    ],
+    "node_filesystem_files": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme0n1p2",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/",
+        "value": 648960
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme1n1",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/data",
+        "value": 524288
+      }
+    ],
+    "node_memory_Active_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 219561984
+      }
+    ],
+    "node_memory_PageTables_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 10997760
+      }
+    ],
+    "node_memory_Unevictable_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 8192
+      }
+    ],
+    "node_network_receive_packets_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 6836339
+      }
+    ],
+    "pgbouncer_in_flight_dns_queries": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": -28
+      }
+    ],
+    "node_memory_Inactive_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 89772032
+      }
+    ],
+    "node_memory_MemFree_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 5734400
+      }
+    ],
+    "node_memory_Mlocked_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 8192
+      }
+    ],
+    "node_network_receive_compressed_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "node_network_transmit_fifo_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "node_network_transmit_packets_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 6650789
+      }
+    ],
+    "pgbouncer_stats_queries_pooled_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "value": 24
+      }
+    ],
+    "pgbouncer_used_servers": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_disk_read_time_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 44749.215
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 47.945
+      }
+    ],
+    "node_filesystem_free_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme0n1p2",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/",
+        "value": 3227017216
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme1n1",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/data",
+        "value": 8163840000
+      }
+    ],
+    "node_memory_AnonPages_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 128593920
+      }
+    ],
+    "node_memory_HardwareCorrupted_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_memory_SReclaimable_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 29437952
+      }
+    ],
+    "node_memory_VmallocUsed_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 14786560
+      }
+    ],
+    "node_network_transmit_bytes_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 1769118274
+      }
+    ],
+    "node_network_transmit_drop_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "node_network_transmit_colls_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "node_scrape_collector_success": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "cpu",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "diskstats",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "filesystem",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "loadavg",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "meminfo",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "netdev",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "vmstat",
+        "value": 1
+      }
+    ],
+    "node_vmstat_pgfault": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 607896493
+      }
+    ],
+    "pgbouncer_databases_disabled": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "force_user": "pgbouncer",
+        "host": "",
+        "name": "pgbouncer",
+        "pool_mode": "statement",
+        "port": "6543",
+        "value": 0
+      }
+    ],
+    "pgbouncer_pools_server_used_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "pgbouncer_version_info": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "version": "PgBouncer 1.19.0",
+        "value": 1
+      }
+    ],
+    "pgbouncer_pools_server_login_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "node_memory_HugePages_Rsvd": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_disk_discarded_sectors_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 0
+      }
+    ],
+    "node_load1": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0.02
+      }
+    ],
+    "node_memory_Committed_AS_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 1168703488
+      }
+    ],
+    "node_scrape_collector_duration_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "cpu",
+        "value": 0.000383068
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "diskstats",
+        "value": 0.002491005
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "filesystem",
+        "value": 0.000319078
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "loadavg",
+        "value": 0.000031384
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "meminfo",
+        "value": 0.000255457
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "netdev",
+        "value": 0.000192329
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "collector": "vmstat",
+        "value": 0.000161996
+      }
+    ],
+    "node_vmstat_pswpin": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 42922253
+      }
+    ],
+    "node_memory_Cached_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 175718400
+      }
+    ],
+    "node_memory_Percpu_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 827392
+      }
+    ],
+    "node_network_receive_errs_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "pgbouncer_users": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 1
+      }
+    ],
+    "node_disk_flush_requests_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 0
+      }
+    ],
+    "node_memory_HugePages_Free": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_memory_VmallocChunk_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_network_receive_multicast_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "pgbouncer_stats_client_wait_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "value": 0.030182
+      }
+    ],
+    "node_network_transmit_errs_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "pgbouncer_pools_client_waiting_cancel_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "pgbouncer_stats_queries_duration_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "value": 0.046705
+      }
+    ],
+    "node_cpu_online": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "value": 1
+      }
+    ],
+    "node_load15": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0.04
+      }
+    ],
+    "node_vmstat_pgpgout": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 234317421
+      }
+    ],
+    "node_disk_filesystem_info": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "type": "ext4",
+        "usage": "filesystem",
+        "uuid": "1c8d472f-15b9-40b3-a753-583a76bc63ca",
+        "version": "1.0",
+        "value": 1
+      }
+    ],
+    "node_memory_Mapped_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 110813184
+      }
+    ],
+    "pgbouncer_databases_max_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "force_user": "pgbouncer",
+        "host": "",
+        "name": "pgbouncer",
+        "pool_mode": "statement",
+        "port": "6543",
+        "value": 0
+      }
+    ],
+    "pgbouncer_pools_client_active_cancel_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "node_filesystem_avail_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme0n1p2",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/",
+        "value": 3199610880
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme1n1",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/data",
+        "value": 8042205184
+      }
+    ],
+    "node_load5": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0.04
+      }
+    ],
+    "node_memory_MemAvailable_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 196829184
+      }
+    ],
+    "node_memory_Slab_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 73830400
+      }
+    ],
+    "node_vmstat_pswpout": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 46754789
+      }
+    ],
+    "pgbouncer_databases_paused": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "force_user": "pgbouncer",
+        "host": "",
+        "name": "pgbouncer",
+        "pool_mode": "statement",
+        "port": "6543",
+        "value": 0
+      }
+    ],
+    "pgbouncer_free_clients": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 49
+      }
+    ],
+    "pgbouncer_login_clients": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_filesystem_device_error": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme0n1p2",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme1n1",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/data",
+        "value": 0
+      }
+    ],
+    "node_memory_SwapCached_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 62390272
+      }
+    ],
+    "node_network_receive_fifo_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "pgbouncer_used_clients": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 1
+      }
+    ],
+    "postgresql_restarts_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_disk_discard_time_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 0
+      }
+    ],
+    "node_network_transmit_carrier_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "node_network_transmit_compressed_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "pgbouncer_config_max_client_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 200
+      }
+    ],
+    "pgbouncer_pools_server_active_cancel_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "node_disk_flush_requests_time_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 0
+      }
+    ],
+    "node_disk_io_time_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 31179.397
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 50.903
+      }
+    ],
+    "node_disk_read_bytes_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 1223210568192
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 3268835328
+      }
+    ],
+    "node_memory_ShmemPmdMapped_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_network_receive_bytes_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 1695862941
+      }
+    ],
+    "pgbouncer_stats_received_bytes_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "value": 9005
+      }
+    ],
+    "pgbouncer_stats_sql_transactions_pooled_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "value": 4
+      }
+    ],
+    "node_disk_info": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "major": "259",
+        "minor": "1",
+        "model": "Amazon Elastic Block Store",
+        "path": "pci-0000:00:04.0-nvme-1",
+        "revision": "1.0",
+        "rotational": "0",
+        "serial": "vol06e7ec14df6cba43a",
+        "wwn": "nvme.1d0f-766f6c3036653765633134646636636261343361-416d617a6f6e20456c617374696320426c6f636b2053746f7265-00000001",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "major": "259",
+        "minor": "0",
+        "model": "Amazon Elastic Block Store",
+        "path": "pci-0000:00:1f.0-nvme-1",
+        "revision": "1.0",
+        "rotational": "0",
+        "serial": "vol0faedc1ce742f3ecb",
+        "wwn": "nvme.1d0f-766f6c3066616564633163653734326633656362-416d617a6f6e20456c617374696320426c6f636b2053746f7265-00000001",
+        "value": 1
+      }
+    ],
+    "node_disk_write_time_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 18866.587
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 123.768
+      }
+    ],
+    "node_filesystem_files_free": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme0n1p2",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/",
+        "value": 387737
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme1n1",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/data",
+        "value": 522746
+      }
+    ],
+    "node_memory_Bounce_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_vmstat_pgmajfault": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 32059480
+      }
+    ],
+    "pgbouncer_pools": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 3
+      }
+    ],
+    "node_memory_Inactive_file_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 50343936
+      }
+    ],
+    "node_memory_WritebackTmp_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_memory_MemTotal_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 431304704
+      }
+    ],
+    "node_disk_writes_completed_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 14934257
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 50376
+      }
+    ],
+    "node_filesystem_readonly": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme0n1p2",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme1n1",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/data",
+        "value": 0
+      }
+    ],
+    "node_memory_AnonHugePages_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_memory_Hugepagesize_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 2097152
+      }
+    ],
+    "node_memory_SwapFree_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 831664128
+      }
+    ],
+    "node_memory_SwapTotal_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 1073737728
+      }
+    ],
+    "pgbouncer_cached_dns_zones": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "pgbouncer_databases": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 1
+      }
+    ],
+    "node_memory_Buffers_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 1089536
+      }
+    ],
+    "node_memory_HugePages_Surp": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_memory_Inactive_anon_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 39428096
+      }
+    ],
+    "pgbouncer_pools_server_active_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "pgbouncer_pools_server_idle_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "pgbouncer_pools_server_testing_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "node_disk_io_time_weighted_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 63615.803
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 171.713
+      }
+    ],
+    "node_disk_reads_completed_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 70095665
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 67950
+      }
+    ],
+    "node_memory_NFS_Unstable_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_memory_Shmem_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 4669440
+      }
+    ],
+    "pgbouncer_pools_client_waiting_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "node_vmstat_pgpgin": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 1197733808
+      }
+    ],
+    "node_memory_Active_file_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 121769984
+      }
+    ],
+    "node_cpu_guest_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "mode": "nice",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "mode": "user",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "mode": "nice",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "mode": "user",
+        "value": 0
+      }
+    ],
+    "node_disk_discards_completed_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 0
+      }
+    ],
+    "node_memory_SUnreclaim_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 44392448
+      }
+    ],
+    "node_memory_ShmemHugePages_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_memory_Active_anon_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 97792000
+      }
+    ],
+    "node_network_receive_frame_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "node_network_receive_nohandler_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "pgbouncer_cached_dns_names": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 1
+      }
+    ],
+    "pgbouncer_pools_client_active_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "node_disk_written_bytes_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 233717781504
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 6223257600
+      }
+    ],
+    "node_filesystem_size_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme0n1p2",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/",
+        "value": 10359754752
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme1n1",
+        "device_error": "",
+        "fstype": "ext4",
+        "mountpoint": "/data",
+        "value": 8350298112
+      }
+    ],
+    "node_memory_CommitLimit_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 1289388032
+      }
+    ],
+    "pgbouncer_databases_current_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "force_user": "pgbouncer",
+        "host": "",
+        "name": "pgbouncer",
+        "pool_mode": "statement",
+        "port": "6543",
+        "value": 0
+      }
+    ],
+    "pgbouncer_databases_pool_size": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "force_user": "pgbouncer",
+        "host": "",
+        "name": "pgbouncer",
+        "pool_mode": "statement",
+        "port": "6543",
+        "value": 2
+      }
+    ],
+    "pgbouncer_pools_server_being_canceled_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "pgbouncer_stats_sent_bytes_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "value": 9450
+      }
+    ],
+    "node_disk_writes_merged_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 39621217
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 32416
+      }
+    ],
+    "db_transmit_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_disk_io_now": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 0
+      }
+    ],
+    "node_filesystem_mount_info": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme0n1p2",
+        "major": "259",
+        "minor": "3",
+        "mountpoint": "/",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "/dev/nvme1n1",
+        "major": "259",
+        "minor": "0",
+        "mountpoint": "/data",
+        "value": 1
+      }
+    ],
+    "node_vmstat_oom_kill": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "pgbouncer_config_max_user_connections": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "pgbouncer_free_servers": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 50
+      }
+    ],
+    "node_disk_discards_merged_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme0n1",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "nvme1n1",
+        "value": 0
+      }
+    ],
+    "node_memory_Dirty_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 630784
+      }
+    ],
+    "node_memory_VmallocTotal_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 138535235485696
+      }
+    ],
+    "pgbouncer_databases_reserve_pool": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "force_user": "pgbouncer",
+        "host": "",
+        "name": "pgbouncer",
+        "pool_mode": "statement",
+        "port": "6543",
+        "value": 0
+      }
+    ],
+    "pgbouncer_stats_server_in_transaction_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "value": 0.078347
+      }
+    ],
+    "node_memory_HugePages_Total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "pgbouncer_pools_client_maxwait_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "pgbouncer",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "pgbouncer",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "database": "postgres",
+        "user": "supabase_storage_admin",
+        "value": 0
+      }
+    ],
+    "node_cpu_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "mode": "idle",
+        "value": 2172663.62
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "mode": "iowait",
+        "value": 15633.07
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "mode": "irq",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "mode": "nice",
+        "value": 107.73
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "mode": "softirq",
+        "value": 92.19
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "mode": "steal",
+        "value": 29.86
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "mode": "system",
+        "value": 7576.57
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "0",
+        "mode": "user",
+        "value": 34165.3
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "mode": "idle",
+        "value": 2169498.28
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "mode": "iowait",
+        "value": 15655.41
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "mode": "irq",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "mode": "nice",
+        "value": 63.99
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "mode": "softirq",
+        "value": 200.48
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "mode": "steal",
+        "value": 30.4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "mode": "system",
+        "value": 7581.69
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "cpu": "1",
+        "mode": "user",
+        "value": 37147
+      }
+    ],
+    "node_memory_Writeback_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "value": 0
+      }
+    ],
+    "node_network_receive_drop_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "db",
+        "device": "ens5",
+        "value": 0
+      }
+    ],
+    "pg_stat_database_temp_files_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 16
+      }
+    ],
+    "pg_stat_database_xact_rollback_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 260
+      }
+    ],
+    "postgres_exporter_config_last_reload_successful": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 0
+      }
+    ],
+    "promhttp_metric_handler_requests_in_flight": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 1
+      }
+    ],
+    "promhttp_metric_handler_requests_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "code": "200",
+        "value": 14704
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "code": "500",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "code": "503",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "code": "200",
+        "value": 37289
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "code": "500",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "code": "503",
+        "value": 0
+      }
+    ],
+    "go_memstats_frees_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 32740087
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 111712549
+      }
+    ],
+    "go_memstats_mallocs_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 32744153
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 111729244
+      }
+    ],
+    "go_memstats_mcache_inuse_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 2400
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 2416
+      }
+    ],
+    "pg_exporter_last_scrape_duration_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 0.006136366
+      }
+    ],
+    "pg_stat_bgwriter_checkpoints_timed_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 7443
+      }
+    ],
+    "pg_stat_statements_total_queries": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 63136
+      }
+    ],
+    "pg_database_size_mb": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 30.480637550354
+      }
+    ],
+    "pg_scrape_collector_success": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "collector": "database",
+        "value": 1
+      }
+    ],
+    "pg_stat_bgwriter_checkpoint_write_time_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 327288
+      }
+    ],
+    "pg_stat_database_blks_hit_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 76323633
+      }
+    ],
+    "pg_stat_database_conflicts_confl_deadlock_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "pg_stat_database_xact_commit_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 1093120
+      }
+    ],
+    "pg_up": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 1
+      }
+    ],
+    "pg_settings_default_transaction_read_only": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "pg_stat_activity_xact_runtime": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "physical_replication_lag_is_connected_to_primary": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "postgres_exporter_config_last_reload_success_timestamp_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 0
+      }
+    ],
+    "process_max_fds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 524288
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 524287
+      }
+    ],
+    "realtime_postgres_changes_total_subscriptions": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "go_memstats_alloc_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 2357504
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 4215240
+      }
+    ],
+    "go_memstats_stack_inuse_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 524288
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 1048576
+      }
+    ],
+    "go_memstats_stack_sys_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 524288
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 1048576
+      }
+    ],
+    "pg_stat_database_blks_read_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 2249
+      }
+    ],
+    "auth_users_user_count": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": -1
+      }
+    ],
+    "go_info": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "version": "go1.21.3",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "version": "go1.25.8",
+        "value": 1
+      }
+    ],
+    "physical_replication_lag_physical_replication_lag_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "go_memstats_alloc_bytes_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 5540438808
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 18079317544
+      }
+    ],
+    "go_memstats_next_gc_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 4842984
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 8324378
+      }
+    ],
+    "pg_stat_bgwriter_checkpoints_req_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 29
+      }
+    ],
+    "pg_stat_bgwriter_maxwritten_clean_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "go_memstats_mcache_sys_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 15600
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 15704
+      }
+    ],
+    "pg_database_size_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "datname": "postgres",
+        "value": 16878739
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "datname": "template0",
+        "value": 7504399
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "datname": "template1",
+        "value": 7578127
+      }
+    ],
+    "pg_exporter_user_queries_load_error": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "filename": "/opt/postgres_exporter/queries.yml",
+        "hashsum": "dd8c1b95014fa823c9dcaaef8645b2536ad29b7bc3149ec544115dd0b752519f",
+        "value": 0
+      }
+    ],
+    "pg_status_in_recovery": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "physical_replication_lag_is_wal_replay_paused": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "supabase_usage_metrics_user_queries_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 8477
+      }
+    ],
+    "go_memstats_lookups_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 0
+      }
+    ],
+    "pg_stat_bgwriter_stats_reset": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 1777932688
+      }
+    ],
+    "pg_stat_database_tup_updated_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 1282
+      }
+    ],
+    "process_virtual_memory_max_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 1.8446744073709552e+19
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 1.8446744073709552e+19
+      }
+    ],
+    "pg_stat_database_tup_deleted_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 2348
+      }
+    ],
+    "pg_stat_statements_total_time_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 245.06642666
+      }
+    ],
+    "go_memstats_heap_idle_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 4308992
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 5398528
+      }
+    ],
+    "go_memstats_other_sys_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 455872
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 641033
+      }
+    ],
+    "pg_scrape_collector_duration_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "collector": "database",
+        "value": 0.00510048
+      }
+    ],
+    "pg_stat_database_conflicts_confl_tablespace_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "pg_stat_database_tup_fetched_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 53673083
+      }
+    ],
+    "process_cpu_seconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 93.47
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 1983.49
+      }
+    ],
+    "process_virtual_memory_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 1266720768
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 1286668288
+      }
+    ],
+    "realtime_postgres_changes_client_subscriptions": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "go_memstats_heap_inuse_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 3522560
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 6135808
+      }
+    ],
+    "pg_stat_bgwriter_buffers_checkpoint_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 3109
+      }
+    ],
+    "pg_stat_database_conflicts_confl_snapshot_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "pg_stat_database_conflicts_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "postgres_exporter_build_info": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "branch": "HEAD",
+        "goarch": "arm64",
+        "goos": "linux",
+        "goversion": "go1.21.3",
+        "revision": "68c176b8833b7580bf847cecf60f8e0ad5923f9a",
+        "tags": "unknown",
+        "version": "0.15.0",
+        "value": 1
+      }
+    ],
+    "process_resident_memory_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 9265152
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 15499264
+      }
+    ],
+    "go_memstats_heap_objects": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 4066
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 16695
+      }
+    ],
+    "go_memstats_heap_released_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 3612672
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 4390912
+      }
+    ],
+    "go_memstats_mspan_inuse_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 63840
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 92320
+      }
+    ],
+    "pg_ls_archive_statusdir_wal_pending_count": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "pg_stat_bgwriter_buffers_alloc_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 2339
+      }
+    ],
+    "pg_stat_bgwriter_buffers_clean_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "pg_stat_bgwriter_checkpoint_sync_time_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 547
+      }
+    ],
+    "pg_stat_database_conflicts_confl_lock_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "go_gc_duration_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "quantile": "0",
+        "value": 0.000037373
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "quantile": "0.25",
+        "value": 0.000060084
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "quantile": "0.5",
+        "value": 0.000099885
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "quantile": "0.75",
+        "value": 0.000239474
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "quantile": "1",
+        "value": 0.028078275
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "quantile": "0",
+        "value": 0.000051633
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "quantile": "0.25",
+        "value": 0.000054751
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "quantile": "0.5",
+        "value": 0.000055931
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "quantile": "0.75",
+        "value": 0.000059436
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "quantile": "1",
+        "value": 0.120750546
+      }
+    ],
+    "go_gc_duration_seconds_sum": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 9.821676664
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 15.143540528
+      }
+    ],
+    "go_gc_duration_seconds_count": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 6879
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 18642
+      }
+    ],
+    "pg_stat_database_deadlocks_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "pg_stat_database_num_backends": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 16
+      }
+    ],
+    "pg_stat_database_temp_bytes_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 133300224
+      }
+    ],
+    "pg_stat_database_tup_inserted_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 3473
+      }
+    ],
+    "pg_wal_size_mb": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 96.0006380081177
+      }
+    ],
+    "process_open_fds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 10
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 9
+      }
+    ],
+    "go_memstats_buck_hash_sys_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 5048
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 1630807
+      }
+    ],
+    "go_memstats_gc_sys_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 3905632
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 3453712
+      }
+    ],
+    "go_memstats_heap_alloc_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 2357504
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 4215240
+      }
+    ],
+    "go_memstats_mspan_sys_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 81480
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 114240
+      }
+    ],
+    "pg_stat_database_tup_returned_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 160417966
+      }
+    ],
+    "process_start_time_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 1779287486.33
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 1777932718.11
+      }
+    ],
+    "connection_stats_connection_count": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "username": "authenticator",
+        "value": 11
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "username": "other",
+        "value": 5
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "username": "supabase_admin",
+        "value": 5
+      }
+    ],
+    "go_goroutines": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 13
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 57
+      }
+    ],
+    "go_memstats_heap_sys_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 7831552
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 11534336
+      }
+    ],
+    "go_memstats_last_gc_time_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 1780169730.04421
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 1780169676.15871
+      }
+    ],
+    "go_threads": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 6
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 9
+      }
+    ],
+    "max_connections_connection_count": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 60
+      }
+    ],
+    "pg_exporter_last_scrape_error": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 0
+      }
+    ],
+    "pg_stat_database_conflicts_confl_bufferpin_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "server": "localhost:5432",
+        "value": 0
+      }
+    ],
+    "go_memstats_sys_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 12819472
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "value": 18438408
+      }
+    ],
+    "pg_exporter_scrapes_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgresql",
+        "value": 14705
+      }
+    ],
+    "pgrst_jwt_cache_evictions_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgrest",
+        "value": 0
+      }
+    ],
+    "pgrst_jwt_cache_hits_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgrest",
+        "value": 8067
+      }
+    ],
+    "pgrst_jwt_cache_requests_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgrest",
+        "value": 8069
+      }
+    ],
+    "pgrst_schema_cache_loads_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgrest",
+        "status": "FAIL",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgrest",
+        "status": "SUCCESS",
+        "value": 29
+      }
+    ],
+    "pgrst_db_pool_max": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgrest",
+        "value": 10
+      }
+    ],
+    "pgrst_db_pool_waiting": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgrest",
+        "value": 0
+      }
+    ],
+    "pgrst_db_pool_available": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgrest",
+        "value": 6
+      }
+    ],
+    "pgrst_schema_cache_query_time_seconds": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgrest",
+        "value": 0.002676849
+      }
+    ],
+    "pgrst_db_pool_timeouts_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "postgrest",
+        "value": 0
+      }
+    ],
+    "process_runtime_go_mem_lookups_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 0
+      }
+    ],
+    "db_sql_connection_closed_max_idle_time_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "value": 2
+      }
+    ],
+    "db_sql_latency_milliseconds_bucket": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "0",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "5",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "10",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "25",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "50",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "75",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "100",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "250",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "750",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "1000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "2500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "5000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "7500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "10000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "+Inf",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "0",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "5",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "10",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "25",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "50",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "75",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "100",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "250",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "750",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "1000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "2500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "5000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "7500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "10000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "+Inf",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "0",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "5",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "10",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "25",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "50",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "75",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "100",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "250",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "750",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "1000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "2500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "5000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "7500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "10000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "+Inf",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "0",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "5",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "10",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "25",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "50",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "75",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "100",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "250",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "750",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "1000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "2500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "5000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "7500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "10000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "+Inf",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "0",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "5",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "10",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "25",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "50",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "75",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "100",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "250",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "750",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "1000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "2500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "5000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "7500",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "10000",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "le": "+Inf",
+        "value": 2
+      }
+    ],
+    "db_sql_latency_milliseconds_sum": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "value": 9.719224
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "value": 9.475154
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "value": 222.111065
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "value": 0.088578
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "value": 0.324532
+      }
+    ],
+    "db_sql_latency_milliseconds_count": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.begin_tx",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.conn.query",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.connector.connect",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.rows",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "value": 2
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "method": "sql.tx.commit",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "ok",
+        "value": 2
+      }
+    ],
+    "global_auth_version_major": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "gotrue",
+        "otel_scope_version": "",
+        "value": 2
+      }
+    ],
+    "db_sql_connection_wait_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "value": 0
+      }
+    ],
+    "process_runtime_go_mem_heap_inuse_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 6135808
+      }
+    ],
+    "db_sql_connection_open": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "idle",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "status": "inuse",
+        "value": 0
+      }
+    ],
+    "process_runtime_go_gc_pause_ns_bucket": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "0",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "5",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "10",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "25",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "50",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "75",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "100",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "250",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "500",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "750",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "1000",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "2500",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "5000",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "7500",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "10000",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "le": "+Inf",
+        "value": 18642
+      }
+    ],
+    "process_runtime_go_gc_pause_ns_sum": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 15143540528
+      }
+    ],
+    "process_runtime_go_gc_pause_ns_count": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 18642
+      }
+    ],
+    "process_runtime_go_mem_heap_objects": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 16695
+      }
+    ],
+    "global_auth_version_minor": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "gotrue",
+        "otel_scope_version": "",
+        "value": 189
+      }
+    ],
+    "http_server_request_body_size_bytes_bucket": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "5",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "10",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "25",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "50",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "75",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "100",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "250",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "500",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "750",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "1000",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "2500",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "5000",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "7500",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "10000",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "+Inf",
+        "value": 4
+      }
+    ],
+    "http_server_request_body_size_bytes_sum": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "value": 0
+      }
+    ],
+    "http_server_request_body_size_bytes_count": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "value": 4
+      }
+    ],
+    "process_runtime_go_gc_pause_total_ns_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 15143540528
+      }
+    ],
+    "process_runtime_go_mem_heap_released_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 4390912
+      }
+    ],
+    "db_sql_connection_closed_max_idle_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "value": 0
+      }
+    ],
+    "http_status_codes_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "code": "200",
+        "http_route": "/health",
+        "otel_scope_name": "gotrue",
+        "otel_scope_version": "",
+        "value": 4
+      }
+    ],
+    "runtime_uptime_milliseconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 2237011599
+      }
+    ],
+    "db_sql_connection_wait_duration_milliseconds_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "value": 0
+      }
+    ],
+    "process_runtime_go_gc_count_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 18642
+      }
+    ],
+    "process_runtime_go_mem_live_objects": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 16695
+      }
+    ],
+    "db_sql_connection_closed_max_lifetime_total": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "value": 0
+      }
+    ],
+    "global_auth_version_patch": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "gotrue",
+        "otel_scope_version": "",
+        "value": 0
+      }
+    ],
+    "http_server_request_duration_seconds_bucket": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0.005",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0.01",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0.025",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0.05",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0.075",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0.1",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0.25",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0.5",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0.75",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "1",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "2.5",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "5",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "7.5",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "10",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "+Inf",
+        "value": 4
+      }
+    ],
+    "http_server_request_duration_seconds_sum": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "value": 0.079104168
+      }
+    ],
+    "http_server_request_duration_seconds_count": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "value": 4
+      }
+    ],
+    "target_info": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "service_name": "unknown_service:auth",
+        "telemetry_sdk_language": "go",
+        "telemetry_sdk_name": "opentelemetry",
+        "telemetry_sdk_version": "1.40.0",
+        "value": 1
+      }
+    ],
+    "global_auth_version_rc": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "gotrue",
+        "otel_scope_version": "",
+        "value": 0
+      }
+    ],
+    "otel_scope_info": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 1
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "gotrue",
+        "otel_scope_version": "",
+        "value": 1
+      }
+    ],
+    "process_runtime_go_goroutines": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 56
+      }
+    ],
+    "gotrue_running": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "gotrue",
+        "otel_scope_version": "",
+        "value": 1
+      }
+    ],
+    "process_runtime_go_cgo_calls": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 0
+      }
+    ],
+    "http_server_response_body_size_bytes_bucket": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "0",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "5",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "10",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "25",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "50",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "75",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "100",
+        "value": 0
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "250",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "500",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "750",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "1000",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "2500",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "5000",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "7500",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "10000",
+        "value": 4
+      },
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "le": "+Inf",
+        "value": 4
+      }
+    ],
+    "http_server_response_body_size_bytes_sum": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "value": 428
+      }
+    ],
+    "http_server_response_body_size_bytes_count": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "http_request_method": "GET",
+        "http_response_status_code": "200",
+        "http_route": "/health",
+        "network_protocol_name": "http",
+        "network_protocol_version": "1.1",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+        "otel_scope_version": "0.64.0",
+        "server_address": "srkvknxdmgomdiicalmn.supabase.co",
+        "url_scheme": "http",
+        "value": 4
+      }
+    ],
+    "process_runtime_go_mem_heap_alloc_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 4215240
+      }
+    ],
+    "process_runtime_go_mem_heap_idle_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 5398528
+      }
+    ],
+    "db_sql_connection_max_open": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "github.com/XSAM/otelsql",
+        "otel_scope_version": "0.26.0",
+        "value": 10
+      }
+    ],
+    "process_runtime_go_mem_heap_sys_bytes": [
+      {
+        "supabase_project_ref": "srkvknxdmgomdiicalmn",
+        "supabase_identifier": "srkvknxdmgomdiicalmn",
+        "service_type": "gotrue",
+        "otel_scope_name": "go.opentelemetry.io/contrib/instrumentation/runtime",
+        "otel_scope_version": "0.45.0",
+        "value": 11534336
+      }
+    ]
+  },
+  "timestamp": "2026-05-30T19:36:16.432Z"
+}

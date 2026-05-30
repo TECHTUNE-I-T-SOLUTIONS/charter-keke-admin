@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { AdminBottomNavigation } from "@/components/admin-bottom-navigation"
 import { AdminDriverDetailsModal } from "@/components/admin-driver-details-modal"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -92,7 +89,6 @@ function DriversContent() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -367,10 +363,7 @@ function DriversContent() {
             </div>
           </motion.div>
         </div>
-      </main>
-      <AdminBottomNavigation />
-
-      {/* Driver Details Modal */}
+      </main>{/* Driver Details Modal */}
       <AdminDriverDetailsModal
         open={detailsModalOpen}
         onOpenChange={setDetailsModalOpen}
@@ -381,9 +374,5 @@ function DriversContent() {
 }
 
 export default function DriversPage() {
-  return (
-    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
-      <DriversContent />
-    </ProtectedRoute>
-  )
+  return <DriversContent />
 }

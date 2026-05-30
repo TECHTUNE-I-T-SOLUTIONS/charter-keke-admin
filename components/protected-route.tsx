@@ -12,12 +12,14 @@ interface ProtectedRouteProps {
   allowedRoles?: string[]
 }
 
+let hasCompletedInitialAuthGate = false
+
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [isAuthorized, setIsAuthorized] = useState(false)
-  const [showLoader, setShowLoader] = useState(true)
-  const initialLoadRef = useRef(true)
+  const [showLoader, setShowLoader] = useState(!hasCompletedInitialAuthGate)
+  const initialLoadRef = useRef(!hasCompletedInitialAuthGate)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -49,6 +51,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
         const timer = setTimeout(() => {
           setIsAuthorized(true)
           setShowLoader(false)
+          hasCompletedInitialAuthGate = true
           initialLoadRef.current = false
         }, 500)
 

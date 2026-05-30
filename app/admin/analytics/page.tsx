@@ -1,8 +1,6 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart3, TrendingUp, Users, Car, Wallet, Activity } from "lucide-react"
@@ -10,7 +8,6 @@ import { BarChart3, TrendingUp, Users, Car, Wallet, Activity } from "lucide-reac
 function AnalyticsContent() {
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -125,9 +122,5 @@ function AnalyticsContent() {
 }
 
 export default function AnalyticsPage() {
-  return (
-    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
-      <AnalyticsContent />
-    </ProtectedRoute>
-  )
+  return <AnalyticsContent />
 }

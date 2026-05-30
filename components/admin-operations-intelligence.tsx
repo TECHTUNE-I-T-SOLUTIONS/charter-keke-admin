@@ -1,9 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { AdminBottomNavigation } from "@/components/admin-bottom-navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -309,7 +306,6 @@ function OperationsIntelligenceContent({ page }: { page: PageKind }) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
       <main className="flex-1 pt-16 lg:pt-0">
         <div className="space-y-6 p-4 md:p-6 lg:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -381,16 +377,10 @@ function OperationsIntelligenceContent({ page }: { page: PageKind }) {
             </>
           )}
         </div>
-      </main>
-      <AdminBottomNavigation />
-    </div>
+      </main></div>
   )
 }
 
 export function AdminOperationsIntelligence({ page }: { page: PageKind }) {
-  return (
-    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
-      <OperationsIntelligenceContent page={page} />
-    </ProtectedRoute>
-  )
+  return <OperationsIntelligenceContent page={page} />
 }

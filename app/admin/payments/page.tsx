@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { AdminBottomNavigation } from "@/components/admin-bottom-navigation"
 import { AdminPaymentDetailsModal } from "@/components/admin-payment-details-modal"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -133,7 +130,6 @@ function PaymentsContent() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0 pb-24">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -374,9 +370,7 @@ function PaymentsContent() {
             </Tabs>
           </motion.div>
         </div>
-      </main>
-      <AdminBottomNavigation />
-      <AdminPaymentDetailsModal
+      </main><AdminPaymentDetailsModal
         open={showPaymentModal}
         onOpenChange={setShowPaymentModal}
         paymentId={selectedPaymentId}
@@ -386,9 +380,5 @@ function PaymentsContent() {
 }
 
 export default function PaymentsPage() {
-  return (
-    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
-      <PaymentsContent />
-    </ProtectedRoute>
-  )
+  return <PaymentsContent />
 }

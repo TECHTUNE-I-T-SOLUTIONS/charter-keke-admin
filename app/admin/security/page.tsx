@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -21,9 +19,7 @@ export default function AdminSecurityPage() {
   }
 
   return (
-    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
       <div className="flex min-h-screen bg-background">
-        <DashboardSidebar />
         <main className="flex-1 pt-16 lg:pt-0 flex flex-col">
           <div className="p-4 md:p-6 lg:p-8 space-y-6 h-full">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -75,6 +71,5 @@ export default function AdminSecurityPage() {
           </div>
         </main>
       </div>
-    </ProtectedRoute>
   )
 }

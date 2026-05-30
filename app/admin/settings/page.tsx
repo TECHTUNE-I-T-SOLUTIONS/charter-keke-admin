@@ -4,8 +4,6 @@ import { useState } from "react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -79,7 +77,6 @@ function AdminSettingsContent() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -423,9 +420,5 @@ function AdminSettingsContent() {
 }
 
 export default function AdminSettingsPage() {
-  return (
-    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
-      <AdminSettingsContent />
-    </ProtectedRoute>
-  )
+  return <AdminSettingsContent />
 }

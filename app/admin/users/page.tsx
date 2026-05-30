@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { AdminBottomNavigation } from "@/components/admin-bottom-navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -80,7 +77,6 @@ function UsersContent() {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -245,16 +241,10 @@ function UsersContent() {
             </Card>
           </motion.div>
         </div>
-      </main>
-      <AdminBottomNavigation />
-    </div>
+      </main></div>
   )
 }
 
 export default function UsersPage() {
-  return (
-    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
-      <UsersContent />
-    </ProtectedRoute>
-  )
+  return <UsersContent />
 }

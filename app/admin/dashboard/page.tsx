@@ -5,12 +5,52 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { useAuth } from "@/lib/auth-context"
-import { ProtectedRoute } from "@/components/protected-route"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { AdminBottomNavigation } from "@/components/admin-bottom-navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Car, MapPin, Wallet, TrendingUp, Activity, ArrowUpRight, Clock, GraduationCap, Loader2 } from "lucide-react"
+import { Users, Car, MapPin, Wallet, TrendingUp, Activity, ArrowUpRight, Clock, Loader2, CheckCircle2, XCircle, Banknote, Percent, Route } from "lucide-react"
 import Link from "next/link"
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+
+type RevenueRide = {
+  id: string
+  status?: string
+  fare_amount?: number | string | null
+  platform_fee?: number | string | null
+  driver_earnings?: number | string | null
+  created_at?: string
+  completed_at?: string | null
+  rider?: { first_name?: string; last_name?: string; email?: string } | null
+  driver?: { id?: string; operating_zones?: string[] } | null
+}
+
+type RevenueData = {
+  rides: RevenueRide[]
+  count: number
+  summary: {
+    totalFares: number
+    totalPlatformFees: number
+    totalDriverEarnings: number
+    easelsEarnings: number
+  }
+}
+
+const money = (value: number) =>
+  new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(value) ? value : 0)
+
+const numberValue = (value: unknown) => {
+  const parsed = Number(value || 0)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const statusColor: Record<string, string> = {
+  accepted: "#f28c00",
+  in_progress: "#06b6d4",
+  completed: "#10b981",
+  cancelled: "#ef4444",
+}
 
 function AdminDashboardContent() {
   const { data: session } = useSession()
@@ -21,6 +61,16 @@ function AdminDashboardContent() {
     drivers: { total: 0, verified: 0, pending: 0 },
     rides: { active: 0, completed: 0, cancelled: 0 },
     revenue: { total: 0, platformFees: 0, fromAcceptedAndInProgress: 0 },
+  })
+  const [revenueData, setRevenueData] = useState<RevenueData>({
+    rides: [],
+    count: 0,
+    summary: {
+      totalFares: 0,
+      totalPlatformFees: 0,
+      totalDriverEarnings: 0,
+      easelsEarnings: 0,
+    },
   })
 
   // Use session data first, fall back to context user
@@ -38,9 +88,25 @@ function AdminDashboardContent() {
     const fetchStats = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch("/api/admin/stats")
-        const data = await response.json()
-        setStats(data)
+        const [statsResponse, revenueResponse] = await Promise.all([
+          fetch("/api/admin/stats"),
+          fetch("/api/admin/revenue?limit=1000"),
+        ])
+        const [statsData, revenuePayload] = await Promise.all([statsResponse.json(), revenueResponse.json()])
+
+        if (statsResponse.ok) setStats(statsData)
+        if (revenueResponse.ok) {
+          setRevenueData({
+            rides: Array.isArray(revenuePayload?.rides) ? revenuePayload.rides : [],
+            count: numberValue(revenuePayload?.count),
+            summary: {
+              totalFares: numberValue(revenuePayload?.summary?.totalFares),
+              totalPlatformFees: numberValue(revenuePayload?.summary?.totalPlatformFees),
+              totalDriverEarnings: numberValue(revenuePayload?.summary?.totalDriverEarnings),
+              easelsEarnings: numberValue(revenuePayload?.summary?.easelsEarnings),
+            },
+          })
+        }
       } catch (error) {
         console.error("Failed to fetch stats:", error)
       } finally {
@@ -78,7 +144,7 @@ function AdminDashboardContent() {
     },
     {
       label: "Revenue",
-      value: `₦${(stats.revenue.total || 0).toLocaleString()}`,
+      value: money(revenueData.summary.totalFares || stats.revenue.total || 0),
       change: "+0%",
       icon: <Wallet className="h-5 w-5" />,
       color: "from-amber-500 to-amber-400",
@@ -86,15 +152,60 @@ function AdminDashboardContent() {
     },
   ]
 
-  const recentActivities = [
-    { type: "info", message: "System initialized", time: "Just now" },
-    { type: "success", message: "Admin dashboard ready", time: "Just now" },
-    { type: "info", message: "Lagos zones configured", time: "Just now" },
+  const rideStatusData = [
+    { name: "Active", value: stats.rides.active, color: statusColor.in_progress },
+    { name: "Completed", value: stats.rides.completed, color: statusColor.completed },
+    { name: "Cancelled", value: stats.rides.cancelled, color: statusColor.cancelled },
+  ].filter((item) => item.value > 0)
+
+  const revenueBreakdown = [
+    { label: "Gross Fares", value: revenueData.summary.totalFares, icon: <Banknote className="h-4 w-4" /> },
+    { label: "Platform Fees", value: revenueData.summary.totalPlatformFees, icon: <Percent className="h-4 w-4" /> },
+    { label: "Driver Earnings", value: revenueData.summary.totalDriverEarnings, icon: <Car className="h-4 w-4" /> },
+    { label: "Platform Net", value: revenueData.summary.easelsEarnings, icon: <Wallet className="h-4 w-4" /> },
   ]
+
+  const monthlyRevenue = Object.values(
+    revenueData.rides.reduce<Record<string, { month: string; gross: number; fees: number; driver: number; net: number }>>(
+      (acc, ride) => {
+        const date = ride.completed_at || ride.created_at
+        if (!date) return acc
+        const month = new Date(date).toLocaleDateString("en-US", { month: "short", year: "2-digit" })
+        if (!acc[month]) acc[month] = { month, gross: 0, fees: 0, driver: 0, net: 0 }
+        const gross = numberValue(ride.fare_amount)
+        const fees = numberValue(ride.platform_fee)
+        const driver = numberValue(ride.driver_earnings)
+        acc[month].gross += gross
+        acc[month].fees += fees
+        acc[month].driver += driver
+        acc[month].net += gross + fees - driver
+        return acc
+      },
+      {}
+    )
+  ).slice(-6)
+
+  const statusBreakdown = Object.values(
+    revenueData.rides.reduce<Record<string, { status: string; rides: number; revenue: number }>>((acc, ride) => {
+      const status = ride.status || "unknown"
+      if (!acc[status]) acc[status] = { status: status.replace(/_/g, " "), rides: 0, revenue: 0 }
+      acc[status].rides += 1
+      acc[status].revenue += numberValue(ride.fare_amount)
+      return acc
+    }, {})
+  )
+
+  const recentActivities =
+    revenueData.rides.length > 0
+      ? revenueData.rides.slice(0, 5).map((ride) => ({
+          type: ride.status === "completed" ? "success" : ride.status === "cancelled" ? "danger" : "info",
+          message: `${ride.status?.replace(/_/g, " ") || "Ride"} ride ${ride.id ? `#${ride.id.slice(0, 8)}` : ""}`,
+          time: ride.created_at ? new Date(ride.created_at).toLocaleString() : "Recent",
+        }))
+      : [{ type: "info", message: "No ride activity yet", time: "Waiting for live data" }]
 
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
 
       <main className="flex-1 lg:pl-0 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -148,60 +259,140 @@ function AdminDashboardContent() {
             )}
           </motion.div>
 
-          {/* Charts Row */}
+          {/* Analytics Row */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="grid lg:grid-cols-2 gap-6"
           >
-            {/* Rides Chart Placeholder */}
             <Card className="bg-card/50 backdrop-blur border-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <Route className="h-5 w-5 text-primary" />
                   Ride Analytics
                 </CardTitle>
-                <CardDescription>Lagos zone statistics</CardDescription>
+                <CardDescription>Live ride movement and completion health</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="h-64 flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg">
-                  <div className="text-center">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                    >
-                      <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                    </motion.div>
-                    <p className="text-muted-foreground">Charts will appear once data is available</p>
+              <CardContent className="space-y-5">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="rounded-lg bg-muted/30 p-3">
+                    <p className="text-xs text-muted-foreground">Active</p>
+                    <p className="text-2xl font-bold text-foreground">{stats.rides.active}</p>
                   </div>
+                  <div className="rounded-lg bg-muted/30 p-3">
+                    <p className="text-xs text-muted-foreground">Completed</p>
+                    <p className="text-2xl font-bold text-emerald-500">{stats.rides.completed}</p>
+                  </div>
+                  <div className="rounded-lg bg-muted/30 p-3">
+                    <p className="text-xs text-muted-foreground">Cancelled</p>
+                    <p className="text-2xl font-bold text-red-500">{stats.rides.cancelled}</p>
+                  </div>
+                </div>
+
+                <div className="h-56 rounded-lg bg-muted/20 p-3">
+                  {rideStatusData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={rideStatusData} dataKey="value" nameKey="name" innerRadius={48} outerRadius={78} paddingAngle={4}>
+                          {rideStatusData.map((entry) => (
+                            <Cell key={entry.name} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => [`${value} rides`, "Count"]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                      No ride activity recorded yet
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  {statusBreakdown.map((item) => (
+                    <div key={item.status} className="flex items-center justify-between rounded-lg bg-muted/30 px-3 py-2">
+                      <span className="text-sm capitalize text-muted-foreground">{item.status}</span>
+                      <span className="text-sm font-semibold text-foreground">
+                        {item.rides} rides · {money(item.revenue)}
+                      </span>
+                    </div>
+                  ))}
+                  {statusBreakdown.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No revenue-eligible rides yet.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Revenue Chart Placeholder */}
             <Card className="bg-card/50 backdrop-blur border-primary/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Wallet className="h-5 w-5 text-primary" />
                   Revenue Overview
                 </CardTitle>
-                <CardDescription>Monthly revenue breakdown</CardDescription>
+                <CardDescription>Gross fare, platform fee and driver payout breakdown</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="h-64 flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg">
-                  <div className="text-center">
-                    <motion.div
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                    >
-                      <Wallet className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                    </motion.div>
-                    <p className="text-muted-foreground">Revenue data will appear here</p>
-                  </div>
+              <CardContent className="space-y-5">
+                <div className="grid grid-cols-2 gap-3">
+                  {revenueBreakdown.map((item) => (
+                    <div key={item.label} className="rounded-lg bg-muted/30 p-3">
+                      <div className="mb-2 flex items-center gap-2 text-primary">
+                        {item.icon}
+                        <span className="text-xs font-medium text-muted-foreground">{item.label}</span>
+                      </div>
+                      <p className="text-lg font-bold text-foreground">{money(item.value)}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="h-56 rounded-lg bg-muted/20 p-3">
+                  {monthlyRevenue.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={monthlyRevenue}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(242,140,0,0.12)" />
+                        <XAxis dataKey="month" tick={{ fill: "currentColor", fontSize: 11 }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fill: "currentColor", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(value) => `₦${Number(value) / 1000}k`} />
+                        <Tooltip formatter={(value) => money(Number(value))} />
+                        <Bar dataKey="gross" name="Gross Fares" fill="#f28c00" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="fees" name="Platform Fees" fill="#10b981" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                      No revenue data recorded yet
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
+          </motion.div>
+
+          {/* Operational Snapshot */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="grid md:grid-cols-2 xl:grid-cols-4 gap-4"
+          >
+            {[
+              { label: "Active Users", value: stats.users.active, icon: <Users className="h-4 w-4" />, href: "/admin/users" },
+              { label: "Pending Users", value: stats.users.pending, icon: <Clock className="h-4 w-4" />, href: "/admin/users" },
+              { label: "Verified Drivers", value: stats.drivers.verified, icon: <CheckCircle2 className="h-4 w-4" />, href: "/admin/drivers" },
+              { label: "Pending Drivers", value: stats.drivers.pending, icon: <XCircle className="h-4 w-4" />, href: "/admin/drivers" },
+            ].map((item) => (
+              <Link key={item.label} href={item.href}>
+                <Card className="bg-card/50 border-primary/10 hover:border-primary/30 transition-colors">
+                  <CardContent className="flex items-center justify-between p-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{item.label}</p>
+                      <p className="text-2xl font-bold text-foreground">{item.value}</p>
+                    </div>
+                    <div className="rounded-lg bg-primary/10 p-2 text-primary">{item.icon}</div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
           </motion.div>
 
           {/* Recent Activity & Quick Stats */}
@@ -277,16 +468,10 @@ function AdminDashboardContent() {
             </Card>
           </motion.div>
         </div>
-      </main>
-      <AdminBottomNavigation />
-    </div>
+      </main></div>
   )
 }
 
 export default function AdminDashboard() {
-  return (
-    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
-      <AdminDashboardContent />
-    </ProtectedRoute>
-  )
+  return <AdminDashboardContent />
 }
