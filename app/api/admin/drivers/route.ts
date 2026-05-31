@@ -84,6 +84,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate earnings per driver from rides
     const earningsMap = new Map<string, number>()
+    const ridesCountMap = new Map<string, number>()
 
     // Fetch all rides for these drivers
     if (driverIds && driverIds.length > 0) {
@@ -111,6 +112,7 @@ export async function GET(request: NextRequest) {
             // Add earnings even if 0, to ensure driver is counted
             const current = earningsMap.get(ride.driver_id) || 0
             earningsMap.set(ride.driver_id, current + earningsAmount)
+            ridesCountMap.set(ride.driver_id, (ridesCountMap.get(ride.driver_id) || 0) + 1)
             console.log(`Driver ${ride.driver_id}: +${earningsAmount} from ride ${ride.id} (status: ${ride.status})`)
           }
         })
@@ -123,8 +125,11 @@ export async function GET(request: NextRequest) {
       const user = userMap.get(driver.user_id)
       // Use calculated earnings from rides, with fallback
       const calculatedEarnings = earningsMap.get(driver.id) || 0
+      const calculatedRides = ridesCountMap.get(driver.id) || 0
       const storedEarnings = driver.total_earnings ? parseFloat(driver.total_earnings.toString()) : 0
+      const storedRides = Number(driver.total_rides_completed || 0)
       const earnings = calculatedEarnings > storedEarnings ? calculatedEarnings : storedEarnings
+      const ridesCompleted = Math.max(calculatedRides, storedRides)
       
       console.log(`Driver ${driver.id} (${user?.first_name}): calculated=${calculatedEarnings}, stored=${storedEarnings}, final=${earnings}`)
       
@@ -139,7 +144,7 @@ export async function GET(request: NextRequest) {
         plate_number: driver.plate_number,
         verified: driver.verified,
         avg_rating: driver.average_rating || 0,
-        rides_completed: driver.total_rides_completed || 0,
+        rides_completed: ridesCompleted,
         earnings: earnings,
         created_at: driver.created_at,
       }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { supabaseAdmin } from "@/lib/supabase"
 
 /**
  * GET /api/admin/drivers/[id]
@@ -18,7 +18,7 @@ export async function GET(
     }
 
     // Fetch driver details
-    const { data: driver, error: driverError } = await supabase
+    const { data: driver, error: driverError } = await supabaseAdmin
       .from("drivers")
       .select(
         `
@@ -33,7 +33,7 @@ export async function GET(
         created_at
       `
       )
-      .eq("id", driverId)
+      .or(`id.eq.${driverId},user_id.eq.${driverId}`)
       .single()
 
     if (driverError) {
@@ -42,7 +42,7 @@ export async function GET(
     }
 
     // Fetch user details
-    const { data: user, error: userError } = await supabase
+    const { data: user, error: userError } = await supabaseAdmin
       .from("users")
       .select("id, first_name, last_name, email, phone_number, profile_picture_url")
       .eq("id", driver.user_id)
@@ -53,7 +53,7 @@ export async function GET(
     }
 
     // Fetch all rides where driver_id matches and status is accepted, in_progress, or completed
-    const { data: rides, error: ridesError } = await supabase
+    const { data: rides, error: ridesError } = await supabaseAdmin
       .from("rides")
       .select(
         `
@@ -64,7 +64,7 @@ export async function GET(
         completed_at
       `
       )
-      .eq("driver_id", driverId)
+      .eq("driver_id", driver.id)
       .in("status", ["accepted", "in_progress", "completed"])
       .order("created_at", { ascending: false })
 
@@ -100,6 +100,11 @@ export async function GET(
       }))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
+    const calculatedRides = (rides || []).length
+    const calculatedEarnings = earningsPerDay.reduce((sum, day) => sum + day.amount, 0)
+    const storedRides = Number(driver.total_rides_completed || 0)
+    const storedEarnings = Number(driver.total_earnings || 0)
+
     return NextResponse.json(
       {
         driver: {
@@ -113,8 +118,8 @@ export async function GET(
           plate_number: driver.plate_number,
           verified: driver.verified,
           avg_rating: driver.average_rating || 0,
-          rides_completed: driver.total_rides_completed || 0,
-          total_earnings: driver.total_earnings || 0,
+          rides_completed: Math.max(calculatedRides, storedRides),
+          total_earnings: Math.max(calculatedEarnings, storedEarnings),
           created_at: driver.created_at,
           settlement_count: earningsPerDay.length,
           earnings_per_day: earningsPerDay,

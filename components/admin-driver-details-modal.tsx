@@ -52,12 +52,25 @@ interface DriverDetail {
   earnings_per_day: EarningPerDay[]
 }
 
+interface DriverSettlement {
+  id: string
+  settlement_date: string
+  total_rides: number
+  total_platform_fees: number
+  total_driver_earnings: number
+  settlement_status: "pending" | "paid" | "overdue"
+  payment_due_date: string
+  paid_at: string | null
+}
+
 export function AdminDriverDetailsModal({ open, onOpenChange, driverId }: DriverDetailsModalProps) {
   const [driver, setDriver] = useState<DriverDetail | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [timeFilter, setTimeFilter] = useState<"all" | "month">("all")
   const [earningsPage, setEarningsPage] = useState(0)
-  const [settlementStatus, setSettlementStatus] = useState<"pending" | "paid" | null>(null)
+  const [settlementStatus, setSettlementStatus] = useState<"pending" | "paid" | "overdue" | "none" | null>(null)
+  const [settlementSummary, setSettlementSummary] = useState<any>(null)
+  const [settlements, setSettlements] = useState<DriverSettlement[]>([])
   const [isDeactivating, setIsDeactivating] = useState(false)
   const [showConfirmDeactivate, setShowConfirmDeactivate] = useState(false)
 
@@ -83,6 +96,8 @@ export function AdminDriverDetailsModal({ open, onOpenChange, driverId }: Driver
         if (settlementResponse.ok) {
           const settlement = await settlementResponse.json()
           setSettlementStatus(settlement.status)
+          setSettlementSummary(settlement.summary || null)
+          setSettlements(settlement.settlements || [])
         }
       } catch (error) {
         console.error("Failed to fetch driver details:", error)
@@ -173,8 +188,10 @@ export function AdminDriverDetailsModal({ open, onOpenChange, driverId }: Driver
             {settlementStatus && (
               <div className="pt-1">
                 <span className={`inline-block text-xs px-2 py-1 rounded-full ${
-                  settlementStatus === 'paid'
+                  settlementStatus === 'paid' || settlementStatus === 'none'
                     ? 'bg-emerald-500/20 text-emerald-500'
+                    : settlementStatus === 'overdue'
+                      ? 'bg-red-500/20 text-red-500'
                     : 'bg-amber-500/20 text-amber-500'
                 }`}>
                   Settlement: {settlementStatus.charAt(0).toUpperCase() + settlementStatus.slice(1)}
@@ -221,6 +238,55 @@ export function AdminDriverDetailsModal({ open, onOpenChange, driverId }: Driver
                     <span className="text-muted-foreground">Rides:</span>
                     <span className="font-medium">{driver.rides_completed}</span>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Settlement Details */}
+            <Card className="bg-card/50 backdrop-blur border-primary/10">
+              <CardContent className="p-3">
+                <h3 className="font-semibold mb-2 text-sm flex items-center gap-2">
+                  <Calendar className="h-3 w-3" /> Settlements
+                </h3>
+                <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                  <div>
+                    <p className="text-muted-foreground">Due</p>
+                    <p className="font-semibold text-amber-600">
+                      ₦{Number(settlementSummary?.totalDue || 0).toLocaleString("en-US")}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Paid</p>
+                    <p className="font-semibold text-emerald-600">
+                      ₦{Number(settlementSummary?.totalPaid || 0).toLocaleString("en-US")}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                  {settlements.length > 0 ? settlements.slice(0, 6).map((settlement) => (
+                    <div key={settlement.id} className="border-b border-primary/10 pb-2 last:border-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium">
+                          {new Date(settlement.settlement_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </span>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                          settlement.settlement_status === "paid"
+                            ? "bg-emerald-500/20 text-emerald-600"
+                            : settlement.settlement_status === "overdue"
+                              ? "bg-red-500/20 text-red-600"
+                              : "bg-amber-500/20 text-amber-600"
+                        }`}>
+                          {settlement.settlement_status}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+                        <span>{Number(settlement.total_rides || 0)} rides</span>
+                        <span>Fee ₦{Number(settlement.total_platform_fees || 0).toLocaleString("en-US")}</span>
+                      </div>
+                    </div>
+                  )) : (
+                    <p className="text-xs text-muted-foreground">No settlement records yet.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
