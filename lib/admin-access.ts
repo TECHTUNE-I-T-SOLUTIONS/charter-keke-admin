@@ -4,6 +4,22 @@ import { supabaseAdmin } from "@/lib/supabase"
 
 const CRM_DEPARTMENTS = new Set(["support", "general", "customer_support"])
 const ADMIN_CREATOR_DEPARTMENTS = new Set(["hr", "human_resources"])
+const SUPER_ADMIN_LEVELS = new Set(["super", "super_admin", "super-admin", "superadmin"])
+
+export function normalizeAdminLevel(level?: string | null) {
+  return String(level || "").trim().toLowerCase().replace(/\s+/g, "_")
+}
+
+export function isSuperAdminLevel(level?: string | null) {
+  return SUPER_ADMIN_LEVELS.has(normalizeAdminLevel(level))
+}
+
+export function isSuperAdminUser(
+  user?: { role?: string | null; adminLevel?: string | null } | null,
+  admin?: { admin_level?: string | null } | null
+) {
+  return user?.role === "super_admin" || isSuperAdminLevel(user?.adminLevel) || isSuperAdminLevel(admin?.admin_level)
+}
 
 export async function getAdminProfile(userId: string) {
   const { data } = await supabaseAdmin
@@ -30,7 +46,7 @@ export async function requireAdminSession(request: NextRequest) {
 export async function requireCrmAccess(request: NextRequest) {
   const result = await requireAdminSession(request)
   if (!result.authorized || !result.session?.user) return { ...result, authorized: false }
-  if (result.session.user.role === "super_admin") return result
+  if (isSuperAdminUser(result.session.user, result.admin)) return result
 
   const department = String(result.admin?.department || "").toLowerCase()
   const crmEnabled = result.admin?.crm_enabled !== false
@@ -41,6 +57,6 @@ export async function requireCrmAccess(request: NextRequest) {
 }
 
 export function canCreateAdmins(role?: string | null, department?: string | null) {
-  if (role === "super_admin") return true
+  if (role === "super_admin" || isSuperAdminLevel(role)) return true
   return ADMIN_CREATOR_DEPARTMENTS.has(String(department || "").toLowerCase())
 }

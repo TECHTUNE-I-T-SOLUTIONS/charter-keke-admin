@@ -28,7 +28,7 @@ const workflows = [
 
 export default function HrDashboardPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div>
         <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-sm text-primary">
           <Shield className="h-4 w-4" />

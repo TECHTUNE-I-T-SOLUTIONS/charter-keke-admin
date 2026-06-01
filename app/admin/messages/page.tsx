@@ -320,7 +320,7 @@ function AdminMessagesContent() {
                           <DialogTrigger asChild>
                             <Button size="sm" variant="outline">Update Status</Button>
                           </DialogTrigger>
-                          <DialogContent>
+                          <DialogContent className="max-h-[92dvh] overflow-y-auto">
                             <DialogTitle>Update Ticket Status</DialogTitle>
                             <div className="space-y-3 mt-2">
                               <Textarea

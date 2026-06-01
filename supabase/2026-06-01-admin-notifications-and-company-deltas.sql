@@ -1,5 +1,5 @@
--- Charter Keke admin/company-management foundation.
--- Run this in Supabase before enabling the new HR/department messaging workflows.
+-- Charter Keke admin/company-management notification deltas.
+-- Safe to run more than once in Supabase.
 
 alter table if exists public.admins
   add column if not exists admin_level varchar(40) default 'admin',
@@ -12,14 +12,24 @@ set
   admin_level = coalesce(admin_level, 'admin'),
   department = coalesce(department, 'general'),
   crm_enabled = case
-    when coalesce(lower(department), '') in ('support', 'general', 'customer_support') then true
+    when lower(coalesce(admin_level, '')) in ('super', 'super_admin', 'super-admin', 'superadmin') then true
+    when lower(coalesce(department, '')) in ('support', 'customer_support', 'general') then true
     else coalesce(crm_enabled, false)
   end,
   permissions = coalesce(permissions, '{}'::jsonb);
 
 insert into public.crm_departments (department_key, department_name, description, email_alias, route_priority, is_active)
 values
-  ('hr', 'Human Resources', 'Admin onboarding, staff operations, driver onboarding coordination, and internal people operations.', 'hr@charterkeke.com', 60, true)
+  ('support', 'Customer Support', 'Customer tickets, rider and driver support, escalations, and final customer replies.', 'support@charterkeke.com', 10, true),
+  ('operations', 'Operations', 'Ride operations, fulfillment, live trip operations, and driver/rider coordination.', 'operations@charterkeke.com', 20, true),
+  ('safety', 'Safety', 'Safety reviews, incidents, compliance escalations, and risk investigations.', 'safety@charterkeke.com', 30, true),
+  ('billing', 'Billing', 'Payment, wallet, settlement, refunds, and remittance support.', 'billing@charterkeke.com', 40, true),
+  ('engineering', 'Engineering', 'Technical support, bugs, platform reliability, and app/backend incidents.', 'engineering@charterkeke.com', 50, true),
+  ('product', 'Product', 'Feature feedback, product requests, and user experience review.', 'product@charterkeke.com', 55, true),
+  ('finance', 'Finance', 'Financial operations, reporting, and revenue/settlement oversight.', 'finance@charterkeke.com', 58, true),
+  ('hr', 'Human Resources', 'Admin onboarding, staff operations, driver onboarding coordination, and internal people operations.', 'hr@charterkeke.com', 60, true),
+  ('riders', 'Rider Success', 'Rider education, rider complaints, and rider lifecycle support.', 'riders@charterkeke.com', 65, true),
+  ('general', 'General', 'General enquiries and unclassified customer messages.', 'general@charterkeke.com', 100, true)
 on conflict (department_key) do update set
   department_name = excluded.department_name,
   description = excluded.description,
@@ -111,23 +121,6 @@ create index if not exists idx_admin_messages_conversation
 create index if not exists idx_admin_messages_mentions
   on public.admin_messages using gin(mentions);
 
-create or replace function public.touch_admin_conversation_on_message()
-returns trigger
-language plpgsql
-as $$
-begin
-  update public.admin_conversations
-  set updated_at = now()
-  where id = new.conversation_id;
-  return new;
-end;
-$$;
-
-drop trigger if exists trg_touch_admin_conversation_on_message on public.admin_messages;
-create trigger trg_touch_admin_conversation_on_message
-after insert on public.admin_messages
-for each row execute function public.touch_admin_conversation_on_message();
-
 create or replace function public.emit_admin_notification_event()
 returns trigger
 language plpgsql
@@ -147,7 +140,6 @@ begin
       'createdAt', new.created_at
     )::text
   );
-
   return new;
 end;
 $$;
@@ -157,51 +149,22 @@ create trigger trg_emit_admin_notification_event
 after insert on public.admin_notifications
 for each row execute function public.emit_admin_notification_event();
 
-create or replace function public.notify_admin_conversation_member_added()
+create or replace function public.touch_admin_conversation_on_message()
 returns trigger
 language plpgsql
 as $$
-declare
-  v_conversation public.admin_conversations%rowtype;
 begin
-  select *
-  into v_conversation
-  from public.admin_conversations
+  update public.admin_conversations
+  set updated_at = now()
   where id = new.conversation_id;
-
-  if new.user_id is not null and (v_conversation.created_by is null or new.user_id <> v_conversation.created_by) then
-    insert into public.admin_notifications (
-      recipient_user_id,
-      title,
-      body,
-      type,
-      action_url,
-      metadata
-    )
-    values (
-      new.user_id,
-      'Added to admin conversation',
-      coalesce(v_conversation.title, 'You were added to a new admin conversation.'),
-      'admin_conversation_member_added',
-      '/admin/messages?conversationId=' || new.conversation_id::text,
-      jsonb_build_object(
-        'conversationId', new.conversation_id,
-        'conversationType', v_conversation.conversation_type,
-        'departmentKey', v_conversation.department_key,
-        'ticketId', v_conversation.ticket_id,
-        'memberRole', new.role
-      )
-    );
-  end if;
-
   return new;
 end;
 $$;
 
-drop trigger if exists trg_notify_admin_conversation_member_added on public.admin_conversation_members;
-create trigger trg_notify_admin_conversation_member_added
-after insert on public.admin_conversation_members
-for each row execute function public.notify_admin_conversation_member_added();
+drop trigger if exists trg_touch_admin_conversation_on_message on public.admin_messages;
+create trigger trg_touch_admin_conversation_on_message
+after insert on public.admin_messages
+for each row execute function public.touch_admin_conversation_on_message();
 
 create or replace function public.notify_admin_message_insert()
 returns trigger
@@ -212,8 +175,7 @@ declare
   v_sender_name text;
   v_preview text;
 begin
-  select *
-  into v_conversation
+  select * into v_conversation
   from public.admin_conversations
   where id = new.conversation_id;
 
@@ -225,15 +187,7 @@ begin
   v_sender_name := nullif(v_sender_name, '');
   v_preview := left(regexp_replace(coalesce(new.body, ''), '\s+', ' ', 'g'), 160);
 
-  -- Notify explicitly mentioned admins first.
-  insert into public.admin_notifications (
-    recipient_user_id,
-    title,
-    body,
-    type,
-    action_url,
-    metadata
-  )
+  insert into public.admin_notifications (recipient_user_id, title, body, type, action_url, metadata)
   select
     mentioned_user_id,
     coalesce(v_sender_name, 'An admin') || ' mentioned you',
@@ -252,16 +206,8 @@ begin
   where mentioned_user_id is not null
     and (new.sender_user_id is null or mentioned_user_id <> new.sender_user_id);
 
-  -- Notify direct/ticket conversation members.
   if v_conversation.conversation_type in ('direct', 'ticket') then
-    insert into public.admin_notifications (
-      recipient_user_id,
-      title,
-      body,
-      type,
-      action_url,
-      metadata
-    )
+    insert into public.admin_notifications (recipient_user_id, title, body, type, action_url, metadata)
     select
       member.user_id,
       coalesce(v_conversation.title, 'New admin message'),
@@ -282,17 +228,8 @@ begin
       and not (member.user_id = any(new.mentions));
   end if;
 
-  -- Notify every admin in the department, plus superadmins, for department channels.
   if v_conversation.conversation_type = 'department' and v_conversation.department_key is not null then
-    insert into public.admin_notifications (
-      recipient_user_id,
-      recipient_department,
-      title,
-      body,
-      type,
-      action_url,
-      metadata
-    )
+    insert into public.admin_notifications (recipient_user_id, recipient_department, title, body, type, action_url, metadata)
     select distinct
       admin.user_id,
       v_conversation.department_key,
@@ -326,21 +263,51 @@ create trigger trg_notify_admin_message_insert
 after insert on public.admin_messages
 for each row execute function public.notify_admin_message_insert();
 
+create or replace function public.notify_admin_conversation_member_added()
+returns trigger
+language plpgsql
+as $$
+declare
+  v_conversation public.admin_conversations%rowtype;
+begin
+  select * into v_conversation
+  from public.admin_conversations
+  where id = new.conversation_id;
+
+  if new.user_id is not null and (v_conversation.created_by is null or new.user_id <> v_conversation.created_by) then
+    insert into public.admin_notifications (recipient_user_id, title, body, type, action_url, metadata)
+    values (
+      new.user_id,
+      'Added to admin conversation',
+      coalesce(v_conversation.title, 'You were added to a new admin conversation.'),
+      'admin_conversation_member_added',
+      '/admin/messages?conversationId=' || new.conversation_id::text,
+      jsonb_build_object(
+        'conversationId', new.conversation_id,
+        'conversationType', v_conversation.conversation_type,
+        'departmentKey', v_conversation.department_key,
+        'ticketId', v_conversation.ticket_id,
+        'memberRole', new.role
+      )
+    );
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_notify_admin_conversation_member_added on public.admin_conversation_members;
+create trigger trg_notify_admin_conversation_member_added
+after insert on public.admin_conversation_members
+for each row execute function public.notify_admin_conversation_member_added();
+
 create or replace function public.notify_admin_department_conversation_created()
 returns trigger
 language plpgsql
 as $$
 begin
   if new.conversation_type = 'department' and new.department_key is not null then
-    insert into public.admin_notifications (
-      recipient_user_id,
-      recipient_department,
-      title,
-      body,
-      type,
-      action_url,
-      metadata
-    )
+    insert into public.admin_notifications (recipient_user_id, recipient_department, title, body, type, action_url, metadata)
     select distinct
       admin.user_id,
       new.department_key,
@@ -371,3 +338,48 @@ drop trigger if exists trg_notify_admin_department_conversation_created on publi
 create trigger trg_notify_admin_department_conversation_created
 after insert on public.admin_conversations
 for each row execute function public.notify_admin_department_conversation_created();
+
+create or replace function public.notify_admins_new_support_ticket_company()
+returns trigger
+language plpgsql
+as $$
+declare
+  v_department text;
+begin
+  select coalesce(department_key, 'support')
+  into v_department
+  from public.crm_departments
+  where id = new.department_id;
+
+  v_department := coalesce(v_department, 'support');
+
+  insert into public.admin_notifications (recipient_user_id, recipient_department, title, body, type, action_url, metadata)
+  select distinct
+    admin.user_id,
+    v_department,
+    'New support ticket',
+    coalesce(new.subject, 'A new support ticket needs attention.'),
+    'support_ticket_created',
+    '/admin/crm/tickets?ticketId=' || new.id::text,
+    jsonb_build_object(
+      'ticketId', new.id,
+      'departmentKey', v_department,
+      'status', new.status,
+      'source', coalesce(new.source_channel, 'in_app'),
+      'category', new.category
+    )
+  from public.admins admin
+  where admin.user_id is not null
+    and (
+      lower(coalesce(admin.department, '')) in (lower(v_department), 'support', 'customer_support')
+      or lower(coalesce(admin.admin_level, '')) in ('super', 'super_admin', 'super-admin', 'superadmin')
+    );
+
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_notify_admins_new_support_ticket_company on public.support_tickets;
+create trigger trg_notify_admins_new_support_ticket_company
+after insert on public.support_tickets
+for each row execute function public.notify_admins_new_support_ticket_company();

@@ -1,8 +1,31 @@
-import { supabase } from "./supabase";
+import { supabase, supabaseAdmin } from "./supabase";
 import bcrypt from "bcryptjs";
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { authSecret } from "./auth-secret";
+
+const SUPER_ADMIN_LEVELS = new Set(["super", "super_admin", "super-admin", "superadmin"]);
+
+function isSuperAdminLevel(level?: string | null) {
+  return SUPER_ADMIN_LEVELS.has(String(level || "").trim().toLowerCase().replace(/\s+/g, "_"));
+}
+
+async function getAdminProfile(userId?: string | null) {
+  if (!userId) return null;
+
+  const { data, error } = await supabaseAdmin
+    .from("admins")
+    .select("id, admin_level, department, crm_enabled, permissions")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[AUTH] Failed to load admin profile:", error);
+    return null;
+  }
+
+  return data;
+}
 
 /**
  * Get the current session from the request
@@ -35,6 +58,8 @@ export async function getSessionFromRequest(request: NextRequest) {
       let adminLevel = (nextAuthToken.adminLevel as string) || "";
       let department = (nextAuthToken.department as string) || "";
       let crmEnabled = nextAuthToken.crmEnabled !== false;
+      let adminId = (nextAuthToken.adminId as string) || "";
+      let permissions = (nextAuthToken.permissions as Record<string, boolean>) || {};
 
       if (!role || !email) {
         const { data: user } = await supabase
@@ -54,6 +79,19 @@ export async function getSessionFromRequest(request: NextRequest) {
         }
       }
 
+      if (role === "admin" || role === "super_admin") {
+        const adminProfile = await getAdminProfile(userId);
+        if (adminProfile) {
+          adminId = adminProfile.id || adminId;
+          adminLevel = adminProfile.admin_level || adminLevel;
+          department = adminProfile.department || department;
+          crmEnabled = adminProfile.crm_enabled !== false;
+          permissions = isSuperAdminLevel(adminProfile.admin_level)
+            ? { "*": true, super_admin: true }
+            : adminProfile.permissions || permissions || {};
+        }
+      }
+
       return {
         user: {
           id: userId,
@@ -64,9 +102,11 @@ export async function getSessionFromRequest(request: NextRequest) {
           phone,
           referralCode,
           createdAt,
+          adminId,
           adminLevel,
           department,
           crmEnabled,
+          permissions,
         },
       };
     }
@@ -95,7 +135,7 @@ export async function getSessionFromRequest(request: NextRequest) {
       }
 
       // Fetch user from database to get session info
-      const { data: user, error } = await supabase
+      const { data: user, error } = await supabaseAdmin
         .from("users")
         .select("*")
         .eq("id", userId)
@@ -113,6 +153,10 @@ export async function getSessionFromRequest(request: NextRequest) {
 
       console.log("✅ [AUTH] Custom Bearer token validated for user:", userId);
 
+      const adminProfile = user.role === "admin" || user.role === "super_admin"
+        ? await getAdminProfile(user.id)
+        : null;
+
       return {
         user: {
           id: user.id,
@@ -123,6 +167,13 @@ export async function getSessionFromRequest(request: NextRequest) {
           phone: user.phone_number,
           referralCode: user.referral_code,
           createdAt: user.created_at,
+          adminId: adminProfile?.id || "",
+          adminLevel: adminProfile?.admin_level || "",
+          department: adminProfile?.department || "",
+          crmEnabled: adminProfile?.crm_enabled !== false,
+          permissions: isSuperAdminLevel(adminProfile?.admin_level)
+            ? { "*": true, super_admin: true }
+            : adminProfile?.permissions || {},
         },
       };
     } catch (e) {

@@ -1,8 +1,31 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { authSecret } from "@/lib/auth-secret";
+
+const SUPER_ADMIN_LEVELS = new Set(["super", "super_admin", "super-admin", "superadmin"]);
+
+function isSuperAdminLevel(level?: string | null) {
+  return SUPER_ADMIN_LEVELS.has(String(level || "").trim().toLowerCase().replace(/\s+/g, "_"));
+}
+
+async function getAdminProfile(userId?: string | null) {
+  if (!userId) return null;
+
+  const { data, error } = await supabaseAdmin
+    .from("admins")
+    .select("id, admin_level, department, crm_enabled, permissions")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[AUTH] Failed to load admin profile:", error);
+    return null;
+  }
+
+  return data;
+}
 
 const handler = NextAuth({
   providers: [
@@ -49,11 +72,9 @@ const handler = NextAuth({
             return null;
           }
 
-          const { data: adminProfile } = await supabase
-            .from("admins")
-            .select("admin_level, department, crm_enabled, permissions")
-            .eq("user_id", user.id)
-            .maybeSingle();
+          const adminProfile = user.role === "admin" || user.role === "super_admin"
+            ? await getAdminProfile(user.id)
+            : null;
 
           return {
             id: user.id,
@@ -69,10 +90,13 @@ const handler = NextAuth({
             gender: user.gender,
             profileComplete: user.profile_complete,
             createdAt: user.created_at,
+            adminId: adminProfile?.id || null,
             adminLevel: adminProfile?.admin_level || null,
             department: adminProfile?.department || null,
             crmEnabled: adminProfile?.crm_enabled ?? false,
-            permissions: adminProfile?.permissions || {},
+            permissions: isSuperAdminLevel(adminProfile?.admin_level)
+              ? { "*": true, super_admin: true }
+              : adminProfile?.permissions || {},
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -96,11 +120,28 @@ const handler = NextAuth({
         token.profileComplete = user.profileComplete;
         token.createdAt = user.createdAt;
         token.status = user.status;
+        token.adminId = user.adminId;
         token.adminLevel = user.adminLevel;
         token.department = user.department;
         token.crmEnabled = user.crmEnabled;
         token.permissions = user.permissions;
       }
+
+      const userId = (token.id as string) || (token.sub as string) || "";
+      const role = token.role as string;
+      if (userId && (role === "admin" || role === "super_admin")) {
+        const adminProfile = await getAdminProfile(userId);
+        if (adminProfile) {
+          token.adminId = adminProfile.id;
+          token.adminLevel = adminProfile.admin_level;
+          token.department = adminProfile.department;
+          token.crmEnabled = adminProfile.crm_enabled ?? false;
+          token.permissions = isSuperAdminLevel(adminProfile.admin_level)
+            ? { "*": true, super_admin: true }
+            : adminProfile.permissions || {};
+        }
+      }
+
       return token;
     },
     async session({ session, token }: any) {
@@ -116,6 +157,7 @@ const handler = NextAuth({
         session.user.profileComplete = token.profileComplete;
         session.user.createdAt = token.createdAt;
         session.user.status = token.status;
+        session.user.adminId = token.adminId;
         session.user.adminLevel = token.adminLevel;
         session.user.department = token.department;
         session.user.crmEnabled = token.crmEnabled;

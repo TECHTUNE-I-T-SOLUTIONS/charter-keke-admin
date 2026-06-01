@@ -1,4 +1,5 @@
 import { supabase } from "./supabase"
+import { isSuperAdminLevel } from "./admin-access"
 
 /**
  * Check if a user has admin access with specific permissions
@@ -45,7 +46,7 @@ export async function checkAdminAccess(userId: string, permission?: string): Pro
     }
 
     // Super admins have all permissions
-    if (user.role === "super_admin") {
+    if (user.role === "super_admin" || isSuperAdminLevel(adminData.admin_level)) {
       return true
     }
 
@@ -61,6 +62,9 @@ export async function checkAdminAccess(userId: string, permission?: string): Pro
       ops: ["view_users", "view_rides", "suspend_users", "view_drivers", "manage_crm_departments", "manage_crm_routing"],
       finance: ["view_payments", "view_drivers", "process_payouts", "view_crm_billing", "manage_crm_email_accounts"],
       super: ["*"], // Super admin has all permissions
+      super_admin: ["*"],
+      "super-admin": ["*"],
+      superadmin: ["*"],
     }
 
     const allowedPerms = defaultPermissions[adminData.admin_level] || []

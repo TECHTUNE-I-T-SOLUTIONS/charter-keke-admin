@@ -13,8 +13,10 @@ export default function CrmLayout({
 }) {
   const { user, isLoading } = useAuth()
   const router = useRouter()
+  const adminLevel = String(user?.adminLevel || "").toLowerCase()
   const canAccessCrm =
     user?.role === "super_admin" ||
+    ["super", "super_admin", "super-admin", "superadmin"].includes(adminLevel) ||
     (user?.role === "admin" &&
       user?.crmEnabled !== false &&
       ["support", "general", "customer_support"].includes(String(user?.department || "").toLowerCase()))

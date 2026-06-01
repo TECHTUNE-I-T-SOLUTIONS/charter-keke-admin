@@ -86,15 +86,38 @@ const adminNavItems: NavItem[] = [
 ]
 
 function canAccessCrm(user: any) {
-  if (user?.role === "super_admin") return true
+  if (user?.role === "super_admin" || ["super", "super_admin", "super-admin", "superadmin"].includes(String(user?.adminLevel || "").toLowerCase())) return true
   const department = String(user?.department || "").toLowerCase()
   return user?.crmEnabled !== false && ["support", "general", "customer_support"].includes(department)
 }
 
 function canManageAdmins(user: any) {
-  if (user?.role === "super_admin") return true
+  if (user?.role === "super_admin" || ["super", "super_admin", "super-admin", "superadmin"].includes(String(user?.adminLevel || "").toLowerCase())) return true
   const department = String(user?.department || "").toLowerCase()
   return user?.role === "admin" && ["hr", "human_resources"].includes(department)
+}
+
+function isSuperAdmin(user: any) {
+  return user?.role === "super_admin" || ["super", "super_admin", "super-admin", "superadmin"].includes(String(user?.adminLevel || "").toLowerCase())
+}
+
+function hasDepartment(user: any, departments: string[]) {
+  return departments.includes(String(user?.department || "").toLowerCase())
+}
+
+function canAccessAdminItem(user: any, href: string) {
+  if (isSuperAdmin(user)) return true
+  if (href === "/admin/dashboard" || href === "/admin/settings") return true
+  if (href === "/admin/crm" || href === "/admin/messages") return canAccessCrm(user)
+  if (href === "/admin/admins" || href === "/admin/hr") return canManageAdmins(user)
+  if (href === "/admin/drivers" || href === "/admin/driver-intelligence") return hasDepartment(user, ["hr", "human_resources", "operations", "driver_management"])
+  if (href === "/admin/rides" || href === "/admin/operations" || href === "/admin/locations" || href === "/admin/mobile-traffic") return hasDepartment(user, ["operations"])
+  if (href === "/admin/payments") return hasDepartment(user, ["finance", "billing"])
+  if (href === "/admin/users") return hasDepartment(user, ["support", "customer_support", "general", "hr", "human_resources"])
+  if (href === "/admin/moderation") return hasDepartment(user, ["support", "customer_support", "safety", "trust_safety"])
+  if (href === "/admin/monitor") return hasDepartment(user, ["operations", "finance", "billing", "engineering"])
+  if (href === "/admin/security") return false
+  return false
 }
 
 function getNavItems(user: any): NavItem[] {
@@ -102,11 +125,7 @@ function getNavItems(user: any): NavItem[] {
   switch (role) {
     case "admin":
     case "super_admin":
-      return adminNavItems.filter((item) => {
-        if (item.href === "/admin/crm") return canAccessCrm(user)
-        if (item.href === "/admin/admins" || item.href === "/admin/hr") return canManageAdmins(user)
-        return true
-      })
+      return adminNavItems.filter((item) => canAccessAdminItem(user, item.href))
     case "driver":
       return driverNavItems
     default:
@@ -119,7 +138,7 @@ function getNavItems(user: any): NavItem[] {
 // Memoized sidebar content component
 const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { user: any; pathname: string; setIsMobileOpen: (open: boolean) => void; onLogout?: () => void }) => {
   const { theme, setTheme } = useTheme()
-  const navItems = useMemo(() => getNavItems(user), [user.role, user.department, user.crmEnabled])
+  const navItems = useMemo(() => getNavItems(user), [user.role, user.adminLevel, user.department, user.crmEnabled])
 
   const { data: session } = useSession()
   const [avatarUrl] = useState("")
@@ -156,7 +175,9 @@ const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { us
             <p className="font-medium text-foreground truncate">
               {user.firstName} {user.lastName}
             </p>
-            <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
+            <p className="text-xs text-muted-foreground capitalize">
+              {user.role === "admin" && user.adminLevel ? `${String(user.adminLevel).replace(/_/g, " ")} admin` : user.role}
+            </p>
           </div>
         </div>
       </div>
@@ -223,7 +244,7 @@ export const DashboardSidebar = memo(function DashboardSidebarComponent() {
   // Memoize the sidebar content render to prevent unnecessary re-renders
   const sidebarContent = useMemo(
     () => <SidebarContent user={user} pathname={pathname} setIsMobileOpen={setIsMobileOpen} onLogout={handleLogout} />,
-    [user?.id, user?.firstName, user?.lastName, user?.role, pathname, handleLogout]
+    [user?.id, user?.firstName, user?.lastName, user?.role, user?.adminLevel, user?.department, user?.crmEnabled, pathname, handleLogout]
   )
 
   return (

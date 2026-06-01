@@ -67,7 +67,7 @@ export async function notifyAdmins(input: AdminNotificationInput) {
     const { data: admins } = await supabaseAdmin
       .from("admins")
       .select("user_id")
-      .or(`department.eq.${department},admin_level.eq.super_admin`)
+      .or(`department.eq.${department},admin_level.eq.super,admin_level.eq.super_admin,admin_level.eq.super-admin`)
 
     for (const admin of admins || []) {
       if (admin.user_id) targetUserIds.add(admin.user_id)

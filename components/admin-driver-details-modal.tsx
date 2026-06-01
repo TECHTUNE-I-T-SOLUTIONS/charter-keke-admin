@@ -176,7 +176,7 @@ export function AdminDriverDetailsModal({ open, onOpenChange, driverId }: Driver
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-4 md:p-6">
+        <DialogContent className="max-w-2xl max-h-[92dvh] overflow-y-auto p-4 md:p-6">
           <DialogHeader className="space-y-2 mb-2">
             <DialogTitle className="text-xl md:text-2xl flex items-center gap-2 flex-wrap">
               {driver.first_name} {driver.last_name}

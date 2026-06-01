@@ -124,7 +124,7 @@ export function AdminPaymentDetailsModal({ open, onOpenChange, paymentId }: Paym
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-4 md:p-6">
+      <DialogContent className="max-w-2xl max-h-[92dvh] overflow-y-auto p-4 md:p-6">
         <DialogHeader className="space-y-2 mb-4">
           <DialogTitle className="text-xl md:text-2xl flex items-center gap-2">
             <CreditCard className="h-5 w-5 text-primary" />

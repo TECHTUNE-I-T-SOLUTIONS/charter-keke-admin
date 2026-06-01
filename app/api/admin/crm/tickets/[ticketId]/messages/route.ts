@@ -85,6 +85,21 @@ export async function POST(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: createError.message }, { status: 400 })
     }
 
+    await supabaseAdmin.from("audit_logs").insert({
+      user_id: session.user.id,
+      action: isInternal ? "CRM internal message added" : "CRM customer reply sent",
+      entity_type: "ticket_message",
+      entity_id: created.id,
+      changes: {
+        ticketId,
+        isInternal,
+        messageType,
+        summary: (message || "[attachment]").slice(0, 180),
+      },
+      ip_address: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+      user_agent: request.headers.get("user-agent"),
+    })
+
     const now = new Date().toISOString()
     await supabaseAdmin
       .from("support_tickets")

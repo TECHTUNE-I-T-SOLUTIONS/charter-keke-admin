@@ -74,6 +74,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(nextAuthUser)
       localStorage.setItem("charterkeke_user", JSON.stringify(nextAuthUser))
       setIsLoading(false)
+
+      if (nextAuthUser.role === "admin" || nextAuthUser.role === "super_admin") {
+        fetch("/api/auth/me", { credentials: "include", cache: "no-store" })
+          .then((response) => (response.ok ? response.json() : null))
+          .then((profile) => {
+            if (!profile) return
+            const hydratedUser: User = {
+              ...nextAuthUser,
+              adminLevel: profile.admin_level || nextAuthUser.adminLevel || null,
+              department: profile.department || nextAuthUser.department || null,
+              crmEnabled: profile.crm_enabled ?? nextAuthUser.crmEnabled,
+              permissions: profile.permissions || nextAuthUser.permissions || {},
+            }
+            setUser(hydratedUser)
+            localStorage.setItem("charterkeke_user", JSON.stringify(hydratedUser))
+          })
+          .catch((error) => {
+            console.error("Admin profile hydration failed:", error)
+          })
+      }
     } else if (status === "unauthenticated") {
       // Check for existing session in localStorage as fallback
       try {

@@ -211,6 +211,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     const updates: Record<string, unknown> = {}
 
+    const { data: beforeTicket } = await supabaseAdmin
+      .from("support_tickets")
+      .select("id, status, priority, assigned_to, department_id, resolution_note, routing_reason, routing_confidence, crm_metadata")
+      .eq("id", ticketId)
+      .maybeSingle()
+
     if (typeof body?.status === "string") updates.status = body.status
     if (typeof body?.priority === "string") updates.priority = body.priority
     if (typeof body?.assignedTo === "string" || body?.assignedTo === null) updates.assigned_to = body.assignedTo || null
@@ -249,6 +255,23 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
+
+    const changes = Object.fromEntries(
+      Object.entries(updates).map(([key, to]) => [key, { from: (beforeTicket as any)?.[key] ?? null, to }])
+    )
+
+    await supabaseAdmin.from("audit_logs").insert({
+      user_id: access.session?.user?.id || null,
+      action: "CRM ticket updated",
+      entity_type: "support_ticket",
+      entity_id: ticketId,
+      changes: {
+        ...changes,
+        summary: `Ticket ${ticketId} updated`,
+      },
+      ip_address: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+      user_agent: request.headers.get("user-agent"),
+    })
 
     return NextResponse.json({ ticket: data })
   } catch (error) {

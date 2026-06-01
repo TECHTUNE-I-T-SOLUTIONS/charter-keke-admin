@@ -90,31 +90,51 @@ type SidebarUser = {
   role?: UserRole | string
   department?: string | null
   crmEnabled?: boolean
+  adminLevel?: string | null
 }
 
 function canAccessCrm(user?: SidebarUser | null) {
   if (!user) return false
-  if (user.role === "super_admin") return true
+  if (user.role === "super_admin" || ["super", "super_admin", "super-admin", "superadmin"].includes(String(user.adminLevel || "").toLowerCase())) return true
   const department = String(user.department || "").toLowerCase()
   return user.role === "admin" && user.crmEnabled !== false && ["support", "general", "customer_support"].includes(department)
 }
 
 function canManageAdmins(user?: SidebarUser | null) {
   if (!user) return false
-  if (user.role === "super_admin") return true
+  if (user.role === "super_admin" || ["super", "super_admin", "super-admin", "superadmin"].includes(String(user.adminLevel || "").toLowerCase())) return true
   const department = String(user.department || "").toLowerCase()
   return user.role === "admin" && ["hr", "human_resources"].includes(department)
+}
+
+function isSuperAdmin(user?: SidebarUser | null) {
+  return Boolean(user && (user.role === "super_admin" || ["super", "super_admin", "super-admin", "superadmin"].includes(String(user.adminLevel || "").toLowerCase())))
+}
+
+function hasDepartment(user: SidebarUser, departments: string[]) {
+  return departments.includes(String(user.department || "").toLowerCase())
+}
+
+function canAccessAdminItem(user: SidebarUser, href: string) {
+  if (isSuperAdmin(user)) return true
+  if (href === "/admin/dashboard" || href === "/admin/settings") return true
+  if (href === "/admin/crm" || href === "/admin/messages") return canAccessCrm(user)
+  if (href === "/admin/admins" || href === "/admin/hr") return canManageAdmins(user)
+  if (href === "/admin/drivers" || href === "/admin/driver-intelligence") return hasDepartment(user, ["hr", "human_resources", "operations", "driver_management"])
+  if (href === "/admin/rides" || href === "/admin/operations" || href === "/admin/locations" || href === "/admin/mobile-traffic") return hasDepartment(user, ["operations"])
+  if (href === "/admin/payments") return hasDepartment(user, ["finance", "billing"])
+  if (href === "/admin/users") return hasDepartment(user, ["support", "customer_support", "general", "hr", "human_resources"])
+  if (href === "/admin/moderation") return hasDepartment(user, ["support", "customer_support", "safety", "trust_safety"])
+  if (href === "/admin/monitor" || href === "/admin/analytics") return hasDepartment(user, ["operations", "finance", "billing", "engineering"])
+  if (href === "/admin/security") return false
+  return false
 }
 
 function getNavItems(user: SidebarUser): NavItem[] {
   switch (user.role) {
     case "admin":
     case "super_admin":
-      return adminNavItems.filter((item) => {
-        if (item.href === "/admin/crm") return canAccessCrm(user)
-        if (item.href === "/admin/admins" || item.href === "/admin/hr") return canManageAdmins(user)
-        return true
-      })
+      return adminNavItems.filter((item) => canAccessAdminItem(user, item.href))
     case "driver":
       return driverNavItems
     default:
@@ -139,6 +159,7 @@ export function AnimatedSidebar() {
         firstName: (session.user as any).firstName || "User",
         lastName: (session.user as any).lastName || "",
         role: ((session.user as any).role || "user") as UserRole,
+        adminLevel: (session.user as any).adminLevel || null,
         department: (session.user as any).department || null,
         crmEnabled: (session.user as any).crmEnabled !== false,
         email: session.user.email || "",
@@ -150,6 +171,7 @@ export function AnimatedSidebar() {
     (session?.user as any)?.id,
     (session?.user as any)?.firstName,
     (session?.user as any)?.role,
+    (session?.user as any)?.adminLevel,
     (session?.user as any)?.department,
     (session?.user as any)?.crmEnabled,
     contextUser,
@@ -161,7 +183,7 @@ export function AnimatedSidebar() {
 
   if (!user) return null
 
-  const navItems = useMemo(() => getNavItems(user), [user.role, user.department, user.crmEnabled])
+  const navItems = useMemo(() => getNavItems(user), [user.role, user.adminLevel, user.department, user.crmEnabled])
 
   const SidebarContent = memo(({ isMobile = false }: { isMobile?: boolean }) => (
     <div className="flex flex-col h-full">
@@ -222,7 +244,7 @@ export function AnimatedSidebar() {
                 {user.firstName} {user.lastName}
               </p>
               <p className="text-xs text-muted-foreground capitalize">
-                {user.role === "user" ? "Rider" : user.role}
+                {user.role === "admin" && user.adminLevel ? `${String(user.adminLevel).replace(/_/g, " ")} admin` : user.role === "user" ? "Rider" : user.role}
               </p>
             </div>
           )}

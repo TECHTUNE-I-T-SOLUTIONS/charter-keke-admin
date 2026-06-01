@@ -6,8 +6,12 @@ import { AdminDriverDetailsModal } from "@/components/admin-driver-details-modal
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Car, Search, UserPlus, Filter, Download, CheckCircle, Clock, XCircle, Loader2, Star, MapPin } from "lucide-react"
+import { toast } from "sonner"
 
 interface Driver {
   id: string
@@ -24,6 +28,39 @@ interface Driver {
   earnings: number
 }
 
+const emptyDriverForm = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  password: "",
+  vehicleType: "keke",
+  plateNumber: "",
+  operatingZones: "",
+  unionName: "",
+  bankName: "",
+  bankAccountNumber: "",
+  accountName: "",
+  emergencyContact: "",
+  emergencyPhone: "",
+  verified: false,
+}
+
+function downloadCsv(filename: string, rows: Array<Record<string, unknown>>) {
+  const headers = Object.keys(rows[0] || { empty: "" })
+  const csv = [
+    headers.join(","),
+    ...rows.map((row) => headers.map((key) => `"${String(row[key] ?? "").replace(/"/g, '""')}"`).join(",")),
+  ].join("\n")
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 function DriversContent() {
   const [searchQuery, setSearchQuery] = useState("")
   const [drivers, setDrivers] = useState<Driver[]>([])
@@ -36,6 +73,9 @@ function DriversContent() {
   const [verifiedFilter, setVerifiedFilter] = useState<"all" | "verified" | "pending">("all")
   const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [selectedDriver, setSelectedDriver] = useState<string | null>(null)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isSavingDriver, setIsSavingDriver] = useState(false)
+  const [driverForm, setDriverForm] = useState(emptyDriverForm)
 
   // Fetch stats
   useEffect(() => {
@@ -87,6 +127,61 @@ function DriversContent() {
     return () => clearTimeout(timer)
   }, [searchQuery, verifiedFilter])
 
+  const refreshDrivers = async () => {
+    setIsLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (searchQuery) params.append("search", searchQuery)
+      if (verifiedFilter === "verified") params.append("verified", "true")
+      else if (verifiedFilter === "pending") params.append("verified", "false")
+      params.append("limit", "50")
+      const response = await fetch(`/api/admin/drivers?${params.toString()}`)
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data?.error || "Failed to fetch drivers")
+      setDrivers(data.drivers || [])
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to fetch drivers")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const exportDrivers = () => {
+    downloadCsv("charter-keke-drivers.csv", drivers.map((driver) => ({
+      name: `${driver.first_name} ${driver.last_name}`.trim(),
+      email: driver.email,
+      phone: driver.phone_number,
+      vehicle_type: driver.vehicle_type,
+      plate_number: driver.plate_number,
+      verified: driver.verified,
+      rating: driver.avg_rating,
+      rides_completed: driver.rides_completed,
+      earnings: driver.earnings,
+    })))
+  }
+
+  const createDriver = async () => {
+    setIsSavingDriver(true)
+    try {
+      const response = await fetch("/api/admin/drivers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(driverForm),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data?.error || "Failed to create driver")
+      toast.success("Driver created")
+      setDriverForm(emptyDriverForm)
+      setIsCreateOpen(false)
+      await refreshDrivers()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to create driver")
+    } finally {
+      setIsSavingDriver(false)
+    }
+  }
+
   return (
     <div className="flex min-h-screen bg-background">
 
@@ -103,11 +198,11 @@ function DriversContent() {
               <p className="text-muted-foreground mt-1">Manage drivers and verify documents</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" className="border-primary/20 hover:bg-primary/10 bg-transparent">
+              <Button variant="outline" onClick={exportDrivers} className="border-primary/20 hover:bg-primary/10 bg-transparent">
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
-              <Button className="bg-gradient-to-r from-primary to-secondary hover:opacity-90">
+              <Button onClick={() => setIsCreateOpen(true)} className="bg-gradient-to-r from-primary to-secondary hover:opacity-90">
                 <UserPlus className="h-4 w-4 mr-2" />
                 Add Driver
               </Button>
@@ -173,6 +268,7 @@ function DriversContent() {
               />
             </div>
             <select
+              title="Filter by verification status"
               value={verifiedFilter}
               onChange={(e) => setVerifiedFilter(e.target.value as "all" | "verified" | "pending")}
               className="px-4 py-2 bg-background/50 border border-primary/20 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -181,7 +277,7 @@ function DriversContent() {
               <option value="verified">Verified</option>
               <option value="pending">Pending Verification</option>
             </select>
-            <Button variant="outline" className="border-primary/20 hover:bg-primary/10 bg-transparent">
+            <Button variant="outline" onClick={exportDrivers} className="border-primary/20 hover:bg-primary/10 bg-transparent">
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
@@ -369,6 +465,38 @@ function DriversContent() {
         onOpenChange={setDetailsModalOpen}
         driverId={selectedDriver}
       />
+
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="max-w-3xl max-h-[92dvh] overflow-hidden p-0">
+          <DialogHeader className="border-b px-5 py-4 md:px-6">
+            <DialogTitle className="pr-8">Add Driver</DialogTitle>
+            <DialogDescription>Create a driver login and driver profile with vehicle, bank, and emergency details.</DialogDescription>
+          </DialogHeader>
+          <div className="overflow-y-auto px-5 py-4 md:px-6 pb-12" style={{ maxHeight: "calc(92dvh - 86px)" }}>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2"><Label>First name</Label><Input value={driverForm.firstName} onChange={(e) => setDriverForm({ ...driverForm, firstName: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Last name</Label><Input value={driverForm.lastName} onChange={(e) => setDriverForm({ ...driverForm, lastName: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Email</Label><Input type="email" value={driverForm.email} onChange={(e) => setDriverForm({ ...driverForm, email: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Phone</Label><Input value={driverForm.phone} onChange={(e) => setDriverForm({ ...driverForm, phone: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Temporary password</Label><Input type="password" value={driverForm.password} onChange={(e) => setDriverForm({ ...driverForm, password: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Vehicle type</Label><Input value={driverForm.vehicleType} onChange={(e) => setDriverForm({ ...driverForm, vehicleType: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Plate number</Label><Input value={driverForm.plateNumber} onChange={(e) => setDriverForm({ ...driverForm, plateNumber: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Operating zones</Label><Input placeholder="Yaba, Surulere, Ikeja" value={driverForm.operatingZones} onChange={(e) => setDriverForm({ ...driverForm, operatingZones: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Union name</Label><Input value={driverForm.unionName} onChange={(e) => setDriverForm({ ...driverForm, unionName: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Bank name</Label><Input value={driverForm.bankName} onChange={(e) => setDriverForm({ ...driverForm, bankName: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Account number</Label><Input value={driverForm.bankAccountNumber} onChange={(e) => setDriverForm({ ...driverForm, bankAccountNumber: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Account name</Label><Input value={driverForm.accountName} onChange={(e) => setDriverForm({ ...driverForm, accountName: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Emergency contact</Label><Input value={driverForm.emergencyContact} onChange={(e) => setDriverForm({ ...driverForm, emergencyContact: e.target.value })} /></div>
+              <div className="space-y-2"><Label>Emergency phone</Label><Input value={driverForm.emergencyPhone} onChange={(e) => setDriverForm({ ...driverForm, emergencyPhone: e.target.value })} /></div>
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <Label>Mark verified</Label>
+                <Switch checked={driverForm.verified} onCheckedChange={(verified) => setDriverForm({ ...driverForm, verified })} />
+              </div>
+            </div>
+            <Button className="mt-4 w-full md:w-auto" onClick={createDriver} disabled={isSavingDriver}>{isSavingDriver ? "Creating..." : "Create Driver"}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
