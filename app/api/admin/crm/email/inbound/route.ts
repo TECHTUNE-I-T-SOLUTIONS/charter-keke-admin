@@ -7,6 +7,7 @@ import {
   normalizeEmailAddress,
   resolveDepartmentKeyFromText,
 } from "@/lib/crm"
+import { notifyAdmins } from "@/lib/admin-notifications"
 
 function normalizeAttachments(input: unknown): Array<Record<string, unknown>> {
   if (!Array.isArray(input)) return []
@@ -241,6 +242,15 @@ export async function POST(request: NextRequest) {
         received_at: new Date().toISOString(),
       })
       .select("id")
+
+    await notifyAdmins({
+      department: departmentKey,
+      title: "New inbound email",
+      body: `${fromName || fromEmail} sent ${subject || "a new support message"}.`,
+      type: "crm_email_inbound",
+      actionUrl: `/admin/crm?ticket=${ticketId}`,
+      metadata: { ticketId, departmentKey, emailAlias: recipientEmail, fromEmail },
+    })
 
     return NextResponse.json(
       {

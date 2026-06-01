@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getSessionFromRequest } from "@/lib/auth"
 import { supabaseAdmin } from "@/lib/supabase"
+import { requireCrmAccess } from "@/lib/admin-access"
+import { notifyAdmins } from "@/lib/admin-notifications"
 
 type Params = { params: Promise<{ ticketId: string }> }
-
-async function assertAdmin(request: NextRequest) {
-  const session = await getSessionFromRequest(request)
-  const isAdmin = session?.user?.role === "admin" || session?.user?.role === "super_admin"
-  return { session, isAdmin }
-}
 
 export async function POST(request: NextRequest, { params }: Params) {
   try {
@@ -16,8 +11,9 @@ export async function POST(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Supabase admin client unavailable" }, { status: 503 })
     }
 
-    const { session, isAdmin } = await assertAdmin(request)
-    if (!isAdmin || !session?.user?.id) {
+    const access = await requireCrmAccess(request)
+    const session = access.session
+    if (!access.authorized || !session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -38,7 +34,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     const { data: ticket, error: ticketError } = await supabaseAdmin
       .from("support_tickets")
-      .select("id, user_id, status")
+      .select("id, user_id, status, source_channel, source_email, source_name, subject, external_thread_id, department_id")
       .eq("id", ticketId)
       .single()
 
@@ -99,6 +95,42 @@ export async function POST(request: NextRequest, { params }: Params) {
         status: ticket.status === "open" ? "in_progress" : ticket.status,
       })
       .eq("id", ticketId)
+
+    if (!isInternal && ticket.source_channel === "email" && ticket.source_email) {
+      await supabaseAdmin.from("crm_email_messages").insert({
+        email_account_id: null,
+        ticket_id: ticketId,
+        direction: "outbound",
+        from_email: "support@charterkeke.com",
+        from_name: "Charter Keke Support",
+        to_emails: [ticket.source_email],
+        cc_emails: [],
+        bcc_emails: [],
+        subject: ticket.subject?.startsWith("Re:") ? ticket.subject : `Re: ${ticket.subject || "Support Request"}`,
+        body_text: message,
+        body_html: null,
+        attachments,
+        external_message_id: null,
+        external_thread_id: ticket.external_thread_id,
+        processing_status: "queued",
+        processing_reason: "Queued admin CRM reply for SMTP delivery",
+        raw_headers: {},
+        raw_payload: { createdByAdminId: session.user.id },
+        received_at: now,
+        processed_at: null,
+      })
+    }
+
+    if (isInternal) {
+      await notifyAdmins({
+        userIds: [session.user.id],
+        title: "New internal CRM note",
+        body: message.slice(0, 140) || "A CRM internal message was added.",
+        type: "crm_internal_message",
+        actionUrl: `/admin/crm?ticket=${ticketId}`,
+        metadata: { ticketId, departmentId: ticket.department_id },
+      })
+    }
 
     return NextResponse.json({ message: created }, { status: 201 })
   } catch (error) {

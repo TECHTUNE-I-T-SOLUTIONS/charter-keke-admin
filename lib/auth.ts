@@ -32,6 +32,9 @@ export async function getSessionFromRequest(request: NextRequest) {
       let phone = (nextAuthToken.phone as string) || "";
       let referralCode = (nextAuthToken.referralCode as string) || "";
       let createdAt = (nextAuthToken.createdAt as string) || "";
+      let adminLevel = (nextAuthToken.adminLevel as string) || "";
+      let department = (nextAuthToken.department as string) || "";
+      let crmEnabled = nextAuthToken.crmEnabled !== false;
 
       if (!role || !email) {
         const { data: user } = await supabase
@@ -61,6 +64,9 @@ export async function getSessionFromRequest(request: NextRequest) {
           phone,
           referralCode,
           createdAt,
+          adminLevel,
+          department,
+          crmEnabled,
         },
       };
     }

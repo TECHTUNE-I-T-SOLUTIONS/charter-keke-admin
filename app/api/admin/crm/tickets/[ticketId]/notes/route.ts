@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getSessionFromRequest } from "@/lib/auth"
+import { requireCrmAccess } from "@/lib/admin-access"
 import { supabaseAdmin } from "@/lib/supabase"
 
 type Params = { params: Promise<{ ticketId: string }> }
-
-async function assertAdmin(request: NextRequest) {
-  const session = await getSessionFromRequest(request)
-  const isAdmin = session?.user?.role === "admin" || session?.user?.role === "super_admin"
-  return { session, isAdmin }
-}
 
 export async function POST(request: NextRequest, { params }: Params) {
   try {
@@ -16,8 +10,9 @@ export async function POST(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Supabase admin client unavailable" }, { status: 503 })
     }
 
-    const { session, isAdmin } = await assertAdmin(request)
-    if (!isAdmin || !session?.user?.id) {
+    const access = await requireCrmAccess(request)
+    const session = access.session
+    if (!access.authorized || !session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

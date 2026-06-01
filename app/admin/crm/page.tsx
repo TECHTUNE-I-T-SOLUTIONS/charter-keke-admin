@@ -494,28 +494,38 @@ export default function AdminCrmPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 xl:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-3">
                 {[
-                  { label: "Open", value: summary.openTickets, icon: ClipboardList, tone: "from-amber-500/90 to-amber-300/80" },
-                  { label: "In Progress", value: summary.inProgressTickets, icon: Clock3, tone: "from-sky-500/90 to-cyan-300/80" },
-                  { label: "Escalated", value: summary.escalatedTickets, icon: ShieldCheck, tone: "from-rose-500/90 to-rose-300/80" },
-                  { label: "Resolved", value: summary.resolvedTickets, icon: MessageSquare, tone: "from-emerald-500/90 to-emerald-300/80" },
-                  { label: "Queued Email", value: summary.queuedInboundEmails, icon: Mail, tone: "from-violet-500/90 to-violet-300/80" },
-                  { label: "Internal Notes", value: summary.internalNotes, icon: Users, tone: "from-zinc-500/90 to-zinc-300/80" },
-                  { label: "Mailboxes", value: summary.emailAccounts, icon: MessageSquare, tone: "from-cyan-500/90 to-cyan-300/80" },
+                  { label: "Open", value: summary.openTickets, icon: ClipboardList, tone: "from-amber-500/90 to-amber-300/80", queue: "open" },
+                  { label: "In Progress", value: summary.inProgressTickets, icon: Clock3, tone: "from-sky-500/90 to-cyan-300/80", queue: "in_progress" },
+                  { label: "Escalated", value: summary.escalatedTickets, icon: ShieldCheck, tone: "from-rose-500/90 to-rose-300/80", queue: "escalated" },
+                  { label: "Resolved", value: summary.resolvedTickets, icon: MessageSquare, tone: "from-emerald-500/90 to-emerald-300/80", queue: "resolved" },
+                  { label: "Queued Email", value: summary.queuedInboundEmails, icon: Mail, tone: "from-violet-500/90 to-violet-300/80", queue: "email" },
+                  { label: "Internal Notes", value: summary.internalNotes, icon: Users, tone: "from-zinc-500/90 to-zinc-300/80", href: "/admin/crm/logs" },
+                  { label: "Mailboxes", value: summary.emailAccounts, icon: MessageSquare, tone: "from-cyan-500/90 to-cyan-300/80", href: "/admin/crm/emails" },
                 ].map((item) => {
                   const Icon = item.icon
+                  const content = (
+                    <CardContent className="p-4 flex items-center justify-between gap-3 min-h-[120px]">
+                      <div className="min-w-0">
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground break-words">{item.label}</p>
+                        <p className="mt-1 text-2xl font-semibold">{item.value}</p>
+                        <p className="mt-2 text-[11px] text-muted-foreground">Open</p>
+                      </div>
+                      <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white", item.tone)}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                    </CardContent>
+                  )
                   return (
-                    <Card key={item.label} className="border-border/60 bg-background/55 backdrop-blur-xl shadow-xl shadow-black/10">
-                      <CardContent className="p-4 flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-xs uppercase tracking-wide text-muted-foreground">{item.label}</p>
-                          <p className="mt-1 text-2xl font-semibold">{item.value}</p>
-                        </div>
-                        <div className={cn("flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br text-white", item.tone)}>
-                          <Icon className="h-5 w-5" />
-                        </div>
-                      </CardContent>
+                    <Card
+                      key={item.label}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => item.queue ? setActiveQueue(item.queue) : undefined}
+                      className="border-border/60 bg-background/55 backdrop-blur-xl shadow-xl shadow-black/10 transition hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5"
+                    >
+                      {item.href ? <Link href={item.href}>{content}</Link> : content}
                     </Card>
                   )
                 })}

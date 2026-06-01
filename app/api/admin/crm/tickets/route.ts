@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getSessionFromRequest } from "@/lib/auth"
 import { supabaseAdmin } from "@/lib/supabase"
 import { CRM_DEPARTMENTS, resolveDepartmentKeyFromText } from "@/lib/crm"
-
-async function assertAdmin(request: NextRequest) {
-  const session = await getSessionFromRequest(request)
-  const isAdmin = session?.user?.role === "admin" || session?.user?.role === "super_admin"
-  return { session, isAdmin }
-}
+import { requireCrmAccess } from "@/lib/admin-access"
+import { notifyAdmins } from "@/lib/admin-notifications"
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,8 +10,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Supabase admin client unavailable" }, { status: 503 })
     }
 
-    const { isAdmin } = await assertAdmin(request)
-    if (!isAdmin) {
+    const access = await requireCrmAccess(request)
+    if (!access.authorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -132,8 +127,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Supabase admin client unavailable" }, { status: 503 })
     }
 
-    const { session, isAdmin } = await assertAdmin(request)
-    if (!isAdmin || !session?.user?.id) {
+    const access = await requireCrmAccess(request)
+    const session = access.session
+    if (!access.authorized || !session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -200,6 +196,15 @@ export async function POST(request: NextRequest) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
+
+    await notifyAdmins({
+      department: departmentKey,
+      title: "New CRM ticket",
+      body: `${subject} was routed to ${departmentKey.replace(/_/g, " ")}.`,
+      type: "crm_ticket_created",
+      actionUrl: `/admin/crm?ticket=${ticket.id}`,
+      metadata: { ticketId: ticket.id, departmentKey, sourceChannel },
+    })
 
     return NextResponse.json({ ticket }, { status: 201 })
   } catch (error) {

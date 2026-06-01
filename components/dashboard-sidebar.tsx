@@ -76,6 +76,8 @@ const adminNavItems: NavItem[] = [
   { label: "Payments", href: "/admin/payments", icon: <CreditCard className="h-5 w-5" /> },
   { label: "Moderation", href: "/admin/moderation", icon: <Shield className="h-5 w-5" /> },
   { label: "Users", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
+  { label: "Admins", href: "/admin/admins", icon: <Shield className="h-5 w-5" /> },
+  { label: "HR", href: "/admin/hr", icon: <Users className="h-5 w-5" /> },
   { label: "Monitor", href: "/admin/monitor", icon: <BarChart3 className="h-5 w-5" /> },
   { label: "Messages", href: "/admin/messages", icon: <MessageSquare className="h-5 w-5" /> },
   { label: "CRM", href: "/admin/crm", icon: <ClipboardList className="h-5 w-5" /> },
@@ -83,11 +85,28 @@ const adminNavItems: NavItem[] = [
   { label: "Settings", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ]
 
-function getNavItems(role: UserRole | string): NavItem[] {
+function canAccessCrm(user: any) {
+  if (user?.role === "super_admin") return true
+  const department = String(user?.department || "").toLowerCase()
+  return user?.crmEnabled !== false && ["support", "general", "customer_support"].includes(department)
+}
+
+function canManageAdmins(user: any) {
+  if (user?.role === "super_admin") return true
+  const department = String(user?.department || "").toLowerCase()
+  return user?.role === "admin" && ["hr", "human_resources"].includes(department)
+}
+
+function getNavItems(user: any): NavItem[] {
+  const role = user?.role
   switch (role) {
     case "admin":
     case "super_admin":
-      return adminNavItems
+      return adminNavItems.filter((item) => {
+        if (item.href === "/admin/crm") return canAccessCrm(user)
+        if (item.href === "/admin/admins" || item.href === "/admin/hr") return canManageAdmins(user)
+        return true
+      })
     case "driver":
       return driverNavItems
     default:
@@ -100,7 +119,7 @@ function getNavItems(role: UserRole | string): NavItem[] {
 // Memoized sidebar content component
 const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { user: any; pathname: string; setIsMobileOpen: (open: boolean) => void; onLogout?: () => void }) => {
   const { theme, setTheme } = useTheme()
-  const navItems = useMemo(() => getNavItems(user.role), [user.role])
+  const navItems = useMemo(() => getNavItems(user), [user.role, user.department, user.crmEnabled])
 
   const { data: session } = useSession()
   const [avatarUrl] = useState("")

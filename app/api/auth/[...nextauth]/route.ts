@@ -49,6 +49,12 @@ const handler = NextAuth({
             return null;
           }
 
+          const { data: adminProfile } = await supabase
+            .from("admins")
+            .select("admin_level, department, crm_enabled, permissions")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
           return {
             id: user.id,
             email: user.email,
@@ -63,6 +69,10 @@ const handler = NextAuth({
             gender: user.gender,
             profileComplete: user.profile_complete,
             createdAt: user.created_at,
+            adminLevel: adminProfile?.admin_level || null,
+            department: adminProfile?.department || null,
+            crmEnabled: adminProfile?.crm_enabled ?? false,
+            permissions: adminProfile?.permissions || {},
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -86,6 +96,10 @@ const handler = NextAuth({
         token.profileComplete = user.profileComplete;
         token.createdAt = user.createdAt;
         token.status = user.status;
+        token.adminLevel = user.adminLevel;
+        token.department = user.department;
+        token.crmEnabled = user.crmEnabled;
+        token.permissions = user.permissions;
       }
       return token;
     },
@@ -102,6 +116,10 @@ const handler = NextAuth({
         session.user.profileComplete = token.profileComplete;
         session.user.createdAt = token.createdAt;
         session.user.status = token.status;
+        session.user.adminLevel = token.adminLevel;
+        session.user.department = token.department;
+        session.user.crmEnabled = token.crmEnabled;
+        session.user.permissions = token.permissions;
       }
       return session;
     },

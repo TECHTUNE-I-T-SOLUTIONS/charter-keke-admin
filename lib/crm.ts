@@ -9,6 +9,7 @@ export type CrmDepartmentKey =
   | "engineering"
   | "product"
   | "finance"
+  | "hr"
 
 export type CrmDepartment = {
   key: CrmDepartmentKey
@@ -88,6 +89,13 @@ export const CRM_DEPARTMENTS: CrmDepartment[] = [
     emailAlias: "finance@charterkeke.com",
     keywords: ["finance", "settlement", "remittance", "reconciliation", "payout"],
     aliases: ["finance", "accounts"],
+  },
+  {
+    key: "hr",
+    label: "Human Resources",
+    emailAlias: "hr@charterkeke.com",
+    keywords: ["hr", "human resources", "recruitment", "onboarding", "staff", "admin onboarding"],
+    aliases: ["hr", "human-resources", "people"],
   },
 ]
 
@@ -183,6 +191,9 @@ export function resolveDepartmentKeyFromText(input: {
       return department.key
     }
     if (department.key === "finance" && (text.includes("settlement") || text.includes("remittance") || text.includes("reconciliation"))) {
+      return department.key
+    }
+    if (department.key === "hr" && (text.includes("human resources") || text.includes("recruitment") || text.includes("onboarding") || text.includes("staff"))) {
       return department.key
     }
   }

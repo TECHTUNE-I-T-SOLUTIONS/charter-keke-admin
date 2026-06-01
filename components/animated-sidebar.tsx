@@ -76,6 +76,8 @@ const adminNavItems: NavItem[] = [
   { label: "Payments", href: "/admin/payments", icon: <CreditCard className="h-5 w-5" /> },
   { label: "Moderation", href: "/admin/moderation", icon: <Shield className="h-5 w-5" /> },
   { label: "Users", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
+  { label: "Admins", href: "/admin/admins", icon: <Shield className="h-5 w-5" /> },
+  { label: "HR", href: "/admin/hr", icon: <Users className="h-5 w-5" /> },
   { label: "Analytics", href: "/admin/analytics", icon: <BarChart3 className="h-5 w-5" /> },
   { label: "Monitor", href: "/admin/monitor", icon: <Activity className="h-5 w-5" /> },
   { label: "Messages", href: "/admin/messages", icon: <MessageSquare className="h-5 w-5" /> },
@@ -84,11 +86,35 @@ const adminNavItems: NavItem[] = [
   { label: "Settings", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ]
 
-function getNavItems(role: UserRole | string): NavItem[] {
-  switch (role) {
+type SidebarUser = {
+  role?: UserRole | string
+  department?: string | null
+  crmEnabled?: boolean
+}
+
+function canAccessCrm(user?: SidebarUser | null) {
+  if (!user) return false
+  if (user.role === "super_admin") return true
+  const department = String(user.department || "").toLowerCase()
+  return user.role === "admin" && user.crmEnabled !== false && ["support", "general", "customer_support"].includes(department)
+}
+
+function canManageAdmins(user?: SidebarUser | null) {
+  if (!user) return false
+  if (user.role === "super_admin") return true
+  const department = String(user.department || "").toLowerCase()
+  return user.role === "admin" && ["hr", "human_resources"].includes(department)
+}
+
+function getNavItems(user: SidebarUser): NavItem[] {
+  switch (user.role) {
     case "admin":
     case "super_admin":
-      return adminNavItems
+      return adminNavItems.filter((item) => {
+        if (item.href === "/admin/crm") return canAccessCrm(user)
+        if (item.href === "/admin/admins" || item.href === "/admin/hr") return canManageAdmins(user)
+        return true
+      })
     case "driver":
       return driverNavItems
     default:
@@ -113,12 +139,21 @@ export function AnimatedSidebar() {
         firstName: (session.user as any).firstName || "User",
         lastName: (session.user as any).lastName || "",
         role: ((session.user as any).role || "user") as UserRole,
+        department: (session.user as any).department || null,
+        crmEnabled: (session.user as any).crmEnabled !== false,
         email: session.user.email || "",
         profilePictureUrl: (session.user as any).profilePictureUrl || "",
       }
     }
     return contextUser
-  }, [(session?.user as any)?.id, (session?.user as any)?.firstName, (session?.user as any)?.role, contextUser])
+  }, [
+    (session?.user as any)?.id,
+    (session?.user as any)?.firstName,
+    (session?.user as any)?.role,
+    (session?.user as any)?.department,
+    (session?.user as any)?.crmEnabled,
+    contextUser,
+  ])
 
   useEffect(() => {
     setMounted(true)
@@ -126,7 +161,7 @@ export function AnimatedSidebar() {
 
   if (!user) return null
 
-  const navItems = useMemo(() => getNavItems(user.role), [user.role])
+  const navItems = useMemo(() => getNavItems(user), [user.role, user.department, user.crmEnabled])
 
   const SidebarContent = memo(({ isMobile = false }: { isMobile?: boolean }) => (
     <div className="flex flex-col h-full">

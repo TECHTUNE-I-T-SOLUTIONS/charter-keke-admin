@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 
-export type UserRole = "user" | "driver" | "admin"
+export type UserRole = "user" | "driver" | "admin" | "super_admin"
 
 export interface User {
   id: string
@@ -17,6 +17,10 @@ export interface User {
   referredBy?: string
   createdAt: string
   profilePictureUrl?: string
+  adminLevel?: string | null
+  department?: string | null
+  crmEnabled?: boolean
+  permissions?: Record<string, boolean>
 }
 
 interface AuthContextType {
@@ -62,6 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         referredBy: (session.user as any).referredBy,
         profilePictureUrl: (session.user as any).profilePictureUrl || "",
         createdAt: (session.user as any).createdAt || new Date().toISOString(),
+        adminLevel: (session.user as any).adminLevel || null,
+        department: (session.user as any).department || null,
+        crmEnabled: (session.user as any).crmEnabled !== false,
+        permissions: (session.user as any).permissions || {},
       }
       setUser(nextAuthUser)
       localStorage.setItem("charterkeke_user", JSON.stringify(nextAuthUser))
