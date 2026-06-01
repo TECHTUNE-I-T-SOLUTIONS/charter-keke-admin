@@ -586,6 +586,7 @@ export default function AdminSignupPage() {
                       <option value="engineering">Engineering</option>
                       <option value="product">Product and Systems</option>
                       <option value="finance">Finance</option>
+                      <option value="hr">Human Resources</option>
                     </select>
                     <p className="text-xs text-muted-foreground">Departments drive CRM routing and queue access.</p>
                   </div>

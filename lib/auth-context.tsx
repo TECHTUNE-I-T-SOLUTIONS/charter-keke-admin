@@ -28,7 +28,7 @@ interface AuthContextType {
   isLoading: boolean
   login: (emailOrPhone: string, password: string) => Promise<{ success: boolean; error?: string }>
   register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>
-  logout: () => Promise<void>
+  logout: (redirectTo?: string) => Promise<void>
   showLogoutConfirm: boolean
   setShowLogoutConfirm: (show: boolean) => void
 }
@@ -180,14 +180,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const logout = async () => {
+  const logout = async (redirectTo = "/") => {
     setIsLoading(true)
     try {
       await new Promise((resolve) => setTimeout(resolve, 500))
       setUser(null)
       localStorage.removeItem("charterkeke_user")
       setShowLogoutConfirm(false)
-      router.push("/")
+      router.push(redirectTo)
     } finally {
       setIsLoading(false)
     }

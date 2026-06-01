@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context"
 import { signOut } from "next-auth/react"
+import { usePathname } from "next/navigation"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,13 +16,19 @@ import {
 import { LogOut } from "lucide-react"
 
 export function LogoutDialog() {
-  const { showLogoutConfirm, setShowLogoutConfirm, logout, isLoading } = useAuth()
+  const { user, showLogoutConfirm, setShowLogoutConfirm, logout, isLoading } = useAuth()
+  const pathname = usePathname()
 
   const handleLogout = async () => {
-    // First try NextAuth logout
-    await signOut({ redirect: true, callbackUrl: "/auth/login" })
-    // Also call the context logout for cleanup
-    await logout()
+    const isAdminSession =
+      pathname?.startsWith("/admin") ||
+      pathname?.startsWith("/auth/admin") ||
+      user?.role === "admin" ||
+      user?.role === "super_admin"
+    const callbackUrl = isAdminSession ? "/auth/admin/login" : "/auth/login"
+
+    await signOut({ redirect: false, callbackUrl })
+    await logout(callbackUrl)
   }
 
   return (
