@@ -58,18 +58,18 @@ const formatCurrency = (value: number) => `₦${Number(value || 0).toLocaleStrin
 
 function MetricCard({ label, value, note, icon: Icon }: any) {
   return (
-    <Card className="border-primary/10 bg-card shadow-sm">
+    <Card className="min-w-0 border-primary/10 bg-card shadow-sm">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
+        <div className="flex min-w-0 items-center justify-between gap-3">
+          <div className="min-w-0">
             <p className="text-xs font-medium text-muted-foreground">{label}</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{value}</p>
+            <p className="mt-1 break-words text-xl font-bold text-foreground sm:text-2xl">{value}</p>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/12 text-primary">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/12 text-primary">
             <Icon className="h-5 w-5" />
           </div>
         </div>
-        {note ? <p className="mt-2 text-xs text-muted-foreground">{note}</p> : null}
+        {note ? <p className="mt-2 break-words text-xs text-muted-foreground">{note}</p> : null}
       </CardContent>
     </Card>
   )
@@ -77,12 +77,13 @@ function MetricCard({ label, value, note, icon: Icon }: any) {
 
 function RankedTable({ title, rows, columns }: { title: string; rows: any[]; columns: { key: string; label: string; format?: (value: any, row: any) => string }[] }) {
   return (
-    <Card className="border-primary/10 bg-card shadow-sm">
+    <Card className="min-w-0 overflow-hidden border-primary/10 bg-card shadow-sm">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">{title}</CardTitle>
+        <CardTitle className="break-words text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="overflow-x-auto">
-        <table className="w-full min-w-[560px] text-sm">
+      <CardContent className="px-0 pb-4">
+        <div className="w-full overflow-x-auto px-4">
+          <table className="w-full min-w-[520px] text-sm sm:min-w-[560px]">
           <thead>
             <tr className="border-b border-border text-left text-xs text-muted-foreground">
               {columns.map((column) => (
@@ -96,7 +97,7 @@ function RankedTable({ title, rows, columns }: { title: string; rows: any[]; col
             {rows.length ? rows.map((row, index) => (
               <tr key={`${row.id || row.name}-${index}`} className="border-b border-border/60 last:border-0">
                 {columns.map((column) => (
-                  <td key={column.key} className="px-2 py-3">
+                  <td key={column.key} className="max-w-[220px] break-words px-2 py-3 align-top">
                     {column.format ? column.format(row[column.key], row) : row[column.key]}
                   </td>
                 ))}
@@ -110,6 +111,7 @@ function RankedTable({ title, rows, columns }: { title: string; rows: any[]; col
             )}
           </tbody>
         </table>
+        </div>
       </CardContent>
     </Card>
   )
@@ -117,16 +119,16 @@ function RankedTable({ title, rows, columns }: { title: string; rows: any[]; col
 
 function ChartCard({ title, data, dataKey, color = "var(--primary)" }: { title: string; data: any[]; dataKey: string; color?: string }) {
   return (
-    <Card className="border-primary/10 bg-card shadow-sm">
+    <Card className="min-w-0 overflow-hidden border-primary/10 bg-card shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">{title}</CardTitle>
+        <CardTitle className="break-words text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-72">
+      <CardContent className="px-2 pb-4 sm:px-4">
+        <div className="h-64 min-w-0 sm:h-72">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.35} />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-18} textAnchor="end" height={76} />
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} interval="preserveStartEnd" angle={-18} textAnchor="end" height={76} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
               <Bar dataKey={dataKey} fill={color} radius={[4, 4, 0, 0]} />
@@ -305,18 +307,18 @@ function OperationsIntelligenceContent({ page }: { page: PageKind }) {
   }, [data, daily, page])
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <main className="flex-1 pt-16 lg:pt-0">
-        <div className="space-y-6 p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen min-w-0 overflow-x-hidden bg-background pb-24">
+      <main className="min-w-0 pt-16 lg:pt-0">
+        <div className="mx-auto w-full max-w-[1600px] min-w-0 space-y-6 overflow-x-hidden p-3 sm:p-4 md:p-6 lg:p-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div>
+            <div className="min-w-0">
               <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 Charter Keke Admin
               </div>
-              <h1 className="text-2xl font-bold text-foreground md:text-3xl">{title.title}</h1>
-              <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{title.subtitle}</p>
+              <h1 className="break-words text-2xl font-bold text-foreground md:text-3xl">{title.title}</h1>
+              <p className="mt-1 max-w-3xl break-words text-sm text-muted-foreground">{title.subtitle}</p>
             </div>
-            <Button onClick={loadData} variant="outline" className="gap-2 border-primary/20">
+            <Button onClick={loadData} variant="outline" className="w-full gap-2 border-primary/20 sm:w-auto">
               <RefreshCw className="h-4 w-4" />
               Refresh
             </Button>
@@ -335,45 +337,45 @@ function OperationsIntelligenceContent({ page }: { page: PageKind }) {
             </Card>
           ) : (
             <>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <MetricCard label="30-day bookings" value={summary.rides || 0} note={`${summary.acceptanceRate || 0}% accepted`} icon={MapPin} />
                 <MetricCard label="Active drivers" value={summary.activeDrivers || 0} note={`${summary.verifiedDrivers || 0} verified drivers`} icon={Car} />
                 <MetricCard label="Platform fees" value={formatCurrency(summary.platformFees || 0)} note={`${formatCurrency(summary.grossRevenue || 0)} gross ride value`} icon={CreditCard} />
                 <MetricCard label="Active devices" value={summary.activeDevices || 0} note={`${summary.openTickets || 0} open support tickets`} icon={Smartphone} />
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-3">
-                <Card className="border-primary/10 bg-card shadow-sm">
-                  <CardContent className="flex items-center gap-3 p-4">
-                    <ShieldCheck className="h-5 w-5 text-primary" />
-                    <div>
+              <div className="grid min-w-0 gap-4 lg:grid-cols-3">
+                <Card className="min-w-0 border-primary/10 bg-card shadow-sm">
+                  <CardContent className="flex min-w-0 flex-col gap-3 p-4 sm:flex-row sm:items-center">
+                    <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
+                    <div className="min-w-0">
                       <p className="text-sm font-semibold">Fulfilment health</p>
-                      <p className="text-xs text-muted-foreground">{summary.completedRides || 0} completed, {summary.cancelledRides || 0} cancelled</p>
+                      <p className="break-words text-xs text-muted-foreground">{summary.completedRides || 0} completed, {summary.cancelledRides || 0} cancelled</p>
                     </div>
-                    <Badge className="ml-auto bg-primary text-primary-foreground">{summary.cancellationRate || 0}% cancelled</Badge>
+                    <Badge className="w-fit bg-primary text-primary-foreground sm:ml-auto">{summary.cancellationRate || 0}% cancelled</Badge>
                   </CardContent>
                 </Card>
-                <Card className="border-primary/10 bg-card shadow-sm">
-                  <CardContent className="flex items-center gap-3 p-4">
-                    <Users className="h-5 w-5 text-primary" />
-                    <div>
+                <Card className="min-w-0 border-primary/10 bg-card shadow-sm">
+                  <CardContent className="flex min-w-0 items-center gap-3 p-4">
+                    <Users className="h-5 w-5 shrink-0 text-primary" />
+                    <div className="min-w-0">
                       <p className="text-sm font-semibold">Marketplace size</p>
-                      <p className="text-xs text-muted-foreground">{summary.riders || 0} riders, {summary.drivers || 0} drivers</p>
+                      <p className="break-words text-xs text-muted-foreground">{summary.riders || 0} riders, {summary.drivers || 0} drivers</p>
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="border-primary/10 bg-card shadow-sm">
-                  <CardContent className="flex items-center gap-3 p-4">
-                    <Activity className="h-5 w-5 text-primary" />
-                    <div>
+                <Card className="min-w-0 border-primary/10 bg-card shadow-sm">
+                  <CardContent className="flex min-w-0 items-center gap-3 p-4">
+                    <Activity className="h-5 w-5 shrink-0 text-primary" />
+                    <div className="min-w-0">
                       <p className="text-sm font-semibold">Remittance risk</p>
-                      <p className="text-xs text-muted-foreground">{summary.overdueSettlements || 0} overdue, {formatCurrency(summary.overdueAmount || 0)} due</p>
+                      <p className="break-words text-xs text-muted-foreground">{summary.overdueSettlements || 0} overdue, {formatCurrency(summary.overdueAmount || 0)} due</p>
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
-              <div className="grid gap-6 xl:grid-cols-2">{primaryTables}</div>
+              <div className="grid min-w-0 gap-4 xl:grid-cols-2 xl:gap-6">{primaryTables}</div>
             </>
           )}
         </div>

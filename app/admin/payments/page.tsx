@@ -129,21 +129,21 @@ function PaymentsContent() {
   }, [statusFilter])
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="min-h-screen min-w-0 overflow-x-hidden bg-background">
 
-      <main className="flex-1 lg:pl-0 pt-16 lg:pt-0 pb-24">
-        <div className="p-4 md:p-6 lg:p-8 space-y-6">
+      <main className="min-w-0 pb-24 pt-16 lg:pl-0 lg:pt-0">
+        <div className="mx-auto w-full max-w-[1600px] min-w-0 space-y-6 overflow-x-hidden p-3 sm:p-4 md:p-6 lg:p-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+            className="flex min-w-0 flex-col gap-4 md:flex-row md:items-center md:justify-between"
           >
-            <div>
-              <h1 className="text-2xl md:text-3xl font-serif font-bold text-foreground">Payments</h1>
-              <p className="text-muted-foreground mt-1">Manage transactions and payouts</p>
+            <div className="min-w-0">
+              <h1 className="break-words font-serif text-2xl font-bold text-foreground md:text-3xl">Payments</h1>
+              <p className="mt-1 break-words text-muted-foreground">Manage transactions and payouts</p>
             </div>
-            <Button variant="outline" className="border-primary/20 hover:bg-primary/10 bg-transparent">
+            <Button variant="outline" className="w-full border-primary/20 bg-transparent hover:bg-primary/10 sm:w-auto">
               <Download className="h-4 w-4 mr-2" />
               Export Report
             </Button>
@@ -154,39 +154,39 @@ function PaymentsContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+            className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
           >
-            <Card className="bg-gradient-to-br from-primary to-secondary text-white">
+            <Card className="min-w-0 bg-gradient-to-br from-primary to-secondary text-white">
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Wallet className="h-4 w-4" />
+                <div className="mb-2 flex min-w-0 items-center gap-2">
+                  <Wallet className="h-4 w-4 shrink-0" />
                   <span className="text-sm opacity-80">Total Revenue</span>
                 </div>
                 <p className="text-2xl font-bold">₦{stats.totalRevenue.toLocaleString()}</p>
               </CardContent>
             </Card>
-            <Card className="bg-card/50 backdrop-blur border-primary/10">
+            <Card className="min-w-0 border-primary/10 bg-card/50 backdrop-blur">
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <ArrowUpRight className="h-4 w-4 text-emerald-500" />
+                <div className="mb-2 flex min-w-0 items-center gap-2">
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-emerald-500" />
                   <span className="text-sm text-muted-foreground">Today</span>
                 </div>
                 <p className="text-2xl font-bold text-foreground">₦{stats.todayRevenue.toLocaleString()}</p>
               </CardContent>
             </Card>
-            <Card className="bg-card/50 backdrop-blur border-primary/10">
+            <Card className="min-w-0 border-primary/10 bg-card/50 backdrop-blur">
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <ArrowDownLeft className="h-4 w-4 text-amber-500" />
+                <div className="mb-2 flex min-w-0 items-center gap-2">
+                  <ArrowDownLeft className="h-4 w-4 shrink-0 text-amber-500" />
                   <span className="text-sm text-muted-foreground">Pending Payouts</span>
                 </div>
                 <p className="text-2xl font-bold text-foreground">₦{stats.pendingPayouts.toLocaleString()}</p>
               </CardContent>
             </Card>
-            <Card className="bg-card/50 backdrop-blur border-primary/10">
+            <Card className="min-w-0 border-primary/10 bg-card/50 backdrop-blur">
               <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <CreditCard className="h-4 w-4 text-primary" />
+                <div className="mb-2 flex min-w-0 items-center gap-2">
+                  <CreditCard className="h-4 w-4 shrink-0 text-primary" />
                   <span className="text-sm text-muted-foreground">Transactions</span>
                 </div>
                 <p className="text-2xl font-bold text-foreground">{stats.totalTransactions}</p>
@@ -200,12 +200,12 @@ function PaymentsContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.15 }}
-              className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-3"
+              className="flex min-w-0 items-start gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4"
             >
               <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-              <div>
+              <div className="min-w-0">
                 <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">Pending Payments</h3>
-                <p className="text-sm text-amber-800 dark:text-amber-200">
+                <p className="break-words text-sm text-amber-800 dark:text-amber-200">
                   {paymentSummary.totalPending} payment{paymentSummary.totalPending !== 1 ? "s" : ""} awaiting processing. Average daily processing: ₦{paymentSummary.averageDaily.toLocaleString("en-US", { maximumFractionDigits: 0 })}
                 </p>
               </div>
@@ -219,21 +219,21 @@ function PaymentsContent() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.17 }}
             >
-              <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Daily Payments Breakdown</h2>
+              <div className="mb-4 flex min-w-0 items-center gap-2">
+                <TrendingUp className="h-5 w-5 shrink-0 text-primary" />
+                <h2 className="break-words text-lg font-semibold text-foreground">Daily Payments Breakdown</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {dailyPayments.slice(0, 6).map((daily, idx) => (
-                  <Card key={idx} className="bg-card/50 backdrop-blur border-primary/10 hover:border-primary/20 transition">
+                  <Card key={idx} className="min-w-0 border-primary/10 bg-card/50 backdrop-blur transition hover:border-primary/20">
                     <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-semibold text-sm">{daily.date}</span>
+                      <div className="mb-3 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          <span className="break-words text-sm font-semibold">{daily.date}</span>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-primary">
+                        <div className="min-w-0 sm:text-right">
+                          <p className="break-words text-xl font-bold text-primary sm:text-2xl">
                             ₦{daily.totalAmount.toLocaleString("en-US", { maximumFractionDigits: 0 })}
                           </p>
                         </div>
@@ -264,22 +264,24 @@ function PaymentsContent() {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                <TabsList className="bg-muted/50">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="pending">Pending</TabsTrigger>
-                  <TabsTrigger value="completed">Completed</TabsTrigger>
-                  <TabsTrigger value="failed">Failed</TabsTrigger>
-                </TabsList>
+              <div className="mb-4 flex min-w-0 flex-col justify-between gap-4 md:flex-row md:items-center">
+                <div className="w-full overflow-x-auto pb-1 md:w-auto">
+                  <TabsList className="min-w-max bg-muted/50">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="pending">Pending</TabsTrigger>
+                    <TabsTrigger value="completed">Completed</TabsTrigger>
+                    <TabsTrigger value="failed">Failed</TabsTrigger>
+                  </TabsList>
+                </div>
 
-                <div className="flex gap-2">
-                  <div className="relative">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
+                  <div className="relative min-w-0 flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search transactions..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 w-64 bg-background/50 border-primary/20"
+                      className="w-full border-primary/20 bg-background/50 pl-10 sm:w-64"
                     />
                   </div>
                   <Button variant="outline" className="border-primary/20 hover:bg-primary/10 bg-transparent">
@@ -289,9 +291,10 @@ function PaymentsContent() {
               </div>
 
               <TabsContent value={statusFilter}>
-                <Card className="bg-card/50 backdrop-blur border-primary/10">
+                <Card className="min-w-0 overflow-hidden border-primary/10 bg-card/50 backdrop-blur">
                   <CardContent className="p-0">
-                    <Table>
+                    <div className="hidden overflow-x-auto md:block">
+                    <Table className="min-w-[760px]">
                       <TableHeader>
                         <TableRow className="border-primary/10">
                           <TableHead>Transaction ID</TableHead>
@@ -364,6 +367,68 @@ function PaymentsContent() {
                         )}
                       </TableBody>
                     </Table>
+                    </div>
+                    <div className="space-y-3 p-3 md:hidden">
+                      {isLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        </div>
+                      ) : payments.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-center">
+                          <div className="mb-4 rounded-full bg-muted/50 p-4">
+                            <CreditCard className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                          <h3 className="mb-1 font-medium text-foreground">No transactions found</h3>
+                          <p className="text-sm text-muted-foreground">Transactions will appear here once payments start.</p>
+                        </div>
+                      ) : (
+                        payments.map((payment) => (
+                          <button
+                            key={payment.id}
+                            type="button"
+                            className="w-full rounded-lg border border-primary/10 bg-background/60 p-4 text-left transition hover:border-primary/30 hover:bg-primary/5"
+                            onClick={() => {
+                              setSelectedPaymentId(payment.id)
+                              setShowPaymentModal(true)
+                            }}
+                          >
+                            <div className="flex min-w-0 items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="break-words text-sm font-semibold text-foreground">
+                                  {payment.driver_first_name} {payment.driver_last_name}
+                                </p>
+                                <p className="mt-1 break-all text-xs text-muted-foreground">#{payment.id}</p>
+                              </div>
+                              <span
+                                className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
+                                  payment.status === "completed"
+                                    ? "bg-emerald-500/20 text-emerald-500"
+                                    : payment.status === "pending"
+                                      ? "bg-amber-500/20 text-amber-500"
+                                      : "bg-red-500/20 text-red-500"
+                                }`}
+                              >
+                                {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                              </span>
+                            </div>
+                            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                              <div>
+                                <p className="text-xs text-muted-foreground">Method</p>
+                                <p className="break-words font-medium text-foreground">{payment.payment_method}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">Amount</p>
+                                <p className="break-words font-semibold text-primary">â‚¦{payment.amount.toLocaleString()}</p>
+                              </div>
+                              <div className="col-span-2">
+                                <p className="text-xs text-muted-foreground">Date</p>
+                                <p className="text-foreground">{new Date(payment.created_at).toLocaleDateString()}</p>
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>

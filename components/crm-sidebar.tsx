@@ -47,7 +47,7 @@ const SidebarContent = memo(({ user, pathname, setIsMobileOpen }: { user: any; p
   )}&background=FF9101&color=000`
 
   return (
-    <div className="flex flex-col h-full bg-background dark:bg-slate-950/80 backdrop-blur-xl border-r border-primary/10">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-background backdrop-blur-xl dark:bg-slate-950/80 border-r border-primary/10">
       {/* Brand Logo */}
       <div className="p-5 border-b border-primary/10 flex items-center justify-between">
         <Link href="/admin/crm" className="flex items-center gap-2">
@@ -90,7 +90,7 @@ const SidebarContent = memo(({ user, pathname, setIsMobileOpen }: { user: any; p
       </div>
 
       {/* CRM Navigation Options */}
-      <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+      <nav className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-4">
         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-3 mb-2">
           Operations
         </p>
@@ -119,7 +119,7 @@ const SidebarContent = memo(({ user, pathname, setIsMobileOpen }: { user: any; p
       </nav>
 
       {/* System Status / Help & Exit */}
-      <div className="p-4 border-t border-primary/10 bg-slate-100 dark:bg-slate-950 space-y-2">
+      <div className="shrink-0 p-4 border-t border-primary/10 bg-slate-100 dark:bg-slate-950 space-y-2">
         <div className="flex items-center gap-2 p-2 rounded bg-amber-500/5 border border-amber-500/10 text-amber-800 dark:text-amber-400/80 text-[11px] mb-1.5">
           <LifeBuoy className="h-4 w-4 text-amber-900 dark:text-amber-500 flex-shrink-0" />
           <span>Lagos Node: Active & Syncing</span>
@@ -190,7 +190,7 @@ export const CrmSidebar = memo(function CrmSidebarComponent() {
             className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
             onClick={() => setIsMobileOpen(false)}
           />
-          <aside className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-72 bg-slate-950 transition-transform duration-300 ease-in-out">
+          <aside className="lg:hidden fixed left-0 top-0 bottom-0 z-50 flex w-[86vw] max-w-80 bg-slate-950 transition-transform duration-300 ease-in-out">
             <Button
               variant="ghost"
               size="icon"

@@ -406,7 +406,7 @@ export default function AdminCrmPage() {
   const selectedQueueCount = filteredTickets.length
 
   return (
-    <div className="mx-auto w-full p-4 md:p-6 lg:p-8 space-y-6 h-screen overflow-y-auto min-w-0">
+    <div className="mx-auto w-full min-w-0 space-y-6 overflow-x-hidden p-3 pt-20 sm:p-4 md:p-6 lg:p-8 lg:pt-8 xl:h-screen xl:overflow-y-auto">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -428,11 +428,11 @@ export default function AdminCrmPage() {
                         Queues
                       </Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="w-[92vw] sm:max-w-md">
+                    <SheetContent side="left" className="flex h-dvh w-[94vw] max-w-[420px] flex-col overflow-hidden p-0 sm:max-w-md">
                       <SheetHeader>
-                        <SheetTitle>Queues and tickets</SheetTitle>
+                        <SheetTitle className="px-4 pt-4">Queues and tickets</SheetTitle>
                       </SheetHeader>
-                      <div className="p-4 pt-0">
+                      <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-2">
                         <CrmLeftRail
                           search={search}
                           setSearch={setSearch}
@@ -455,11 +455,11 @@ export default function AdminCrmPage() {
                         Details
                       </Button>
                     </SheetTrigger>
-                    <SheetContent side="right" className="w-[92vw] sm:max-w-md">
+                    <SheetContent side="right" className="flex h-dvh w-[94vw] max-w-[420px] flex-col overflow-hidden p-0 sm:max-w-md">
                       <SheetHeader>
-                        <SheetTitle>Ticket details</SheetTitle>
+                        <SheetTitle className="px-4 pt-4">Ticket details</SheetTitle>
                       </SheetHeader>
-                      <div className="p-4 pt-0">
+                      <div className="min-h-0 flex-1 overflow-y-auto p-4 pt-2">
                         <CrmRightRail
                           selectedTicket={selectedTicket}
                           departments={departments}
@@ -532,8 +532,8 @@ export default function AdminCrmPage() {
               </div>
             </motion.div>
 
-            <div className="grid min-h-[72vh] grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)_360px] gap-4">
-              <aside className={cn("hidden xl:flex flex-col rounded-3xl border border-border/60 bg-background/50 backdrop-blur-xl shadow-2xl shadow-black/10 overflow-hidden", leftCollapsed && "xl:w-20") }>
+            <div className="grid min-w-0 grid-cols-1 gap-4 xl:h-[calc(100dvh-330px)] xl:min-h-[620px] xl:grid-cols-[minmax(280px,320px)_minmax(0,1fr)_minmax(300px,360px)]">
+              <aside className={cn("hidden min-w-0 xl:flex flex-col rounded-3xl border border-border/60 bg-background/50 backdrop-blur-xl shadow-2xl shadow-black/10 overflow-hidden", leftCollapsed && "xl:w-20") }>
                 <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
                   <div className={cn("transition-all", leftCollapsed && "xl:hidden") }>
                     <p className="text-sm font-semibold">Queues</p>
@@ -543,7 +543,7 @@ export default function AdminCrmPage() {
                     {leftCollapsed ? <ChevronRight className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
                   </Button>
                 </div>
-                <ScrollArea className="flex-1">
+                <ScrollArea className="min-h-0 flex-1">
                   <div className="p-4 space-y-4">
                     <div className={cn("space-y-2", leftCollapsed && "xl:hidden") }>
                       <div className="relative">
@@ -583,12 +583,12 @@ export default function AdminCrmPage() {
                     <div className={cn("space-y-2", leftCollapsed && "xl:hidden") }>
                       <p className="text-xs uppercase tracking-wide text-muted-foreground">Departments</p>
                       {departments.map((department) => (
-                        <div key={String(department.id)} className="flex items-center justify-between rounded-2xl border border-border/60 px-3 py-2 bg-background/40">
-                          <div>
-                            <p className="text-sm font-medium">{String(department.department_name || department.department_key)}</p>
-                            <p className="text-xs text-muted-foreground">{String(department.email_alias || formatDepartmentEmail(String(department.department_key)))} </p>
+                        <div key={String(department.id)} className="flex min-w-0 items-center justify-between gap-2 rounded-2xl border border-border/60 bg-background/40 px-3 py-2">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">{String(department.department_name || department.department_key)}</p>
+                            <p className="truncate text-xs text-muted-foreground">{String(department.email_alias || formatDepartmentEmail(String(department.department_key)))} </p>
                           </div>
-                          <Badge variant="outline">{String(department.route_priority ?? 100)}</Badge>
+                          <Badge variant="outline" className="shrink-0">{String(department.route_priority ?? 100)}</Badge>
                         </div>
                       ))}
                     </div>
@@ -614,22 +614,22 @@ export default function AdminCrmPage() {
                               key={ticket.id}
                               onClick={() => setSelectedTicketId(ticket.id)}
                               className={cn(
-                                "w-full rounded-2xl border p-3 text-left transition",
+                                "w-full min-w-0 rounded-2xl border p-3 text-left transition",
                                 active ? "border-primary/40 bg-primary/10 shadow-md" : "border-border/60 bg-background/45 hover:border-primary/20"
                               )}
                             >
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="truncate font-medium">{ticket.subject}</p>
-                                  <p className="mt-1 text-xs text-muted-foreground truncate">
+                              <div className="flex min-w-0 items-start justify-between gap-3">
+                                <div className="min-w-0 flex-1">
+                                  <p className="break-words font-medium leading-snug">{ticket.subject}</p>
+                                  <p className="mt-1 break-words text-xs text-muted-foreground">
                                     {displayName(ticket.users)} • {ticket.source_channel || "in-app"}
                                   </p>
                                 </div>
-                                <Badge variant={statusVariants[ticket.status] || "secondary"}>{ticket.status}</Badge>
+                                <Badge variant={statusVariants[ticket.status] || "secondary"} className="shrink-0 whitespace-nowrap">{ticket.status}</Badge>
                               </div>
-                              <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                                <span>{departmentLabel(departmentKey)}</span>
-                                <span>{new Date(ticket.last_message_at || ticket.updated_at).toLocaleString()}</span>
+                              <div className="mt-2 flex min-w-0 flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-start sm:justify-between">
+                                <span className="min-w-0 break-words">{departmentLabel(departmentKey)}</span>
+                                <span className="shrink-0 break-words text-left sm:max-w-[150px] sm:text-right">{new Date(ticket.last_message_at || ticket.updated_at).toLocaleString()}</span>
                               </div>
                             </button>
                           )
@@ -640,12 +640,12 @@ export default function AdminCrmPage() {
                 </ScrollArea>
               </aside>
 
-              <section className="rounded-3xl border border-border/60 bg-background/55 backdrop-blur-xl shadow-2xl shadow-black/10 overflow-hidden min-w-0">
+              <section className="flex min-w-0 flex-col overflow-hidden rounded-3xl border border-border/60 bg-background/55 shadow-2xl shadow-black/10 backdrop-blur-xl xl:h-full">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-4">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">Current ticket</p>
-                    <h2 className="truncate text-xl font-semibold">{selectedTicket?.subject || "Select a ticket"}</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <h2 className="break-words text-xl font-semibold md:truncate">{selectedTicket?.subject || "Select a ticket"}</h2>
+                    <p className="mt-1 break-words text-sm text-muted-foreground md:truncate">
                       {selectedTicket ? `${displayName(selectedTicket.users)} • ${normalizeEmailAddress(selectedTicket.source_email || selectedTicket.users?.email) || "No email"}` : "Choose a ticket from the inbox to start managing it."}
                     </p>
                   </div>
@@ -672,7 +672,7 @@ export default function AdminCrmPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid min-h-[60vh] grid-rows-[auto_minmax(0,1fr)_auto]">
+                  <div className="min-h-[60vh] min-w-0 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
                     {isDeptMismatch && (
                       <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3 flex items-center gap-2.5 text-amber-400">
                         <AlertCircle className="h-4.5 w-4.5 text-amber-500 flex-shrink-0 animate-pulse" />
@@ -681,36 +681,36 @@ export default function AdminCrmPage() {
                         </p>
                       </div>
                     )}
-                    <div className="grid gap-4 border-b border-border/60 p-4 lg:grid-cols-3">
-                      <Card className="bg-background/60 border-border/60">
+                    <div className="grid min-w-0 gap-4 border-b border-border/60 p-4 lg:grid-cols-3">
+                      <Card className="min-w-0 bg-background/60 border-border/60">
                         <CardContent className="p-4 space-y-2">
                           <p className="text-xs uppercase tracking-wide text-muted-foreground">Customer</p>
-                          <p className="font-semibold">{displayName(selectedTicket.users)}</p>
-                          <p className="text-sm text-muted-foreground">{selectedTicket.users?.email || selectedTicket.source_email || "No email"}</p>
-                          <p className="text-xs text-muted-foreground">{selectedTicket.users?.role || "user"}</p>
+                          <p className="break-words font-semibold">{displayName(selectedTicket.users)}</p>
+                          <p className="break-all text-sm text-muted-foreground">{selectedTicket.users?.email || selectedTicket.source_email || "No email"}</p>
+                          <p className="break-words text-xs text-muted-foreground">{selectedTicket.users?.role || "user"}</p>
                         </CardContent>
                       </Card>
 
-                      <Card className="bg-background/60 border-border/60">
+                      <Card className="min-w-0 bg-background/60 border-border/60">
                         <CardContent className="p-4 space-y-2">
                           <p className="text-xs uppercase tracking-wide text-muted-foreground">Routing</p>
-                          <p className="font-semibold">{departmentLabel(selectedTicket.departments?.department_key || selectedTicket.category)}</p>
-                          <p className="text-sm text-muted-foreground">{selectedTicket.routing_reason || "Auto-routed from subject and email alias."}</p>
-                          <p className="text-xs text-muted-foreground">Confidence {Number(selectedTicket.routing_confidence || 0).toFixed(0)}%</p>
+                          <p className="break-words font-semibold">{departmentLabel(selectedTicket.departments?.department_key || selectedTicket.category)}</p>
+                          <p className="break-words text-sm text-muted-foreground">{selectedTicket.routing_reason || "Auto-routed from subject and email alias."}</p>
+                          <p className="break-words text-xs text-muted-foreground">Confidence {Number(selectedTicket.routing_confidence || 0).toFixed(0)}%</p>
                         </CardContent>
                       </Card>
 
-                      <Card className="bg-background/60 border-border/60">
+                      <Card className="min-w-0 bg-background/60 border-border/60">
                         <CardContent className="p-4 space-y-2">
                           <p className="text-xs uppercase tracking-wide text-muted-foreground">Email Alias</p>
-                          <p className="font-semibold">{formatDepartmentEmail(selectedTicket.departments?.department_key || selectedTicket.category)}</p>
-                          <p className="text-sm text-muted-foreground">{selectedTicket.external_thread_id || "No email thread yet"}</p>
-                          <p className="text-xs text-muted-foreground">{selectedTicket.source_name || "Inbound customer message"}</p>
+                          <p className="break-all font-semibold">{formatDepartmentEmail(selectedTicket.departments?.department_key || selectedTicket.category)}</p>
+                          <p className="break-all text-sm text-muted-foreground">{selectedTicket.external_thread_id || "No email thread yet"}</p>
+                          <p className="break-words text-xs text-muted-foreground">{selectedTicket.source_name || "Inbound customer message"}</p>
                         </CardContent>
                       </Card>
                     </div>
 
-                    <ScrollArea className="min-h-0">
+                    <div>
                       <div className="space-y-6 p-4">
                         <div className="space-y-3">
                           <p className="text-xs uppercase tracking-wide text-muted-foreground">Conversation thread</p>
@@ -725,7 +725,7 @@ export default function AdminCrmPage() {
                                   <div
                                     key={message.id}
                                     className={cn(
-                                      "flex flex-col max-w-[80%] rounded-2xl px-4 py-3 border shadow-md transition-all duration-200",
+                                      "flex max-w-[92%] flex-col rounded-2xl border px-4 py-3 shadow-md transition-all duration-200 sm:max-w-[80%]",
                                       isAdmin
                                         ? "self-end bg-amber-500/10 border-amber-500/25 text-foreground rounded-tr-none"
                                         : "self-start bg-slate-900/50 border-border/50 text-foreground rounded-tl-none"
@@ -777,7 +777,7 @@ export default function AdminCrmPage() {
                           )}
                         </div>
                       </div>
-                    </ScrollArea>
+                    </div>
 
                     <div className="border-t border-border/60 bg-background/70 p-4">
                       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -940,7 +940,7 @@ export default function AdminCrmPage() {
                 )}
               </section>
 
-              <aside className={cn("hidden xl:flex flex-col rounded-3xl border border-border/60 bg-background/50 backdrop-blur-xl shadow-2xl shadow-black/10 overflow-hidden", rightCollapsed && "xl:w-20") }>
+              <aside className={cn("hidden min-w-0 xl:flex flex-col rounded-3xl border border-border/60 bg-background/50 backdrop-blur-xl shadow-2xl shadow-black/10 overflow-hidden", rightCollapsed && "xl:w-20") }>
                 <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
                   <div className={cn("transition-all", rightCollapsed && "xl:hidden") }>
                     <p className="text-sm font-semibold">Details</p>
@@ -951,33 +951,33 @@ export default function AdminCrmPage() {
                   </Button>
                 </div>
 
-                <ScrollArea className="flex-1">
+                <ScrollArea className="min-h-0 flex-1">
                   <div className="p-4 space-y-4">
                     <div className={cn("space-y-3", rightCollapsed && "xl:hidden") }>
-                      <Card className="bg-background/60 border-border/60">
+                      <Card className="min-w-0 bg-background/60 border-border/60">
                         <CardContent className="p-4 space-y-2">
                           <p className="text-xs uppercase tracking-wide text-muted-foreground">Routing summary</p>
-                          <p className="font-semibold">{selectedTicket ? departmentLabel(selectedTicket.departments?.department_key || selectedTicket.category) : "No ticket selected"}</p>
-                          <p className="text-sm text-muted-foreground">{selectedTicket?.routing_reason || "Ready for auto-assignment."}</p>
-                          <p className="text-xs text-muted-foreground">Alias: {selectedTicket ? formatDepartmentEmail(selectedTicket.departments?.department_key || selectedTicket.category) : "support@charterkeke.com"}</p>
+                          <p className="break-words font-semibold">{selectedTicket ? departmentLabel(selectedTicket.departments?.department_key || selectedTicket.category) : "No ticket selected"}</p>
+                          <p className="break-words text-sm text-muted-foreground">{selectedTicket?.routing_reason || "Ready for auto-assignment."}</p>
+                          <p className="break-all text-xs text-muted-foreground">Alias: {selectedTicket ? formatDepartmentEmail(selectedTicket.departments?.department_key || selectedTicket.category) : "support@charterkeke.com"}</p>
                         </CardContent>
                       </Card>
 
-                      <Card className="bg-background/60 border-border/60">
+                      <Card className="min-w-0 bg-background/60 border-border/60">
                         <CardContent className="p-4 space-y-2">
                           <p className="text-xs uppercase tracking-wide text-muted-foreground">Assignment</p>
-                          <p className="font-semibold">{selectedTicket?.admins?.users ? displayName(selectedTicket.admins.users) : "Unassigned"}</p>
-                          <p className="text-sm text-muted-foreground">{selectedTicket?.admins?.department || "general"}</p>
-                          <p className="text-xs text-muted-foreground">Assigned to admin id {selectedTicket?.assigned_to || "pending"}</p>
+                          <p className="break-words font-semibold">{selectedTicket?.admins?.users ? displayName(selectedTicket.admins.users) : "Unassigned"}</p>
+                          <p className="break-words text-sm text-muted-foreground">{selectedTicket?.admins?.department || "general"}</p>
+                          <p className="break-all text-xs text-muted-foreground">Assigned to admin id {selectedTicket?.assigned_to || "pending"}</p>
                         </CardContent>
                       </Card>
 
-                      <Card className="bg-background/60 border-border/60">
+                      <Card className="min-w-0 bg-background/60 border-border/60">
                         <CardContent className="p-4 space-y-2">
                           <p className="text-xs uppercase tracking-wide text-muted-foreground">Email details</p>
-                          <p className="font-semibold">{normalizeEmailAddress(selectedTicket?.source_email || selectedTicket?.users?.email) || "unknown@charterkeke.com"}</p>
-                          <p className="text-sm text-muted-foreground">{selectedTicket?.source_name || "Incoming email"}</p>
-                          <p className="text-xs text-muted-foreground">Thread {selectedTicket?.external_thread_id || "not yet synced"}</p>
+                          <p className="break-all font-semibold">{normalizeEmailAddress(selectedTicket?.source_email || selectedTicket?.users?.email) || "unknown@charterkeke.com"}</p>
+                          <p className="break-words text-sm text-muted-foreground">{selectedTicket?.source_name || "Incoming email"}</p>
+                          <p className="break-all text-xs text-muted-foreground">Thread {selectedTicket?.external_thread_id || "not yet synced"}</p>
                         </CardContent>
                       </Card>
 
@@ -992,7 +992,7 @@ export default function AdminCrmPage() {
                             detail.notes.slice(0, 4).map((note) => (
                               <div key={note.id} className="rounded-2xl border border-border/60 p-3">
                                 <p className="text-xs text-muted-foreground">{new Date(note.created_at).toLocaleString()}</p>
-                                <p className="mt-2 text-sm">{note.note}</p>
+                                <p className="mt-2 whitespace-pre-wrap break-words text-sm">{note.note}</p>
                               </div>
                             ))
                           )}
@@ -1029,7 +1029,7 @@ function CrmLeftRail({
   loading: boolean
 }) {
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       <div className="relative">
         <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
         <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search CRM tickets" className="pl-9 bg-background/70" />
@@ -1050,14 +1050,14 @@ function CrmLeftRail({
             key={queue.key}
             onClick={() => setActiveQueue(queue.key)}
             className={cn(
-              "flex w-full items-center justify-between rounded-2xl border px-3 py-2.5 text-left transition",
+              "flex w-full min-w-0 items-center justify-between gap-2 rounded-2xl border px-3 py-2.5 text-left transition",
               activeQueue === queue.key
                 ? "border-primary/30 bg-primary/10 text-foreground shadow-sm"
                 : "border-border/60 bg-background/45 text-muted-foreground hover:border-primary/20 hover:text-foreground"
             )}
           >
-            <span className="font-medium">{queue.label}</span>
-            <ChevronDown className={cn("h-4 w-4 transition-transform", activeQueue === queue.key && "rotate-180")} />
+            <span className="min-w-0 truncate font-medium">{queue.label}</span>
+            <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform", activeQueue === queue.key && "rotate-180")} />
           </button>
         ))}
       </div>
@@ -1084,20 +1084,20 @@ function CrmLeftRail({
                 key={ticket.id}
                 onClick={() => onSelectTicket(ticket.id)}
                 className={cn(
-                  "w-full rounded-2xl border p-3 text-left transition",
+                  "w-full min-w-0 rounded-2xl border p-3 text-left transition",
                   active ? "border-primary/40 bg-primary/10 shadow-md" : "border-border/60 bg-background/45 hover:border-primary/20"
                 )}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{ticket.subject}</p>
+                    <p className="break-words font-medium leading-snug">{ticket.subject}</p>
                     <p className="mt-1 text-xs text-muted-foreground truncate">{displayName(ticket.users)} • {ticket.source_channel || "in-app"}</p>
                   </div>
-                  <Badge variant={statusVariants[ticket.status] || "secondary"}>{ticket.status}</Badge>
+                  <Badge variant={statusVariants[ticket.status] || "secondary"} className="shrink-0 whitespace-nowrap">{ticket.status}</Badge>
                 </div>
-                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{departmentLabel(ticket.departments?.department_key || ticket.category)}</span>
-                  <span>{new Date(ticket.last_message_at || ticket.updated_at).toLocaleString()}</span>
+                <div className="mt-2 flex min-w-0 flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                  <span className="min-w-0 break-words">{departmentLabel(ticket.departments?.department_key || ticket.category)}</span>
+                  <span className="shrink-0 truncate sm:max-w-[160px]">{new Date(ticket.last_message_at || ticket.updated_at).toLocaleString()}</span>
                 </div>
               </button>
             )
@@ -1150,22 +1150,22 @@ function CrmRightRail({
   notes: CrmNote[]
 }) {
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       <Card className="bg-background/60 border-border/60">
         <CardContent className="p-4 space-y-3">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Routing summary</p>
-          <p className="font-semibold">{selectedTicket ? departmentLabel(selectedTicket.departments?.department_key || selectedTicket.category) : "No ticket selected"}</p>
-          <p className="text-sm text-muted-foreground">{selectedTicket?.routing_reason || "Ready for auto-assignment."}</p>
-          <p className="text-xs text-muted-foreground">Alias: {selectedTicket ? formatDepartmentEmail(selectedTicket.departments?.department_key || selectedTicket.category) : "support@charterkeke.com"}</p>
+          <p className="break-words font-semibold">{selectedTicket ? departmentLabel(selectedTicket.departments?.department_key || selectedTicket.category) : "No ticket selected"}</p>
+          <p className="break-words text-sm text-muted-foreground">{selectedTicket?.routing_reason || "Ready for auto-assignment."}</p>
+          <p className="break-all text-xs text-muted-foreground">Alias: {selectedTicket ? formatDepartmentEmail(selectedTicket.departments?.department_key || selectedTicket.category) : "support@charterkeke.com"}</p>
         </CardContent>
       </Card>
 
       <Card className="bg-background/60 border-border/60">
         <CardContent className="p-4 space-y-3">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Assignment</p>
-          <p className="font-semibold">{selectedTicket?.admins?.users ? displayName(selectedTicket.admins.users) : "Unassigned"}</p>
-          <p className="text-sm text-muted-foreground">{selectedTicket?.admins?.department || "general"}</p>
-          <p className="text-xs text-muted-foreground">Assigned admin id {selectedTicket?.assigned_to || "pending"}</p>
+          <p className="break-words font-semibold">{selectedTicket?.admins?.users ? displayName(selectedTicket.admins.users) : "Unassigned"}</p>
+          <p className="break-words text-sm text-muted-foreground">{selectedTicket?.admins?.department || "general"}</p>
+          <p className="break-all text-xs text-muted-foreground">Assigned admin id {selectedTicket?.assigned_to || "pending"}</p>
         </CardContent>
       </Card>
 
@@ -1209,7 +1209,7 @@ function CrmRightRail({
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div className="space-y-1.5">
               <p className="text-xs text-muted-foreground font-medium">Status</p>
               <select
@@ -1288,7 +1288,7 @@ function CrmRightRail({
             notes.slice(0, 5).map((note) => (
               <div key={note.id} className="rounded-2xl border border-border/60 p-3">
                 <p className="text-xs text-muted-foreground">{new Date(note.created_at).toLocaleString()}</p>
-                <p className="mt-2 text-sm leading-6">{note.note}</p>
+                <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6">{note.note}</p>
               </div>
             ))
           )}

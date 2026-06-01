@@ -246,7 +246,7 @@ function AdminMessagesContent() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background pb-24">
       <main className="flex-1 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 h-full flex flex-col gap-4">
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
