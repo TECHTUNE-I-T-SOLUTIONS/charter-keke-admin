@@ -418,7 +418,7 @@ function PaymentsContent() {
                               </div>
                               <div>
                                 <p className="text-xs text-muted-foreground">Amount</p>
-                                <p className="break-words font-semibold text-primary">â‚¦{payment.amount.toLocaleString()}</p>
+                                <p className="break-words font-semibold text-primary">₦{payment.amount.toLocaleString()}</p>
                               </div>
                               <div className="col-span-2">
                                 <p className="text-xs text-muted-foreground">Date</p>
