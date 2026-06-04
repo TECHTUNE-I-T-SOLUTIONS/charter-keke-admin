@@ -4,7 +4,7 @@ import { requireAdminSession } from "@/lib/admin-access"
 import { supabaseAdmin } from "@/lib/supabase"
 
 const USER_FIELDS =
-  "id, first_name, last_name, phone_number, email, dob, gender, profile_picture_url, role, status, profile_complete, emergency_contact, emergency_phone, created_at, updated_at"
+  "id, first_name, last_name, phone_number, email, profile_picture_url, role, status, profile_complete, emergency_contact, emergency_phone, created_at, updated_at"
 
 const ADMIN_FIELDS =
   "id, user_id, admin_level, department, crm_enabled, crm_meta, permissions, created_at, updated_at"
@@ -57,8 +57,6 @@ export async function PATCH(request: NextRequest) {
     if ("lastName" in body) userUpdates.last_name = cleanString(body.lastName)
     if ("phone" in body) userUpdates.phone_number = cleanString(body.phone)
     if ("email" in body) userUpdates.email = cleanString(body.email).toLowerCase()
-    if ("dob" in body) userUpdates.dob = cleanString(body.dob) || null
-    if ("gender" in body) userUpdates.gender = cleanString(body.gender) || null
     if ("emergencyContact" in body) userUpdates.emergency_contact = cleanString(body.emergencyContact) || null
     if ("emergencyPhone" in body) userUpdates.emergency_phone = cleanString(body.emergencyPhone) || null
 

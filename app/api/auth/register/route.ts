@@ -18,8 +18,6 @@ export async function POST(request: NextRequest) {
       phone_number,
       password,
       role,
-      dob,
-      gender,
     } = body;
 
     // Validate required fields
@@ -59,8 +57,6 @@ export async function POST(request: NextRequest) {
           phone_number,
           password_hash,
           role: role || "user",
-          dob: dob || null,
-          gender: gender || null,
           status: "pending",
         },
       ])

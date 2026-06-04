@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { CRM_DEPARTMENTS, normalizeEmailAddress } from "@/lib/crm"
@@ -127,6 +128,11 @@ function formatDepartmentEmail(departmentKey?: string | null) {
   return CRM_DEPARTMENTS.find((department) => department.key === departmentKey)?.emailAlias || "support@charterkeke.com"
 }
 
+function isImageAttachment(url?: string | null, mimeType?: string | null) {
+  if (mimeType?.startsWith("image/")) return true
+  return /\.(png|jpe?g|gif|webp|avif)$/i.test(String(url || "").split("?")[0])
+}
+
 export default function AdminCrmPage() {
   const { user } = useAuth()
   const [adminDept, setAdminDept] = useState<string>("general")
@@ -201,6 +207,7 @@ export default function AdminCrmPage() {
   const [priorityDraft, setPriorityDraft] = useState("normal")
   const [departmentDraft, setDepartmentDraft] = useState("")
   const [assignedToDraft, setAssignedToDraft] = useState("")
+  const [previewImage, setPreviewImage] = useState<{ url: string; name?: string | null } | null>(null)
 
   const selectedTicket = detail.ticket
 
@@ -406,6 +413,7 @@ export default function AdminCrmPage() {
   const selectedQueueCount = filteredTickets.length
 
   return (
+    <>
     <div className="mx-auto w-full min-w-0 space-y-6 overflow-x-hidden p-3 pt-20 sm:p-4 md:p-6 lg:p-8 lg:pt-8 xl:h-screen xl:overflow-y-auto">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -741,14 +749,31 @@ export default function AdminCrmPage() {
                                     </div>
                                     <p className="whitespace-pre-wrap text-sm leading-6">{message.message}</p>
                                     {message.attachment_url ? (
-                                      <a
-                                        href={message.attachment_url}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="mt-2 inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 underline underline-offset-2"
-                                      >
-                                        Open attachment
-                                      </a>
+                                      isImageAttachment(message.attachment_url, message.attachment_mime_type) ? (
+                                        <button
+                                          type="button"
+                                          onClick={() => setPreviewImage({ url: message.attachment_url!, name: message.attachment_name })}
+                                          className="mt-3 overflow-hidden rounded-xl border border-border/50 bg-black/20 text-left"
+                                        >
+                                          <img
+                                            src={message.attachment_url}
+                                            alt={message.attachment_name || "Support attachment"}
+                                            className="h-44 w-full max-w-[320px] object-cover"
+                                          />
+                                          <span className="block max-w-[320px] truncate px-3 py-2 text-xs text-muted-foreground">
+                                            {message.attachment_name || "Open image"}
+                                          </span>
+                                        </button>
+                                      ) : (
+                                        <a
+                                          href={message.attachment_url}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="mt-2 inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 underline underline-offset-2"
+                                        >
+                                          Open attachment
+                                        </a>
+                                      )
                                     ) : null}
                                   </div>
                                 )
@@ -1004,6 +1029,18 @@ export default function AdminCrmPage() {
               </aside>
             </div>
           </div>
+      <Dialog open={!!previewImage} onOpenChange={(open) => !open && setPreviewImage(null)}>
+        <DialogContent className="max-w-5xl border-border/60 bg-black p-0 text-white">
+          <DialogTitle className="sr-only">{previewImage?.name || "Support image"}</DialogTitle>
+          <div className="border-b border-white/10 px-4 py-3 text-sm font-semibold">
+            {previewImage?.name || "Support image"}
+          </div>
+          {previewImage?.url ? (
+            <img src={previewImage.url} alt={previewImage.name || "Support image"} className="max-h-[82dvh] w-full object-contain" />
+          ) : null}
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
 import { Loader2, Upload } from "lucide-react"
@@ -21,8 +20,6 @@ export default function CompleteProfileContent({ userRole }: CompleteProfileCont
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>("")
 
   const [formData, setFormData] = useState({
-    dob: "",
-    gender: "",
     vehicle_type: "",
     plate_number: "",
     operating_zones: "",
@@ -52,8 +49,6 @@ export default function CompleteProfileContent({ userRole }: CompleteProfileCont
 
     try {
       const form = new FormData()
-      form.append("dob", formData.dob)
-      form.append("gender", formData.gender)
 
       if (profilePicture) {
         form.append("profile_picture", profilePicture)
@@ -137,34 +132,6 @@ export default function CompleteProfileContent({ userRole }: CompleteProfileCont
                       JPG, PNG or GIF. Max size 5MB.
                     </p>
                   </div>
-                </div>
-              </div>
-
-              {/* Basic Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="dob">Date of Birth</Label>
-                  <Input
-                    id="dob"
-                    name="dob"
-                    type="date"
-                    value={formData.dob}
-                    onChange={handleFormChange}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="gender">Gender</Label>
-                  <Select value={formData.gender} onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
 

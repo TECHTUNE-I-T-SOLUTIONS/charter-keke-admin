@@ -21,8 +21,6 @@ type AdminProfile = {
     last_name: string
     phone_number: string
     email: string
-    dob: string | null
-    gender: string | null
     profile_picture_url: string | null
     role: string
     status: string
@@ -49,8 +47,6 @@ type ProfileForm = {
   lastName: string
   email: string
   phone: string
-  dob: string
-  gender: string
   emergencyContact: string
   emergencyPhone: string
 }
@@ -96,8 +92,6 @@ function AdminSettingsContent() {
     lastName: "",
     email: "",
     phone: "",
-    dob: "",
-    gender: "",
     emergencyContact: "",
     emergencyPhone: "",
   })
@@ -127,8 +121,6 @@ function AdminSettingsContent() {
       lastName: nextProfile.user.last_name || "",
       email: nextProfile.user.email || "",
       phone: nextProfile.user.phone_number || "",
-      dob: nextProfile.user.dob || "",
-      gender: nextProfile.user.gender || "",
       emergencyContact: nextProfile.user.emergency_contact || "",
       emergencyPhone: nextProfile.user.emergency_phone || "",
     })
@@ -388,32 +380,6 @@ function AdminSettingsContent() {
                       value={profileForm.phone}
                       onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="dob">Date of birth</Label>
-                    <Input
-                      id="dob"
-                      type="date"
-                      value={profileForm.dob}
-                      onChange={(e) => setProfileForm({ ...profileForm, dob: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="gender">Gender</Label>
-                    <Select
-                      value={profileForm.gender || "not_set"}
-                      onValueChange={(value) => setProfileForm({ ...profileForm, gender: value === "not_set" ? "" : value })}
-                    >
-                      <SelectTrigger id="gender">
-                        <SelectValue placeholder="Select gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="not_set">Prefer not to say</SelectItem>
-                        <SelectItem value="female">Female</SelectItem>
-                        <SelectItem value="male">Male</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="emergencyContact">Emergency contact</Label>

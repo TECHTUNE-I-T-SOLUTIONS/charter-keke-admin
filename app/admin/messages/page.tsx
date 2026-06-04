@@ -64,6 +64,11 @@ function statusVariant(status: TicketStatus) {
   return "destructive" as const
 }
 
+function isImageAttachment(url?: string | null, mimeType?: string | null) {
+  if (mimeType?.startsWith("image/")) return true
+  return /\.(png|jpe?g|gif|webp|avif)$/i.test(String(url || "").split("?")[0])
+}
+
 function AdminMessagesContent() {
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null)
@@ -76,6 +81,7 @@ function AdminMessagesContent() {
   const [resolutionNote, setResolutionNote] = useState("")
   const [statusDialogOpen, setStatusDialogOpen] = useState(false)
   const [attachment, setAttachment] = useState<File | null>(null)
+  const [previewImage, setPreviewImage] = useState<{ url: string; name?: string | null } | null>(null)
   const pollRef = useRef<NodeJS.Timeout | null>(null)
 
   const selectedTicket = useMemo(
@@ -246,6 +252,7 @@ function AdminMessagesContent() {
   }
 
   return (
+    <>
     <div className="flex min-h-screen bg-background pb-24">
       <main className="flex-1 pt-16 lg:pt-0">
         <div className="p-4 md:p-6 lg:p-8 h-full flex flex-col gap-4">
@@ -357,9 +364,26 @@ function AdminMessagesContent() {
                                   <p className="text-xs opacity-80 mb-1">{senderName}</p>
                                   <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                                   {msg.attachment_url ? (
-                                    <a href={msg.attachment_url} target="_blank" rel="noreferrer" className="block mt-2 underline text-xs">
-                                      {msg.attachment_name || "View attachment"}
-                                    </a>
+                                    isImageAttachment(msg.attachment_url, msg.attachment_mime_type) ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => setPreviewImage({ url: msg.attachment_url!, name: msg.attachment_name })}
+                                        className="mt-2 block overflow-hidden rounded-lg border bg-black/10 text-left"
+                                      >
+                                        <img
+                                          src={msg.attachment_url}
+                                          alt={msg.attachment_name || "Support attachment"}
+                                          className="h-40 w-full max-w-[280px] object-cover"
+                                        />
+                                        <span className="block max-w-[280px] truncate px-2 py-1 text-xs opacity-80">
+                                          {msg.attachment_name || "Open image"}
+                                        </span>
+                                      </button>
+                                    ) : (
+                                      <a href={msg.attachment_url} target="_blank" rel="noreferrer" className="block mt-2 underline text-xs">
+                                        {msg.attachment_name || "View attachment"}
+                                      </a>
+                                    )
                                   ) : null}
                                   <p className="text-[10px] opacity-70 mt-1">
                                     {new Date(msg.created_at).toLocaleString()}
@@ -410,6 +434,18 @@ function AdminMessagesContent() {
         </div>
       </main>
     </div>
+    <Dialog open={!!previewImage} onOpenChange={(open) => !open && setPreviewImage(null)}>
+      <DialogContent className="max-w-5xl border-border/60 bg-black p-0 text-white">
+        <DialogTitle className="sr-only">{previewImage?.name || "Support image"}</DialogTitle>
+        <div className="border-b border-white/10 px-4 py-3 text-sm font-semibold">
+          {previewImage?.name || "Support image"}
+        </div>
+        {previewImage?.url ? (
+          <img src={previewImage.url} alt={previewImage.name || "Support image"} className="max-h-[82dvh] w-full object-contain" />
+        ) : null}
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }
 

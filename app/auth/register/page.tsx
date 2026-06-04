@@ -51,8 +51,6 @@ export default function RegisterPage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [dob, setDob] = useState('');
-  const [gender, setGender] = useState('');
   const [homeAddress, setHomeAddress] = useState('');
   const [workAddress, setWorkAddress] = useState('');
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
@@ -101,7 +99,7 @@ export default function RegisterPage() {
         }
         return true;
       case 'basic':
-        if (!firstName || !lastName || !email || !phone || !dob || !gender || !homeAddress) {
+        if (!firstName || !lastName || !email || !phone || !homeAddress) {
           toast.error('Complete your basic details before continuing.');
           return false;
         }
@@ -187,8 +185,6 @@ export default function RegisterPage() {
       formData.append('lastName', lastName);
       formData.append('email', email);
       formData.append('phone', phone);
-      formData.append('dob', dob);
-      formData.append('gender', gender);
       formData.append('homeAddress', homeAddress);
       if (workAddress) {
         formData.append('workAddress', workAddress);
@@ -373,29 +369,6 @@ export default function RegisterPage() {
                         <Phone className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
                         <Input id="phone" value={phone} onChange={(event) => setPhone(event.target.value)} className="h-12 pl-10" autoComplete="tel" required />
                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="dob">Date of birth</Label>
-                      <Input id="dob" type="date" value={dob} onChange={(event) => setDob(event.target.value)} className="h-12" required />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="gender">Gender</Label>
-                      <select
-                        id="gender"
-                        value={gender}
-                        onChange={(event) => setGender(event.target.value)}
-                        aria-label="Gender"
-                        title="Gender"
-                        className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm"
-                        required
-                      >
-                        <option value="">Select gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
                     </div>
 
                     <div className="space-y-2 sm:col-span-2">

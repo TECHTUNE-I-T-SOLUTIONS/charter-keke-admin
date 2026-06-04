@@ -25,8 +25,6 @@ export default function AdminSignupPage() {
     phone: "",
     password: "",
     confirmPassword: "",
-    dob: "",
-    gender: "",
     emergencyContact: "",
     emergencyPhone: "",
     // Admin fields
@@ -86,15 +84,7 @@ export default function AdminSignupPage() {
         return true
 
       case 3:
-        // Additional info validation
-        if (!formData.dob) {
-          toast.error("Date of birth is required")
-          return false
-        }
-        if (!formData.gender) {
-          toast.error("Gender is required")
-          return false
-        }
+        // Privacy acknowledgement step. Charter Keke does not collect DOB or gender.
         return true
 
       case 4:
@@ -163,8 +153,6 @@ export default function AdminSignupPage() {
           email: formData.email,
           phone: formData.phone,
           password: formData.password,
-          dob: formData.dob,
-          gender: formData.gender,
           emergencyContact: formData.emergencyContact,
           emergencyPhone: formData.emergencyPhone,
           adminLevel: formData.adminLevel,
@@ -445,7 +433,7 @@ export default function AdminSignupPage() {
                 </motion.div>
               )}
 
-              {/* STEP 3: Additional Information */}
+              {/* STEP 3: Privacy */}
               {currentStep === 3 && (
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
@@ -453,38 +441,9 @@ export default function AdminSignupPage() {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-4"
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="dob">Date of Birth *</Label>
-                    <Input
-                      id="dob"
-                      name="dob"
-                      type="date"
-                      value={formData.dob}
-                      onChange={handleInputChange}
-                      disabled={isSubmitting}
-                      className="bg-background/50 h-10"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="gender">Gender *</Label>
-                    <select
-                      id="gender"
-                      name="gender"
-                      title="Select your gender"
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                      disabled={isSubmitting}
-                      className="w-full h-10 px-3 rounded-md border border-input bg-background/50 text-foreground text-sm"
-                      required
-                    >
-                      <option value="">Select gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                      <option value="prefer_not_to_say">Prefer not to say</option>
-                    </select>
+                  <div className="rounded-lg border border-orange-200 bg-orange-50 p-4 text-sm text-orange-950 dark:border-orange-900/50 dark:bg-orange-950/20 dark:text-orange-100">
+                    Charter Keke only collects details needed to create your admin account, verify contact information,
+                    and route company operations. We do not collect date of birth or gender for admin access.
                   </div>
                 </motion.div>
               )}
