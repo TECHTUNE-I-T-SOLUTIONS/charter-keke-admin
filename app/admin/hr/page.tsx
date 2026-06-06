@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Shield, UserPlus, Users, Workflow } from "lucide-react"
+import { Archive, Shield, UserPlus, Users, Workflow } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -24,6 +24,12 @@ const workflows = [
     href: "/admin/crm/departments",
     icon: Workflow,
   },
+  {
+    title: "Deleted Accounts",
+    description: "Review permanent account deletion records without exposing deleted users to notifications.",
+    href: "/admin/hr/deleted-accounts",
+    icon: Archive,
+  },
 ]
 
 export default function HrDashboardPage() {
@@ -40,7 +46,7 @@ export default function HrDashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {workflows.map((item) => {
           const Icon = item.icon
           return (

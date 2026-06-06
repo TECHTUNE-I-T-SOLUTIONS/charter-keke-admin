@@ -78,6 +78,7 @@ const adminNavItems: NavItem[] = [
   { label: "Users", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
   { label: "Admins", href: "/admin/admins", icon: <Shield className="h-5 w-5" /> },
   { label: "HR", href: "/admin/hr", icon: <Users className="h-5 w-5" /> },
+  { label: "Deleted Accounts", href: "/admin/hr/deleted-accounts", icon: <History className="h-5 w-5" /> },
   { label: "Analytics", href: "/admin/analytics", icon: <BarChart3 className="h-5 w-5" /> },
   { label: "Monitor", href: "/admin/monitor", icon: <Activity className="h-5 w-5" /> },
   { label: "Messages", href: "/admin/messages", icon: <MessageSquare className="h-5 w-5" /> },
@@ -119,7 +120,7 @@ function canAccessAdminItem(user: SidebarUser, href: string) {
   if (isSuperAdmin(user)) return true
   if (href === "/admin/dashboard" || href === "/admin/settings") return true
   if (href === "/admin/crm" || href === "/admin/messages") return canAccessCrm(user)
-  if (href === "/admin/admins" || href === "/admin/hr") return canManageAdmins(user)
+  if (href === "/admin/admins" || href === "/admin/hr" || href.startsWith("/admin/hr/")) return canManageAdmins(user)
   if (href === "/admin/drivers" || href === "/admin/driver-intelligence") return hasDepartment(user, ["hr", "human_resources", "operations", "driver_management"])
   if (href === "/admin/rides" || href === "/admin/operations" || href === "/admin/locations" || href === "/admin/mobile-traffic") return hasDepartment(user, ["operations"])
   if (href === "/admin/payments") return hasDepartment(user, ["finance", "billing"])
