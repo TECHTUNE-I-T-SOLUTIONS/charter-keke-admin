@@ -1,17 +1,96 @@
 import webpush from "web-push"
+import nodemailer from "nodemailer"
 import { supabaseAdmin } from "@/lib/supabase"
 
 type AdminNotificationInput = {
   userIds?: string[]
   department?: string
+  allAdmins?: boolean
   title: string
   body: string
   type?: string
   actionUrl?: string
   metadata?: Record<string, unknown>
+  sourceEventId?: string
+  persist?: boolean
 }
 
 let vapidConfigured = false
+
+function env(name: string, fallback = "") {
+  return process.env[name] || fallback
+}
+
+function boolEnv(name: string, fallback = true) {
+  const value = (process.env[name] || "").toLowerCase()
+  if (!value) return fallback
+  return value === "true" || value === "1" || value === "yes"
+}
+
+function smtpTransport() {
+  const user = env("CRM_EMAIL_SMTP_USER", "support@charterkeke.com")
+  const pass = env("CRM_EMAIL_SMTP_PASSWORD") || env("CRM_EMAIL_SMTP_FALLBACK_PASSWORD")
+  if (!pass) return null
+
+  return nodemailer.createTransport({
+    host: env("CRM_EMAIL_SMTP_HOST", "smtp.privateemail.com"),
+    port: Number(env("CRM_EMAIL_SMTP_PORT", "465")),
+    secure: boolEnv("CRM_EMAIL_USE_SSL", true),
+    auth: { user, pass },
+  })
+}
+
+async function sendAdminNotificationEmails(userIds: string[], input: AdminNotificationInput) {
+  if (!userIds.length || env("ADMIN_NOTIFICATION_EMAILS_ENABLED", "true") === "false") return 0
+  const transporter = smtpTransport()
+  if (!transporter || !supabaseAdmin) return 0
+
+  const { data: users } = await supabaseAdmin
+    .from("users")
+    .select("email, first_name")
+    .in("id", userIds)
+    .not("email", "is", null)
+
+  let sent = 0
+  await Promise.all(
+    (users || []).map(async (user) => {
+      try {
+        await transporter.sendMail({
+          from: `Charter Keke Admin Alerts <${env("CRM_EMAIL_SMTP_USER", "support@charterkeke.com")}>`,
+          to: user.email,
+          subject: input.title,
+          text: `${input.body}\n\nOpen: ${absoluteActionUrl(input.actionUrl)}`,
+          html: `
+            <div style="font-family:Arial,Helvetica,sans-serif;background:#f6f2ec;padding:24px">
+              <div style="max-width:640px;margin:0 auto;background:#fff;border:1px solid #f0dec8;border-radius:18px;overflow:hidden">
+                <div style="background:#111;color:#fff;padding:22px 24px">
+                  <div style="color:#ff8a00;font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase">Charter Keke Admin Alert</div>
+                  <h1 style="margin:8px 0 0;font-size:24px;line-height:1.25">${input.title}</h1>
+                </div>
+                <div style="padding:24px;color:#333;font-size:15px;line-height:1.65">
+                  <p>Hello ${user.first_name || "Admin"},</p>
+                  <p>${input.body}</p>
+                  ${input.actionUrl ? `<p><a href="${absoluteActionUrl(input.actionUrl)}" style="display:inline-block;background:#ff8a00;color:#111;text-decoration:none;font-weight:800;border-radius:12px;padding:12px 16px">Open in admin</a></p>` : ""}
+                </div>
+              </div>
+            </div>
+          `,
+        })
+        sent += 1
+      } catch (error) {
+        console.error("[ADMIN][NOTIFICATIONS][EMAIL]", error)
+      }
+    })
+  )
+  return sent
+}
+
+function absoluteActionUrl(actionUrl?: string) {
+  const base = env("ADMIN_APP_URL", env("NEXT_PUBLIC_ADMIN_URL", "https://admin.charterkeke.com")).replace(/\/+$/, "")
+  if (!actionUrl) return `${base}/admin/dashboard`
+  if (/^https?:\/\//i.test(actionUrl)) return actionUrl
+  return `${base}${actionUrl.startsWith("/") ? actionUrl : `/${actionUrl}`}`
+}
 
 function configureVapid() {
   if (vapidConfigured) return true
@@ -30,39 +109,35 @@ function configureVapid() {
 export async function notifyAdmins(input: AdminNotificationInput) {
   if (!supabaseAdmin) return { success: false, delivered: 0, error: "Supabase admin client unavailable" }
 
-  const userIds = Array.from(new Set(input.userIds || [])).filter(Boolean)
-  const department = input.department?.trim().toLowerCase()
+  const shouldPersist = input.persist !== false
 
-  const rows = [
-    ...userIds.map((userId) => ({
-      recipient_user_id: userId,
-      recipient_department: null,
-      title: input.title,
-      body: input.body,
-      type: input.type || "admin_event",
-      action_url: input.actionUrl || null,
-      metadata: input.metadata || {},
-    })),
-    ...(department
-      ? [
-          {
-            recipient_user_id: null,
-            recipient_department: department,
-            title: input.title,
-            body: input.body,
-            type: input.type || "admin_event",
-            action_url: input.actionUrl || null,
-            metadata: input.metadata || {},
-          },
-        ]
-      : []),
-  ]
+  if (input.sourceEventId && shouldPersist) {
+    const { data: existing } = await supabaseAdmin
+      .from("admin_notifications")
+      .select("id")
+      .eq("type", input.type || "admin_event")
+      .contains("metadata", { sourceEventId: input.sourceEventId })
+      .limit(1)
 
-  if (rows.length) {
-    await supabaseAdmin.from("admin_notifications").insert(rows)
+    if (existing?.length) {
+      return { success: true, delivered: 0, emailed: 0, skipped: "duplicate" }
+    }
   }
 
-  const targetUserIds = new Set(userIds)
+  const targetUserIds = new Set(Array.from(new Set(input.userIds || [])).filter(Boolean))
+  const department = input.department?.trim().toLowerCase()
+
+  if (input.allAdmins) {
+    const { data: admins } = await supabaseAdmin
+      .from("admins")
+      .select("user_id, users:user_id(status, role)")
+
+    for (const admin of admins || []) {
+      const user = Array.isArray((admin as any).users) ? (admin as any).users[0] : (admin as any).users
+      if (admin.user_id && user?.status !== "deleted") targetUserIds.add(admin.user_id)
+    }
+  }
+
   if (department) {
     const { data: admins } = await supabaseAdmin
       .from("admins")
@@ -74,8 +149,43 @@ export async function notifyAdmins(input: AdminNotificationInput) {
     }
   }
 
+  const metadata = {
+    ...(input.metadata || {}),
+    ...(input.sourceEventId ? { sourceEventId: input.sourceEventId } : {}),
+  }
+
+  const rows = [
+    ...Array.from(targetUserIds).map((userId) => ({
+      recipient_user_id: userId,
+      recipient_department: null,
+      title: input.title,
+      body: input.body,
+      type: input.type || "admin_event",
+      action_url: input.actionUrl || null,
+      metadata,
+    })),
+    ...(department && !targetUserIds.size
+      ? [
+          {
+            recipient_user_id: null,
+            recipient_department: department,
+            title: input.title,
+            body: input.body,
+            type: input.type || "admin_event",
+            action_url: input.actionUrl || null,
+            metadata,
+          },
+        ]
+      : []),
+  ]
+
+  if (shouldPersist && rows.length) {
+    await supabaseAdmin.from("admin_notifications").insert(rows)
+  }
+
   if (!targetUserIds.size || !configureVapid()) {
-    return { success: true, delivered: 0 }
+    const emailed = await sendAdminNotificationEmails(Array.from(targetUserIds), input)
+    return { success: true, delivered: 0, emailed }
   }
 
   const { data: subscriptions } = await supabaseAdmin
@@ -96,13 +206,13 @@ export async function notifyAdmins(input: AdminNotificationInput) {
               auth: subscription.auth,
             },
           },
-          JSON.stringify({
-            title: input.title,
-            body: input.body,
-            type: input.type || "admin_event",
-            actionUrl: input.actionUrl,
-            metadata: input.metadata || {},
-          })
+            JSON.stringify({
+              title: input.title,
+              body: input.body,
+              type: input.type || "admin_event",
+              actionUrl: absoluteActionUrl(input.actionUrl),
+              metadata,
+            })
         )
         delivered += 1
       } catch (error: any) {
@@ -116,5 +226,6 @@ export async function notifyAdmins(input: AdminNotificationInput) {
     })
   )
 
-  return { success: true, delivered }
+  const emailed = await sendAdminNotificationEmails(Array.from(targetUserIds), input)
+  return { success: true, delivered, emailed }
 }

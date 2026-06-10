@@ -4,6 +4,7 @@ import { getSessionFromRequest } from "@/lib/auth"
 import { emitDriverArrived, emitRideCompleted, emitRideUpdate } from "@/lib/push-emitters"
 import { sendPushNotification } from "@/lib/push-service"
 import { cancelExpiredOpenRides, isRideExpired } from "@/lib/ride-expiry"
+import { notifyAdmins } from "@/lib/admin-notifications"
 
 export async function POST(request: NextRequest) {
   try {
@@ -266,6 +267,16 @@ export async function POST(request: NextRequest) {
           },
         })
       }
+
+      await notifyAdmins({
+        allAdmins: true,
+        title: status === "completed" ? "Ride completed" : "Ride started",
+        body: `Ride from ${ride.pickup_zone} to ${ride.destination_zone} is now ${status.replace(/_/g, " ")}.`,
+        type: status === "completed" ? "ride_completed" : "ride_started",
+        actionUrl: `/admin/rides?ride=${rideId}`,
+        metadata: { rideId, riderId: ride.rider_id, driverUserId: session.user.id, status },
+        sourceEventId: `ride_status:${rideId}:${status}:${updatedRide.updated_at}`,
+      })
     } catch (notificationError) {
       console.error("Failed to send status notifications:", notificationError)
       // Don't fail the entire request if notifications fail

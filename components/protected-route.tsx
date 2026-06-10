@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useSession, signIn } from "next-auth/react"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 import { DashboardLoader } from "./dashboard-loader"
@@ -10,11 +10,12 @@ import { DashboardLoader } from "./dashboard-loader"
 interface ProtectedRouteProps {
   children: React.ReactNode
   allowedRoles?: string[]
+  loginPath?: string
 }
 
 let hasCompletedInitialAuthGate = false
 
-export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, allowedRoles, loginPath = "/auth/login" }: ProtectedRouteProps) {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [isAuthorized, setIsAuthorized] = useState(false)
@@ -23,7 +24,11 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      signIn(undefined, { callbackUrl: "/auth/login" })
+      const callbackUrl =
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : "/"
+      router.replace(`${loginPath}?callbackUrl=${encodeURIComponent(callbackUrl)}`)
       return
     }
 
@@ -61,7 +66,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
         setShowLoader(false)
       }
     }
-  }, [session, status, allowedRoles, router])
+  }, [session, status, allowedRoles, router, loginPath])
 
   if (status === "loading" || showLoader) {
     return <DashboardLoader />

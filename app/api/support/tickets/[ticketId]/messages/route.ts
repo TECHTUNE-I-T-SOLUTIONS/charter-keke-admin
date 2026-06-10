@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabase";
+import { notifyAdmins } from "@/lib/admin-notifications";
 
 type Params = { params: Promise<{ ticketId: string }> };
 
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     const isAdmin = session.user.role === "admin" || session.user.role === "super_admin";
 
-    let ticketQuery = supabaseAdmin.from("support_tickets").select("id, user_id, status").eq("id", ticketId);
+    let ticketQuery = supabaseAdmin.from("support_tickets").select("id, user_id, status, category, subject").eq("id", ticketId);
     if (!isAdmin) {
       ticketQuery = ticketQuery.eq("user_id", session.user.id);
     }
@@ -109,6 +110,17 @@ export async function POST(request: NextRequest, { params }: Params) {
     }
 
     await supabaseAdmin.from("support_tickets").update(ticketUpdate).eq("id", ticketId);
+
+    if (!isAdmin) {
+      await notifyAdmins({
+        department: String(ticket.category || "general"),
+        title: "New support message",
+        body: text.slice(0, 140) || "A customer sent a support attachment.",
+        type: "support_message",
+        actionUrl: `/admin/crm?ticket=${ticketId}`,
+        metadata: { ticketId, subject: ticket.subject },
+      });
+    }
 
     return NextResponse.json({ message: created }, { status: 201 });
   } catch (error) {

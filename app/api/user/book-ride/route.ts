@@ -5,6 +5,7 @@ import { notifyDriverAboutRide } from "@/lib/notifications"
 import { emitRideRequest, emitRideUpdate } from "@/lib/push-emitters"
 import { sendRideRequestSMS, toTermiiPhoneNumber } from "@/lib/termii"
 import { sendPushNotification } from "@/lib/push-service"
+import { notifyAdmins } from "@/lib/admin-notifications"
 
 export async function POST(request: NextRequest) {
   try {
@@ -110,6 +111,22 @@ export async function POST(request: NextRequest) {
       console.error("Failed to create ride:", error)
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
+
+    await notifyAdmins({
+      allAdmins: true,
+      title: "New ride requested",
+      body: `${session.user.firstName || "A rider"} requested a ride from ${pickupZone} to ${destinationZone}.`,
+      type: "ride_requested",
+      actionUrl: `/admin/rides?ride=${ride.id}`,
+      metadata: {
+        rideId: ride.id,
+        riderId: session.user.id,
+        pickup: pickupZone,
+        destination: destinationZone,
+        fare: Number(final_fare_amount || 0),
+      },
+      sourceEventId: `ride_requested:${ride.id}`,
+    })
 
     // Find available drivers in the pickup zone
     const pickupZone = pickup_location.address

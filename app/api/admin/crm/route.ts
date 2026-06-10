@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       supabaseAdmin.from("support_tickets").select("id", { count: "exact", head: true }).eq("status", "in_progress"),
       supabaseAdmin.from("support_tickets").select("id", { count: "exact", head: true }).eq("status", "escalated"),
       supabaseAdmin.from("support_tickets").select("id", { count: "exact", head: true }).eq("status", "resolved"),
-      supabaseAdmin.from("crm_email_messages").select("id", { count: "exact", head: true }).eq("processing_status", "queued").eq("direction", "inbound"),
+      supabaseAdmin.from("support_tickets").select("id", { count: "exact", head: true }).eq("source_channel", "email").in("status", ["open", "in_progress", "escalated"]),
       supabaseAdmin.from("crm_internal_notes").select("id", { count: "exact", head: true }),
       supabaseAdmin.from("crm_departments").select("id, department_key, department_name, email_alias, route_priority, is_active, created_at").order("route_priority", { ascending: true }),
       supabaseAdmin.from("crm_email_accounts").select("id", { count: "exact", head: true }).eq("is_active", true),

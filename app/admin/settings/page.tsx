@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { requestNotificationPermission, subscribeToPushNotifications, unsubscribeFromPushNotifications } from "@/lib/push-notifications"
 
 type AdminProfile = {
   user: {
@@ -103,6 +104,9 @@ function AdminSettingsContent() {
   const [savingPassword, setSavingPassword] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState("")
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [pushPermission, setPushPermission] = useState<NotificationPermission>("default")
+  const [savingPushSubscription, setSavingPushSubscription] = useState(false)
+  const [adminPushSubscribed, setAdminPushSubscribed] = useState(false)
 
   const displayName = useMemo(() => {
     const name = `${profileForm.firstName} ${profileForm.lastName}`.trim()
@@ -147,7 +151,95 @@ function AdminSettingsContent() {
 
   useEffect(() => {
     loadProfile()
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setPushPermission(Notification.permission)
+    }
+    const loadPushStatus = async () => {
+      if (typeof window === "undefined" || !("serviceWorker" in navigator)) return
+      const registration = (await navigator.serviceWorker.getRegistration()) || (await navigator.serviceWorker.ready.catch(() => null))
+      const subscription = await registration?.pushManager.getSubscription()
+      const endpoint = subscription?.endpoint
+      const response = await fetch(`/api/admin/push/subscribe${endpoint ? `?endpoint=${encodeURIComponent(endpoint)}` : ""}`, {
+        cache: "no-store",
+        credentials: "include",
+      }).catch(() => null)
+      const result = await response?.json().catch(() => null)
+      setAdminPushSubscribed(Boolean(result?.subscribed))
+    }
+    void loadPushStatus()
   }, [])
+
+  const handleSubscribeAdminPush = async () => {
+    try {
+      setSavingPushSubscription(true)
+      const permission = await requestNotificationPermission()
+      setPushPermission(permission)
+      if (permission !== "granted") {
+        toast.error("Browser notification permission was not granted")
+        return
+      }
+
+      let subscription: PushSubscription | null = null
+      try {
+        subscription = await subscribeToPushNotifications()
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) throw error
+      }
+
+      const response = await fetch("/api/admin/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(subscription ? subscription.toJSON() : { adoptExisting: true }),
+      })
+      const result = await response.json()
+      if (!response.ok) {
+        if (!subscription) {
+          throw new Error("Chrome rejected a new localhost push subscription and no existing web subscription was available to adopt. Test on https://admin.charterkeke.com after deploy, or clear site data and try again.")
+        }
+        throw new Error(result?.error || "Failed to save browser subscription")
+      }
+
+      setPreferences((current) => ({ ...current, pushAlerts: true }))
+      setAdminPushSubscribed(true)
+      toast.success("Admin push notifications enabled on this device")
+    } catch (error) {
+      const message = error instanceof DOMException && error.name === "AbortError"
+        ? "The browser push service rejected this subscription. Check that you are on HTTPS, not in private mode, and that browser notifications are allowed."
+        : error instanceof Error
+          ? error.message
+          : "Failed to enable push notifications"
+      toast.error(message)
+    } finally {
+      setSavingPushSubscription(false)
+    }
+  }
+
+  const handleUnsubscribeAdminPush = async () => {
+    try {
+      setSavingPushSubscription(true)
+      const registration = await navigator.serviceWorker.ready
+      const subscription = await registration.pushManager.getSubscription()
+      await unsubscribeFromPushNotifications()
+
+      if (subscription?.endpoint) {
+        await fetch("/api/admin/push/subscribe", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ endpoint: subscription.endpoint }),
+        })
+      }
+
+      setPreferences((current) => ({ ...current, pushAlerts: false }))
+      setAdminPushSubscribed(false)
+      toast.success("Admin push notifications disabled on this device")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to disable push notifications")
+    } finally {
+      setSavingPushSubscription(false)
+    }
+  }
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -507,6 +599,25 @@ function AdminSettingsContent() {
                   checked={preferences.pushAlerts}
                   onCheckedChange={(pushAlerts) => setPreferences({ ...preferences, pushAlerts })}
                 />
+                <div className="rounded-lg border border-primary/10 bg-primary/5 p-4">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p className="font-semibold text-foreground">This browser</p>
+                      <p className="text-sm text-muted-foreground">
+                        Permission: {pushPermission}. Admin subscription: {adminPushSubscribed ? "active" : "not active"}.
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="button" onClick={handleSubscribeAdminPush} disabled={savingPushSubscription} className="bg-primary hover:bg-primary/90">
+                        {savingPushSubscription ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Bell className="h-4 w-4 mr-2" />}
+                        {adminPushSubscribed ? "Refresh" : "Subscribe"}
+                      </Button>
+                      <Button type="button" variant="outline" onClick={handleUnsubscribeAdminPush} disabled={savingPushSubscription}>
+                        Disable
+                      </Button>
+                    </div>
+                  </div>
+                </div>
                 <PreferenceSwitch
                   title="Daily operations summary"
                   description="Include this account in daily summary emails when enabled by the system."

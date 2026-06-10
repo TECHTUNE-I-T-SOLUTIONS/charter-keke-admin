@@ -2,12 +2,13 @@
 
 import type React from "react"
 
-import { useState, useMemo, useCallback, memo } from "react"
+import { useEffect, useState, useMemo, useCallback, memo } from "react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useAuth, type UserRole } from "@/lib/auth-context"
+import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useTheme } from "next-themes"
@@ -33,6 +34,7 @@ import {
   LineChart,
   Map,
   Radar,
+  Siren,
   Sun,
   Moon
 } from "lucide-react"
@@ -82,6 +84,7 @@ const adminNavItems: NavItem[] = [
   { label: "Monitor", href: "/admin/monitor", icon: <BarChart3 className="h-5 w-5" /> },
   { label: "Messages", href: "/admin/messages", icon: <MessageSquare className="h-5 w-5" /> },
   { label: "CRM", href: "/admin/crm", icon: <ClipboardList className="h-5 w-5" /> },
+  { label: "SOS", href: "/admin/sos", icon: <Siren className="h-5 w-5" /> },
   { label: "Security", href: "/admin/security", icon: <Shield className="h-5 w-5" /> },
   { label: "Settings", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ]
@@ -111,6 +114,7 @@ function canAccessAdminItem(user: any, href: string) {
   if (href === "/admin/dashboard" || href === "/admin/settings") return true
   if (href === "/admin/crm" || href === "/admin/messages") return canAccessCrm(user)
   if (href === "/admin/admins" || href === "/admin/hr" || href.startsWith("/admin/hr/")) return canManageAdmins(user)
+  if (href === "/admin/sos") return canAccessCrm(user) || canManageAdmins(user) || hasDepartment(user, ["safety", "trust_safety", "operations"])
   if (href === "/admin/drivers" || href === "/admin/driver-intelligence") return hasDepartment(user, ["hr", "human_resources", "operations", "driver_management"])
   if (href === "/admin/rides" || href === "/admin/operations" || href === "/admin/locations" || href === "/admin/mobile-traffic") return hasDepartment(user, ["operations"])
   if (href === "/admin/payments") return hasDepartment(user, ["finance", "billing"])
@@ -140,13 +144,56 @@ function getNavItems(user: any): NavItem[] {
 const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { user: any; pathname: string; setIsMobileOpen: (open: boolean) => void; onLogout?: () => void }) => {
   const { theme, setTheme } = useTheme()
   const navItems = useMemo(() => getNavItems(user), [user.role, user.adminLevel, user.department, user.crmEnabled])
+  const [adminUnreadCount, setAdminUnreadCount] = useState(0)
+  const [openSosCount, setOpenSosCount] = useState(0)
 
   const { data: session } = useSession()
   const [avatarUrl] = useState("")
   const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     (session?.user as any)?.firstName || session?.user?.name || "Admin"
   )}&background=FF9101&color=000`
-  
+
+  useEffect(() => {
+    if (!user?.id || (user.role !== "admin" && user.role !== "super_admin")) return
+
+    const loadUnreadCount = async () => {
+      const department = String(user.department || "").toLowerCase()
+      let query = supabase
+        .from("admin_notifications")
+        .select("id", { count: "exact", head: true })
+        .is("read_at", null)
+
+      query = department
+        ? query.or(`recipient_user_id.eq.${user.id},recipient_department.eq.${department}`)
+        : query.eq("recipient_user_id", user.id)
+
+      const { count } = await query
+      setAdminUnreadCount(count || 0)
+
+      const { count: sosCount } = await supabase
+        .from("sos_alerts")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "open")
+      setOpenSosCount(sosCount || 0)
+    }
+
+    void loadUnreadCount()
+    const channel = supabase
+      .channel(`admin-sidebar-notifications-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_notifications" }, () => {
+        void loadUnreadCount()
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "sos_alerts" }, () => {
+        void loadUnreadCount()
+      })
+      .subscribe()
+
+    const interval = setInterval(() => void loadUnreadCount(), 30000)
+    return () => {
+      clearInterval(interval)
+      void supabase.removeChannel(channel)
+    }
+  }, [user?.id, user?.role, user?.department])
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -201,6 +248,16 @@ const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { us
             >
               {item.icon}
               <span className="font-medium">{item.label}</span>
+              {(item.href === "/admin/messages" || item.href === "/admin/crm") && adminUnreadCount > 0 ? (
+                <span className="ml-auto min-w-5 rounded-full bg-destructive px-1.5 py-0.5 text-center text-[11px] font-black text-destructive-foreground">
+                  {adminUnreadCount > 99 ? "99+" : adminUnreadCount}
+                </span>
+              ) : null}
+              {item.href === "/admin/sos" && openSosCount > 0 ? (
+                <span className="ml-auto min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-[11px] font-black text-white">
+                  {openSosCount > 99 ? "99+" : openSosCount}
+                </span>
+              ) : null}
             </Link>
           )
         })}

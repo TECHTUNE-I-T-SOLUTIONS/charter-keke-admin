@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -13,10 +14,13 @@ import {
 import { toast } from "sonner"
 
 export function NotificationPrompt() {
+  const pathname = usePathname()
   const [showPrompt, setShowPrompt] = useState(false)
   const [permission, setPermission] = useState<NotificationPermission>("default")
 
   useEffect(() => {
+    if (pathname?.startsWith("/admin")) return
+
     const checkPermission = async () => {
       const perm = await checkNotificationPermission()
       setPermission(perm)
@@ -31,7 +35,9 @@ export function NotificationPrompt() {
     }
 
     checkPermission()
-  }, [])
+  }, [pathname])
+
+  if (pathname?.startsWith("/admin")) return null
 
   const handleEnable = async () => {
     const perm = await requestNotificationPermission()

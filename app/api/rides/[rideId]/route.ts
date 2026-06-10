@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSessionFromRequest } from "@/lib/auth"
 import { supabaseAdmin } from "@/lib/supabase"
 import { sendPushNotification } from "@/lib/push-service"
+import { notifyAdmins } from "@/lib/admin-notifications"
 
 interface RouteParams {
   params: Promise<{ rideId: string }>
@@ -123,6 +124,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             cancellationReason: cancellationReason || "User cancelled",
             action: "ride_cancelled_notification",
           },
+        })
+        await notifyAdmins({
+          allAdmins: true,
+          title: "Ride cancelled",
+          body: cancellationReason || "A ride was cancelled.",
+          type: "ride_cancelled",
+          actionUrl: `/admin/rides?ride=${rideId}`,
+          metadata: {
+            rideId,
+            cancelledBy: session.user.id,
+            riderId: existingRide.rider_id,
+            assignedDriverId: existingRide.assigned_driver_id,
+            cancellationReason: cancellationReason || "User cancelled",
+          },
+          sourceEventId: `ride_cancelled:${rideId}:${updatedRide.updated_at}`,
         })
       } catch (pushError) {
         console.warn("[Rides/:id][PUT] cancellation push failed:", pushError)

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase"
 import { requireCrmAccess } from "@/lib/admin-access"
 import { notifyAdmins } from "@/lib/admin-notifications"
+import { processOutboundQueue } from "@/lib/crm-email-service"
 
 type Params = { params: Promise<{ ticketId: string }> }
 
@@ -214,6 +215,10 @@ export async function POST(request: NextRequest, { params }: Params) {
         raw_payload: { createdByAdminId: session.user.id },
         received_at: now,
         processed_at: null,
+      })
+
+      processOutboundQueue(10).catch((error) => {
+        console.error("[CRM][MESSAGES][POST] outbound delivery failed", error)
       })
     }
 

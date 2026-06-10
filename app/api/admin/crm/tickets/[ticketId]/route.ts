@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireCrmAccess } from "@/lib/admin-access"
 import { supabaseAdmin } from "@/lib/supabase"
+import { notifyAdmins } from "@/lib/admin-notifications"
 
 type Params = { params: Promise<{ ticketId: string }> }
 
@@ -272,6 +273,56 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       ip_address: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
       user_agent: request.headers.get("user-agent"),
     })
+
+    if (Object.prototype.hasOwnProperty.call(updates, "assigned_to") && data.assigned_to && data.assigned_to !== beforeTicket?.assigned_to) {
+      const { data: assignedAdmin } = await supabaseAdmin
+        .from("admins")
+        .select("user_id")
+        .eq("id", data.assigned_to)
+        .maybeSingle()
+
+      if (assignedAdmin?.user_id) {
+        await notifyAdmins({
+          userIds: [assignedAdmin.user_id],
+          title: "CRM ticket assigned to you",
+          body: data.subject || `Ticket ${ticketId} needs your attention.`,
+          type: "crm_ticket_assigned",
+          actionUrl: `/admin/crm?ticket=${ticketId}`,
+          metadata: { ticketId, assignedTo: data.assigned_to },
+          sourceEventId: `crm_ticket_assigned:${ticketId}:${data.assigned_to}:${data.updated_at}`,
+        })
+      }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, "department_id") && data.department_id && data.department_id !== beforeTicket?.department_id) {
+      const { data: department } = await supabaseAdmin
+        .from("crm_departments")
+        .select("department_key")
+        .eq("id", data.department_id)
+        .maybeSingle()
+
+      await notifyAdmins({
+        department: department?.department_key || "support",
+        title: "CRM ticket moved departments",
+        body: data.subject || `Ticket ${ticketId} was reassigned to your department.`,
+        type: "crm_ticket_department_changed",
+        actionUrl: `/admin/crm?ticket=${ticketId}`,
+        metadata: { ticketId, departmentId: data.department_id },
+        sourceEventId: `crm_ticket_department:${ticketId}:${data.department_id}:${data.updated_at}`,
+      })
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, "status") && data.status !== beforeTicket?.status) {
+      await notifyAdmins({
+        allAdmins: true,
+        title: "CRM ticket status changed",
+        body: `${data.subject || "A CRM ticket"} is now ${String(data.status).replace(/_/g, " ")}.`,
+        type: "crm_ticket_status_changed",
+        actionUrl: `/admin/crm?ticket=${ticketId}`,
+        metadata: { ticketId, status: data.status },
+        sourceEventId: `crm_ticket_status:${ticketId}:${data.status}:${data.updated_at}`,
+      })
+    }
 
     return NextResponse.json({ ticket: data })
   } catch (error) {

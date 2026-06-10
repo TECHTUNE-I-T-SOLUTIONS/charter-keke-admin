@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import bcrypt from "bcryptjs";
 import { uploadFileWithServiceRole } from "@/lib/upload-file";
+import { notifyAdmins } from "@/lib/admin-notifications";
 
 function errorResponse(status: number, error: string, meta?: Record<string, unknown>) {
   return NextResponse.json(
@@ -331,6 +332,16 @@ export async function POST(request: NextRequest) {
         console.error("Admin record creation error:", adminError);
       }
     }
+
+    await notifyAdmins({
+      allAdmins: true,
+      title: role === "driver" ? "New driver signup" : role === "admin" ? "New admin signup" : "New rider signup",
+      body: `${firstName} ${lastName} signed up as ${role}.`,
+      type: "user_signup",
+      actionUrl: role === "driver" ? `/admin/drivers?user=${newUser.id}` : role === "admin" ? `/admin/admins?user=${newUser.id}` : `/admin/users?user=${newUser.id}`,
+      metadata: { userId: newUser.id, role, email },
+      sourceEventId: `user_signup:${newUser.id}`,
+    })
 
     return NextResponse.json(
       {

@@ -46,12 +46,14 @@ self.addEventListener("push", (event) => {
     }
   }
 
+  const targetUrl = data.actionUrl || data.url || data.data?.url || "/"
+
   const options = {
     body: data.body,
     icon: data.icon || "/logo.png",
     badge: data.badge || "/logo.png",
     tag: data.tag,
-    data: data.data,
+    data: { ...(data.data || {}), url: targetUrl },
     vibrate: [100, 50, 100],
     actions: [
       { action: "view", title: "View" },

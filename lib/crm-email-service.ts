@@ -70,6 +70,41 @@ function smtpTransport(password = env("CRM_EMAIL_SMTP_PASSWORD")) {
   })
 }
 
+function escapeHtml(value: string) {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;")
+}
+
+function renderTicketAcknowledgmentEmail({ customerName, ticketId, subject }: { customerName?: string | null; ticketId: string; subject: string }) {
+  const safeName = escapeHtml(customerName || "there")
+  const safeTicket = escapeHtml(ticketId)
+  const safeSubject = escapeHtml(subject || "Support Request")
+  return `
+    <div style="margin:0;padding:0;background:#f6f2ec;font-family:Arial,Helvetica,sans-serif;color:#171717">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f6f2ec;padding:28px 12px">
+        <tr><td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;background:#fff;border:1px solid #f0dec8;border-radius:22px;overflow:hidden">
+            <tr><td style="background:#111;padding:24px 28px;color:#fff">
+              <div style="font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#ff8a00">Charter Keke Support</div>
+              <div style="font-size:26px;line-height:1.25;font-weight:900;margin-top:6px">Ticket received</div>
+            </td></tr>
+            <tr><td style="padding:30px 28px">
+              <p style="margin:0 0 14px;font-size:16px;line-height:1.65;color:#333">Hello ${safeName},</p>
+              <p style="margin:0 0 22px;font-size:16px;line-height:1.65;color:#333">Your message has been received. Our support team will review it and reply as soon as possible.</p>
+              <div style="background:#fff5e8;border:1px solid #f0dec8;border-radius:18px;padding:18px;margin-bottom:22px">
+                <div style="font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#9a5a00;font-weight:800">Ticket reference</div>
+                <div style="font-size:20px;font-weight:900;color:#171717;margin-top:6px">${safeTicket}</div>
+                <div style="font-size:14px;color:#555;margin-top:8px">${safeSubject}</div>
+              </div>
+              <p style="margin:0;font-size:14px;line-height:1.6;color:#6b7280">You can reply to this email to add more details. Please keep the ticket reference in the thread.</p>
+            </td></tr>
+            <tr><td style="background:#ff8a00;padding:16px 28px;color:#111;font-size:13px;font-weight:700">Charter Keke - Affordable Keke rides in Lagos</td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </div>
+  `
+}
+
 async function resolveContactUserId(fromEmail: string, fromName: string | null): Promise<string | null> {
   const normalizedEmail = normalizeEmailAddress(fromEmail)
   if (!normalizedEmail || !supabaseAdmin) return null
@@ -341,7 +376,7 @@ async function persistInboundMessage(message: ParsedMessage) {
         bcc_emails: [],
         subject: `Ticket Received - ${ticketId}`,
         body_text: `Hello ${message.fromName || "there"}, your message has been received and assigned ticket ${ticketId}.`,
-        body_html: null,
+        body_html: renderTicketAcknowledgmentEmail({ customerName: message.fromName, ticketId, subject: message.subject }),
         attachments: [],
         external_message_id: null,
         external_thread_id: message.threadId,

@@ -1,1 +1,1 @@
-{"name":"Charter Keke Admin","short_name":"CK Admin","icons":[{"src":"/charter keke.png","sizes":"512x512","type":"image/png"}],"theme_color":"#f28c00","background_color":"#ffffff","display":"standalone"}
+{"name":"Charter Keke Admin","short_name":"CK Admin","icons":[{"src":"/charter keke.png","sizes":"512x512","type":"image/png"}],"theme_color":"#f28c00","background_color":"#ffffff","display":"standalone","gcm_sender_id":"103953800507"}
