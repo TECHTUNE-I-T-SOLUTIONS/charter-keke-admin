@@ -128,7 +128,7 @@ async function resolveContactUserId(fromEmail: string, fromName: string | null):
     .insert({
       first_name: firstName,
       last_name: lastName,
-      phone_number: normalizedEmail,
+      phone_number: `email:${normalizedEmail}`,
       email: normalizedEmail,
       role: "user",
       status: "active",
@@ -376,7 +376,7 @@ async function persistInboundMessage(message: ParsedMessage) {
         bcc_emails: [],
         subject: `Ticket Received - ${ticketId}`,
         body_text: `Hello ${message.fromName || "there"}, your message has been received and assigned ticket ${ticketId}.`,
-        body_html: renderTicketAcknowledgmentEmail({ customerName: message.fromName, ticketId, subject: message.subject }),
+        body_html: renderTicketAcknowledgmentEmail({ customerName: message.fromName || undefined, ticketId: String(ticketId), subject: message.subject }),
         attachments: [],
         external_message_id: null,
         external_thread_id: message.threadId,

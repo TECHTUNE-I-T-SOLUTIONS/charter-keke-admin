@@ -72,7 +72,7 @@ async function resolveContactUserId(fromEmail: string, fromName: string | null) 
     .insert({
       first_name: firstName,
       last_name: lastName,
-      phone_number: normalizedEmail,
+      phone_number: `email:${normalizedEmail}`,
       email: normalizedEmail,
       role: "user",
       status: "active",
@@ -267,7 +267,7 @@ export async function POST(request: NextRequest) {
         to_emails: fromEmail ? [fromEmail] : [],
         subject: `Ticket Received - ${ticketId}`,
         body_text: `Hello ${fromName || "there"}, your message has been received and assigned ticket ${ticketId}.`,
-        body_html: renderTicketAcknowledgmentEmail({ customerName: fromName, ticketId, subject: subject || "Support Request" }),
+        body_html: renderTicketAcknowledgmentEmail({ customerName: fromName || undefined, ticketId: String(ticketId), subject: subject || "Support Request" }),
         attachments: [],
         external_thread_id: threadId,
         external_message_id: null,

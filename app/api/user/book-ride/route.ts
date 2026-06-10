@@ -112,6 +112,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
+    const pickupZone = pickup_location.address
+    const destinationZone = dropoff_location.address
+
     await notifyAdmins({
       allAdmins: true,
       title: "New ride requested",
@@ -129,9 +132,6 @@ export async function POST(request: NextRequest) {
     })
 
     // Find available drivers in the pickup zone
-    const pickupZone = pickup_location.address
-    const destinationZone = dropoff_location.address
-
     const { data: zoneDrivers } = await supabaseAdmin
       .from("drivers")
       .select("id, user_id")
