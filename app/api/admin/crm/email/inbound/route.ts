@@ -7,47 +7,11 @@ import {
   normalizeEmailAddress,
   resolveDepartmentKeyFromText,
 } from "@/lib/crm"
-import { notifyAdmins } from "@/lib/admin-notifications"
 import { processOutboundQueue } from "@/lib/crm-email-service"
 
 function normalizeAttachments(input: unknown): Array<Record<string, unknown>> {
   if (!Array.isArray(input)) return []
   return input.filter((item) => item && typeof item === "object") as Array<Record<string, unknown>>
-}
-
-function escapeHtml(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;")
-}
-
-function renderTicketAcknowledgmentEmail({ customerName, ticketId, subject }: { customerName?: string | null; ticketId: string; subject: string }) {
-  const safeName = escapeHtml(customerName || "there")
-  const safeTicket = escapeHtml(ticketId)
-  const safeSubject = escapeHtml(subject || "Support Request")
-  return `
-    <div style="margin:0;padding:0;background:#f6f2ec;font-family:Arial,Helvetica,sans-serif;color:#171717">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f6f2ec;padding:28px 12px">
-        <tr><td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:680px;background:#fff;border:1px solid #f0dec8;border-radius:22px;overflow:hidden">
-            <tr><td style="background:#111;padding:24px 28px;color:#fff">
-              <div style="font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#ff8a00">Charter Keke Support</div>
-              <div style="font-size:26px;line-height:1.25;font-weight:900;margin-top:6px">Ticket received</div>
-            </td></tr>
-            <tr><td style="padding:30px 28px">
-              <p style="margin:0 0 14px;font-size:16px;line-height:1.65;color:#333">Hello ${safeName},</p>
-              <p style="margin:0 0 22px;font-size:16px;line-height:1.65;color:#333">Your message has been received. Our support team will review it and reply as soon as possible.</p>
-              <div style="background:#fff5e8;border:1px solid #f0dec8;border-radius:18px;padding:18px;margin-bottom:22px">
-                <div style="font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#9a5a00;font-weight:800">Ticket reference</div>
-                <div style="font-size:20px;font-weight:900;color:#171717;margin-top:6px">${safeTicket}</div>
-                <div style="font-size:14px;color:#555;margin-top:8px">${safeSubject}</div>
-              </div>
-              <p style="margin:0;font-size:14px;line-height:1.6;color:#6b7280">You can reply to this email to add more details. Please keep the ticket reference in the thread.</p>
-            </td></tr>
-            <tr><td style="background:#ff8a00;padding:16px 28px;color:#111;font-size:13px;font-weight:700">Charter Keke - Affordable Keke rides in Lagos</td></tr>
-          </table>
-        </td></tr>
-      </table>
-    </div>
-  `
 }
 
 async function resolveContactUserId(fromEmail: string, fromName: string | null) {
@@ -144,6 +108,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unable to resolve sender contact" }, { status: 400 })
     }
 
+    const normalizedThreadKey = threadId || messageId || `${fromEmail}:${recipientEmail}:${subject}`.toLowerCase()
+    let conversationId: string | null = null
+    if (normalizedThreadKey) {
+      const { data: existingConversation } = await supabaseAdmin
+        .from("support_conversations")
+        .select("id")
+        .eq("source_channel", "email")
+        .eq("external_thread_id", normalizedThreadKey)
+        .maybeSingle()
+
+      if (existingConversation?.id) {
+        conversationId = existingConversation.id
+      } else {
+        const { data: createdConversation } = await supabaseAdmin
+          .from("support_conversations")
+          .insert({
+            user_id: contactUserId,
+            source_channel: "email",
+            source_email: fromEmail || null,
+            source_name: fromName,
+            external_thread_id: normalizedThreadKey,
+            subject: subject || `Email from ${fromEmail || "customer"}`,
+            status: "open",
+            last_message_at: receivedAt,
+            metadata: { recipientEmail, departmentKey },
+          })
+          .select("id")
+          .single()
+        conversationId = createdConversation?.id || null
+      }
+    }
+
     let ticketId = body?.ticketId ? String(body.ticketId) : null
     if (!ticketId && threadId) {
       const { data: existingTicket } = await supabaseAdmin
@@ -161,6 +157,9 @@ export async function POST(request: NextRequest) {
         .from("support_tickets")
         .insert({
           user_id: contactUserId,
+          conversation_id: conversationId,
+          case_number: 1,
+          case_source: "email",
           subject: subject || `Email from ${fromEmail || recipientEmail || "customer"}`,
           description: textBody || htmlBody || subject || "Incoming email",
           category: departmentKey,
@@ -230,6 +229,7 @@ export async function POST(request: NextRequest) {
     await supabaseAdmin
       .from("support_tickets")
       .update({
+        conversation_id: conversationId,
         source_channel: "email",
         department_id: effectiveDepartmentId,
         external_thread_id: threadId,
@@ -238,6 +238,13 @@ export async function POST(request: NextRequest) {
         updated_at: receivedAt,
       })
       .eq("id", ticketId)
+
+    if (conversationId) {
+      await supabaseAdmin
+        .from("support_conversations")
+        .update({ last_message_at: receivedAt, updated_at: receivedAt, status: "in_progress" })
+        .eq("id", conversationId)
+    }
 
     const { data: outboundAck } = await supabaseAdmin
       .from("crm_email_messages")
@@ -250,7 +257,6 @@ export async function POST(request: NextRequest) {
         to_emails: fromEmail ? [fromEmail] : [],
         subject: `Ticket Received - ${ticketId}`,
         body_text: `Hello ${fromName || "there"}, your message has been received and assigned ticket ${ticketId}.`,
-        body_html: renderTicketAcknowledgmentEmail({ customerName: fromName || undefined, ticketId: String(ticketId), subject: subject || "Support Request" }),
         attachments: [],
         external_thread_id: threadId,
         external_message_id: null,
@@ -265,16 +271,6 @@ export async function POST(request: NextRequest) {
     if (outboundAck?.length) {
       processOutboundQueue(10).catch((error) => console.error("[CRM][EMAIL][INBOUND][OUTBOUND_QUEUE]", error))
     }
-
-    await notifyAdmins({
-      allAdmins: true,
-      department: departmentKey,
-      title: "New inbound email",
-      body: `${fromName || fromEmail} sent ${subject || "a new support message"}.`,
-      type: "crm_email_inbound",
-      actionUrl: `/admin/crm?ticket=${ticketId}`,
-      metadata: { ticketId, departmentKey, emailAlias: recipientEmail, fromEmail },
-    })
 
     return NextResponse.json(
       {
