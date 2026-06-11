@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Card, CardContent } from "@/components/ui/card"
-import { User, Car, Star, CheckCircle, Loader2, TrendingUp, Calendar, AlertCircle } from "lucide-react"
+import { User, Car, Star, CheckCircle, Loader2, TrendingUp, Calendar, AlertCircle, FileCheck, ShieldCheck } from "lucide-react"
 
 interface DriverDetailsModalProps {
   open: boolean
@@ -43,6 +43,14 @@ interface DriverDetail {
   profile_picture_url: string
   vehicle_type: string
   plate_number: string
+  operating_zones: string[]
+  union_name: string
+  bank_name: string
+  bank_account_number: string
+  account_name: string
+  emergency_contact: string
+  vehicle_picture_url: string
+  license_picture_url: string
   verified: boolean
   avg_rating: number
   rides_completed: number
@@ -72,6 +80,7 @@ export function AdminDriverDetailsModal({ open, onOpenChange, driverId }: Driver
   const [settlementSummary, setSettlementSummary] = useState<any>(null)
   const [settlements, setSettlements] = useState<DriverSettlement[]>([])
   const [isDeactivating, setIsDeactivating] = useState(false)
+  const [isApproving, setIsApproving] = useState(false)
   const [showConfirmDeactivate, setShowConfirmDeactivate] = useState(false)
 
   const EARNINGS_PER_PAGE = 5
@@ -173,6 +182,25 @@ export function AdminDriverDetailsModal({ open, onOpenChange, driverId }: Driver
     }
   }
 
+  const handleApproveDriver = async () => {
+    if (!driverId) return
+
+    setIsApproving(true)
+    try {
+      const response = await fetch(`/api/admin/drivers/${driverId}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data?.error || "Failed to approve driver")
+      setDriver((current) => (current ? { ...current, verified: true } : current))
+    } catch (error) {
+      console.error("Failed to approve driver:", error)
+    } finally {
+      setIsApproving(false)
+    }
+  }
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -197,6 +225,16 @@ export function AdminDriverDetailsModal({ open, onOpenChange, driverId }: Driver
                   Settlement: {settlementStatus.charAt(0).toUpperCase() + settlementStatus.slice(1)}
                 </span>
               </div>
+            )}
+            {!driver.verified && (
+              <button
+                onClick={handleApproveDriver}
+                disabled={isApproving}
+                className="mt-2 inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
+              >
+                {isApproving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+                Approve Driver
+              </button>
             )}
           </DialogHeader>
 
@@ -237,6 +275,41 @@ export function AdminDriverDetailsModal({ open, onOpenChange, driverId }: Driver
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Rides:</span>
                     <span className="font-medium">{driver.rides_completed}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/50 backdrop-blur border-primary/10">
+              <CardContent className="p-3">
+                <h3 className="font-semibold mb-2 text-sm flex items-center gap-2">
+                  <FileCheck className="h-3 w-3" /> Credentials
+                </h3>
+                <div className="space-y-2 text-xs">
+                  <div className="grid grid-cols-2 gap-2">
+                    <a
+                      className={`rounded-md border p-2 ${driver.license_picture_url ? "text-primary hover:bg-primary/10" : "pointer-events-none text-muted-foreground opacity-60"}`}
+                      href={driver.license_picture_url || "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Driver license
+                    </a>
+                    <a
+                      className={`rounded-md border p-2 ${driver.vehicle_picture_url ? "text-primary hover:bg-primary/10" : "pointer-events-none text-muted-foreground opacity-60"}`}
+                      href={driver.vehicle_picture_url || "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Vehicle photo
+                    </a>
+                  </div>
+                  <div className="rounded-md bg-background/50 p-2">
+                    <p><span className="text-muted-foreground">Union:</span> {driver.union_name || "Not provided"}</p>
+                    <p><span className="text-muted-foreground">Zones:</span> {driver.operating_zones?.length ? driver.operating_zones.join(", ") : "Not provided"}</p>
+                    <p><span className="text-muted-foreground">Bank:</span> {driver.bank_name || "Not provided"}</p>
+                    <p><span className="text-muted-foreground">Account:</span> {driver.account_name || "Not provided"} {driver.bank_account_number ? `(${driver.bank_account_number})` : ""}</p>
+                    <p><span className="text-muted-foreground">Emergency:</span> {driver.emergency_contact || "Not provided"}</p>
                   </div>
                 </div>
               </CardContent>

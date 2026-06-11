@@ -283,6 +283,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
       if (assignedAdmin?.user_id) {
         await notifyAdmins({
+          allAdmins: true,
           userIds: [assignedAdmin.user_id],
           title: "CRM ticket assigned to you",
           body: data.subject || `Ticket ${ticketId} needs your attention.`,
@@ -302,6 +303,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         .maybeSingle()
 
       await notifyAdmins({
+        allAdmins: true,
         department: department?.department_key || "support",
         title: "CRM ticket moved departments",
         body: data.subject || `Ticket ${ticketId} was reassigned to your department.`,

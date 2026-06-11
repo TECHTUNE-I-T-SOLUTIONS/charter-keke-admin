@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { canCreateAdmins, requireAdminSession } from "@/lib/admin-access"
+import { purgeDeletedUsersFromUsersTable } from "@/lib/contact-hygiene"
 import { supabaseAdmin } from "@/lib/supabase"
 
 export async function GET(request: NextRequest) {
@@ -59,5 +60,25 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("[ADMIN][DELETED_ACCOUNTS][GET]", error)
     return NextResponse.json({ error: "Failed to load deleted accounts" }, { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const access = await requireAdminSession(request)
+    if (!access.authorized || !canCreateAdmins(access.admin?.admin_level, access.admin?.department)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await request.json().catch(() => ({}))
+    if (body?.action !== "purge_deleted_users") {
+      return NextResponse.json({ error: "Unsupported action" }, { status: 400 })
+    }
+
+    const result = await purgeDeletedUsersFromUsersTable(Math.min(Number(body?.limit || 100), 500))
+    return NextResponse.json({ success: true, ...result })
+  } catch (error) {
+    console.error("[ADMIN][DELETED_ACCOUNTS][POST]", error)
+    return NextResponse.json({ error: "Failed to purge deleted users" }, { status: 500 })
   }
 }

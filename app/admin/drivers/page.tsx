@@ -267,16 +267,26 @@ function DriversContent() {
                 className="pl-10 bg-background/50 border-primary/20"
               />
             </div>
-            <select
-              title="Filter by verification status"
-              value={verifiedFilter}
-              onChange={(e) => setVerifiedFilter(e.target.value as "all" | "verified" | "pending")}
-              className="px-4 py-2 bg-background/50 border border-primary/20 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">All Drivers</option>
-              <option value="verified">Verified</option>
-              <option value="pending">Pending Verification</option>
-            </select>
+            <div className="flex rounded-lg border border-primary/20 bg-background/50 p-1">
+              {[
+                { value: "all", label: "All" },
+                { value: "verified", label: "Verified" },
+                { value: "pending", label: "Pending Verification" },
+              ].map((tab) => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => setVerifiedFilter(tab.value as "all" | "verified" | "pending")}
+                  className={`rounded-md px-3 py-2 text-sm font-medium transition ${
+                    verifiedFilter === tab.value
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
             <Button variant="outline" onClick={exportDrivers} className="border-primary/20 hover:bg-primary/10 bg-transparent">
               <Download className="h-4 w-4 mr-2" />
               Export

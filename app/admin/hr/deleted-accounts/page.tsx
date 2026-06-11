@@ -67,6 +67,7 @@ export default function DeletedAccountsPage() {
   const [search, setSearch] = useState("")
   const [role, setRole] = useState("all")
   const [loading, setLoading] = useState(true)
+  const [purging, setPurging] = useState(false)
   const [migrationRequired, setMigrationRequired] = useState(false)
 
   const loadDeletedAccounts = async () => {
@@ -99,6 +100,28 @@ export default function DeletedAccountsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, role])
 
+  const purgeDeletedUsers = async () => {
+    setPurging(true)
+    try {
+      const response = await fetch("/api/admin/deleted-accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ action: "purge_deleted_users", limit: 200 }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(data?.error || "Failed to purge deleted users")
+      toast.success(`Purged ${data.purged?.length || 0} deleted user row(s)`, {
+        description: data.blocked?.length ? `${data.blocked.length} row(s) are still blocked by related records.` : undefined,
+      })
+      await loadDeletedAccounts()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to purge deleted users")
+    } finally {
+      setPurging(false)
+    }
+  }
+
   const cards = useMemo(() => [
     { label: "Deleted accounts", value: stats.total, icon: UserX, tone: "text-primary" },
     { label: "Riders", value: stats.riders, icon: Users, tone: "text-emerald-500" },
@@ -121,10 +144,16 @@ export default function DeletedAccountsPage() {
                 Audit permanently deleted rider, driver, and admin accounts. Contact details are masked and hashed so deleted users are not reachable from this ledger.
               </p>
             </div>
-            <Button variant="outline" className="w-full border-primary/20 bg-transparent md:w-auto" onClick={() => downloadCsv(rows)} disabled={!rows.length}>
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
+            <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
+              <Button variant="outline" className="border-primary/20 bg-transparent" onClick={purgeDeletedUsers} disabled={purging}>
+                {purging ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserX className="mr-2 h-4 w-4" />}
+                Purge User Rows
+              </Button>
+              <Button variant="outline" className="border-primary/20 bg-transparent" onClick={() => downloadCsv(rows)} disabled={!rows.length}>
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+            </div>
           </div>
 
           {migrationRequired ? (

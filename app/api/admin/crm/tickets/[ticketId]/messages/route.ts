@@ -119,54 +119,61 @@ export async function POST(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 })
     }
 
-    const { data: created, error: createError } = await supabaseAdmin
-      .from("ticket_messages")
-      .insert({
-        ticket_id: ticketId,
-        sender_id: session.user.id,
-        message: message || "[attachment]",
-        attachments,
-        message_type: messageType,
-        attachment_url: attachmentUrl,
-        attachment_name: attachmentName,
-        attachment_mime_type: attachmentMimeType,
-        attachment_size: attachmentSize,
-        is_internal: isInternal,
-      })
-      .select(
-        `
-          id,
-          ticket_id,
-          sender_id,
-          message,
-          attachments,
-          created_at,
-          message_type,
-          attachment_url,
-          attachment_name,
-          attachment_mime_type,
-          attachment_size,
-          is_internal,
-          users:sender_id (
-            id,
-            first_name,
-            last_name,
-            role,
-            profile_picture_url
-          )
-        `
-      )
-      .single()
+    const shouldSendViaEmail = !isInternal && ticket.source_channel === "email" && ticket.source_email
+    let created: any = null
 
-    if (createError) {
-      return NextResponse.json({ error: createError.message }, { status: 400 })
+    if (!shouldSendViaEmail) {
+      const { data: messageRecord, error: createError } = await supabaseAdmin
+        .from("ticket_messages")
+        .insert({
+          ticket_id: ticketId,
+          sender_id: session.user.id,
+          message: message || "[attachment]",
+          attachments,
+          message_type: messageType,
+          attachment_url: attachmentUrl,
+          attachment_name: attachmentName,
+          attachment_mime_type: attachmentMimeType,
+          attachment_size: attachmentSize,
+          is_internal: isInternal,
+        })
+        .select(
+          `
+            id,
+            ticket_id,
+            sender_id,
+            message,
+            attachments,
+            created_at,
+            message_type,
+            attachment_url,
+            attachment_name,
+            attachment_mime_type,
+            attachment_size,
+            is_internal,
+            users:sender_id (
+              id,
+              first_name,
+              last_name,
+              role,
+              profile_picture_url
+            )
+          `
+        )
+        .single()
+
+      if (createError) {
+        return NextResponse.json({ error: createError.message }, { status: 400 })
+      }
+
+      created = messageRecord
     }
 
     await supabaseAdmin.from("audit_logs").insert({
       user_id: session.user.id,
       action: isInternal ? "CRM internal message added" : "CRM customer reply sent",
       entity_type: "ticket_message",
-      entity_id: created.id,
+      entity_id: created?.id || ticketId,
       changes: {
         ticketId,
         isInternal,
@@ -188,8 +195,9 @@ export async function POST(request: NextRequest, { params }: Params) {
       })
       .eq("id", ticketId)
 
-    if (!isInternal && ticket.source_channel === "email" && ticket.source_email) {
-      await supabaseAdmin.from("crm_email_messages").insert({
+    let queuedEmail: any = null
+    if (shouldSendViaEmail) {
+      const { data: emailRecord, error: emailError } = await supabaseAdmin.from("crm_email_messages").insert({
         email_account_id: null,
         ticket_id: ticketId,
         direction: "outbound",
@@ -216,6 +224,14 @@ export async function POST(request: NextRequest, { params }: Params) {
         received_at: now,
         processed_at: null,
       })
+      .select("*")
+      .single()
+
+      if (emailError) {
+        return NextResponse.json({ error: emailError.message }, { status: 400 })
+      }
+
+      queuedEmail = emailRecord
 
       processOutboundQueue(10).catch((error) => {
         console.error("[CRM][MESSAGES][POST] outbound delivery failed", error)
@@ -224,6 +240,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     if (isInternal) {
       await notifyAdmins({
+        allAdmins: true,
         userIds: [session.user.id],
         title: "New internal CRM note",
         body: message.slice(0, 140) || "A CRM internal message was added.",
@@ -233,7 +250,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       })
     }
 
-    return NextResponse.json({ message: created }, { status: 201 })
+    return NextResponse.json({ message: created, emailMessage: queuedEmail }, { status: 201 })
   } catch (error) {
     console.error("[CRM][MESSAGES][POST]", error)
     return NextResponse.json({ error: "Failed to create CRM message" }, { status: 500 })

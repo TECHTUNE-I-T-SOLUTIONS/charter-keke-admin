@@ -144,10 +144,15 @@ export async function POST(request: NextRequest) {
         category,
         priority,
         status: "open",
+        source_channel: "in_app",
         related_ride_id: relatedRideId || null,
         user_last_read_at: now,
         admin_last_read_at: null,
         last_message_at: now,
+        crm_metadata: {
+          source: "web_app",
+          channel: "in_app",
+        },
       })
       .select("*")
       .single();

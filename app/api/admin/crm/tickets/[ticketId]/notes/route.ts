@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireCrmAccess } from "@/lib/admin-access"
 import { supabaseAdmin } from "@/lib/supabase"
+import { notifyAdmins } from "@/lib/admin-notifications"
 
 type Params = { params: Promise<{ ticketId: string }> }
 
@@ -83,6 +84,16 @@ export async function POST(request: NextRequest, { params }: Params) {
       ip_address: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
       user_agent: request.headers.get("user-agent"),
     })
+
+    await notifyAdmins({
+      allAdmins: true,
+      title: "New CRM internal note",
+      body: note.slice(0, 180),
+      type: "crm_internal_note",
+      actionUrl: `/admin/crm?ticket=${ticketId}`,
+      metadata: { ticketId, noteId: data.id, visibility, mentions },
+      sourceEventId: `crm_internal_note:${data.id}`,
+    }).catch((error) => console.error("[CRM][NOTES][NOTIFY]", error))
 
     return NextResponse.json({ note: data }, { status: 201 })
   } catch (error) {

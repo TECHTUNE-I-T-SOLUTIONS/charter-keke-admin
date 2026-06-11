@@ -198,6 +198,7 @@ export async function POST(request: NextRequest) {
     }
 
     await notifyAdmins({
+      allAdmins: true,
       department: departmentKey,
       title: "New CRM ticket",
       body: `${subject} was routed to ${departmentKey.replace(/_/g, " ")}.`,

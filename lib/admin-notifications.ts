@@ -1,6 +1,7 @@
 import webpush from "web-push"
 import nodemailer from "nodemailer"
 import { supabaseAdmin } from "@/lib/supabase"
+import { isDeletedPlaceholderEmail, isDeletedUserLike } from "@/lib/contact-hygiene"
 
 type AdminNotificationInput = {
   userIds?: string[]
@@ -47,7 +48,7 @@ async function sendAdminNotificationEmails(userIds: string[], input: AdminNotifi
 
   const { data: users } = await supabaseAdmin
     .from("users")
-    .select("email, first_name")
+    .select("email, first_name, status, deleted_at, deletion_reason, phone_number")
     .in("id", userIds)
     .not("email", "is", null)
 
@@ -55,6 +56,7 @@ async function sendAdminNotificationEmails(userIds: string[], input: AdminNotifi
   await Promise.all(
     (users || []).map(async (user) => {
       try {
+        if (isDeletedUserLike(user) || isDeletedPlaceholderEmail(user.email)) return
         await transporter.sendMail({
           from: `Charter Keke Admin Alerts <${env("CRM_EMAIL_SMTP_USER", "support@charterkeke.com")}>`,
           to: user.email,
