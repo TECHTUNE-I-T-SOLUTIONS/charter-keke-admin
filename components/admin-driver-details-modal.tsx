@@ -44,11 +44,21 @@ interface DriverDetail {
   vehicle_type: string
   plate_number: string
   operating_zones: string[]
-  union_name: string
+  guarantor_name: string
+  guarantor_phone: string
+  guarantor_address: string
   bank_name: string
+  bank_code: string
   bank_account_number: string
   account_name: string
   emergency_contact: string
+  identity_type: string
+  identity_last4: string
+  identity_verified: boolean
+  identity_verification_status: string
+  identity_verification_provider: string
+  identity_verification_reason: string
+  identity_verified_at: string | null
   vehicle_picture_url: string
   license_picture_url: string
   verified: boolean
@@ -305,11 +315,31 @@ export function AdminDriverDetailsModal({ open, onOpenChange, driverId }: Driver
                     </a>
                   </div>
                   <div className="rounded-md bg-background/50 p-2">
-                    <p><span className="text-muted-foreground">Union:</span> {driver.union_name || "Not provided"}</p>
                     <p><span className="text-muted-foreground">Zones:</span> {driver.operating_zones?.length ? driver.operating_zones.join(", ") : "Not provided"}</p>
                     <p><span className="text-muted-foreground">Bank:</span> {driver.bank_name || "Not provided"}</p>
                     <p><span className="text-muted-foreground">Account:</span> {driver.account_name || "Not provided"} {driver.bank_account_number ? `(${driver.bank_account_number})` : ""}</p>
                     <p><span className="text-muted-foreground">Emergency:</span> {driver.emergency_contact || "Not provided"}</p>
+                    <div className="mt-2 border-t pt-2">
+                      <p><span className="text-muted-foreground">Guarantor:</span> {driver.guarantor_name || "Not provided"}</p>
+                      <p><span className="text-muted-foreground">Guarantor phone:</span> {driver.guarantor_phone || "Not provided"}</p>
+                      <p><span className="text-muted-foreground">Guarantor address:</span> {driver.guarantor_address || "Not provided"}</p>
+                    </div>
+                    <div className="mt-2 border-t pt-2">
+                      <p>
+                        <span className="text-muted-foreground">Identity:</span>{" "}
+                        {driver.identity_type ? driver.identity_type.toUpperCase() : "Not provided"}
+                        {driver.identity_last4 ? ` ending ${driver.identity_last4}` : ""}
+                      </p>
+                      <p>
+                        <span className="text-muted-foreground">Verification:</span>{" "}
+                        <span className={driver.identity_verified ? "text-emerald-600" : "text-amber-600"}>
+                          {driver.identity_verification_status || "not_started"}
+                        </span>
+                      </p>
+                      {driver.identity_verification_reason && (
+                        <p><span className="text-muted-foreground">Reason:</span> {driver.identity_verification_reason}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>

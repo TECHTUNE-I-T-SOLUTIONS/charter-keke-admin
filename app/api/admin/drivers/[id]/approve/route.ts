@@ -86,6 +86,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .from("drivers")
       .update({
         verified: true,
+        identity_verified: true,
+        identity_verification_status: "verified",
+        identity_verification_provider: "manual_admin",
+        identity_verification_reason: null,
+        identity_verified_at: new Date().toISOString(),
         availability_status: "offline",
         updated_at: new Date().toISOString(),
       })

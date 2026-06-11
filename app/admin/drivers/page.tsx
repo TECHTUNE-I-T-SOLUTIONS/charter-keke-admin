@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { AdminDriverDetailsModal } from "@/components/admin-driver-details-modal"
 import { Card, CardContent } from "@/components/ui/card"
@@ -62,6 +63,7 @@ function downloadCsv(filename: string, rows: Array<Record<string, unknown>>) {
 }
 
 function DriversContent() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [stats, setStats] = useState({
@@ -341,8 +343,7 @@ function DriversContent() {
                             key={driver.id}
                             className="border-primary/10 cursor-pointer hover:bg-primary/5 transition"
                             onClick={() => {
-                              setSelectedDriver(driver.id)
-                              setDetailsModalOpen(true)
+                              router.push(`/admin/drivers/${driver.id}`)
                             }}
                           >
                             <TableCell className="font-medium">
@@ -401,8 +402,7 @@ function DriversContent() {
                     key={driver.id}
                     className="bg-card/50 backdrop-blur border-primary/10 cursor-pointer hover:border-primary/30 transition"
                     onClick={() => {
-                      setSelectedDriver(driver.id)
-                      setDetailsModalOpen(true)
+                      router.push(`/admin/drivers/${driver.id}`)
                     }}
                   >
                     <CardContent className="p-4">
