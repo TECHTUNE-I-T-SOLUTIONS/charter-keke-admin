@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase";
 import { notifyAdmins } from "@/lib/admin-notifications";
+import { generateSupportAIReply } from "@/lib/gemini-support";
+import { supabaseAdmin } from "@/lib/supabase";
 
 type Params = { params: Promise<{ ticketId: string }> };
+
+async function getAutomationSenderId(): Promise<string | null> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin
+    .from("admins")
+    .select("user_id")
+    .or("department.eq.support,admin_level.eq.super,admin_level.eq.super_admin,admin_level.eq.super-admin")
+    .limit(1)
+    .maybeSingle();
+  return data?.user_id || null;
+}
 
 export async function POST(request: NextRequest, { params }: Params) {
   try {
@@ -36,7 +48,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     const isAdmin = session.user.role === "admin" || session.user.role === "super_admin";
 
-    let ticketQuery = supabaseAdmin.from("support_tickets").select("id, user_id, status, category, subject").eq("id", ticketId);
+    let ticketQuery = supabaseAdmin.from("support_tickets").select("id, user_id, status, subject").eq("id", ticketId);
     if (!isAdmin) {
       ticketQuery = ticketQuery.eq("user_id", session.user.id);
     }
@@ -103,9 +115,10 @@ export async function POST(request: NextRequest, { params }: Params) {
       if (ticket.status === "open") ticketUpdate.status = "in_progress";
     } else {
       ticketUpdate.user_last_read_at = now;
-      if (ticket.status === "resolved") {
+      if (ticket.status === "resolved" || ticket.status === "closed") {
         ticketUpdate.status = "in_progress";
         ticketUpdate.resolution_confirmed_at = null;
+        ticketUpdate.closed_by_user = false;
       }
     }
 
@@ -113,13 +126,87 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     if (!isAdmin) {
       await notifyAdmins({
-        department: String(ticket.category || "general"),
+        allAdmins: true,
+        department: "support",
         title: "New support message",
-        body: text.slice(0, 140) || "A customer sent a support attachment.",
+        body: `${session.user.firstName || "A customer"} replied to a support ticket.`,
         type: "support_message",
         actionUrl: `/admin/crm?ticket=${ticketId}`,
-        metadata: { ticketId, subject: ticket.subject },
+        metadata: { ticketId, userId: session.user.id, messageId: created?.id },
+        sourceEventId: `support_message:${created?.id || ticketId}`,
+      }).catch((error) => console.error("[SUPPORT][MESSAGES][ADMIN_NOTIFY]", error));
+
+      const { data: recentMessages } = await supabaseAdmin
+        .from("ticket_messages")
+        .select("message, sender_id, users:sender_id(role)")
+        .eq("ticket_id", ticketId)
+        .eq("is_internal", false)
+        .order("created_at", { ascending: false })
+        .limit(12);
+
+      const history = (recentMessages || [])
+        .reverse()
+        .map((item: any) => {
+          const user = Array.isArray(item.users) ? item.users[0] : item.users;
+          const role: "customer" | "assistant" | "admin" =
+            user?.role === "admin" || user?.role === "super_admin"
+              ? "admin"
+              : item.sender_id === session.user.id
+                ? "customer"
+                : "assistant";
+          return { role, content: String(item.message || "") };
+        });
+
+      const ai = await generateSupportAIReply({
+        channel: "in_app",
+        subject: ticket.subject,
+        customerName: session.user.firstName,
+        latestMessage: text || "[attachment]",
+        history,
+      }).catch((error) => {
+        console.error("[SUPPORT][MESSAGES][AI]", error);
+        return null;
       });
+
+      if (ai?.ok && ai.reply) {
+        const senderId = await getAutomationSenderId();
+        if (senderId) {
+          await supabaseAdmin.from("ticket_messages").insert({
+            ticket_id: ticketId,
+            sender_id: senderId,
+            message: ai.reply,
+            message_type: "text",
+            is_internal: false,
+          });
+        }
+      }
+
+      if (ai?.shouldEscalate) {
+        await notifyAdmins({
+          allAdmins: true,
+          department: ai.department || "support",
+          title: "AI escalated support reply",
+          body: ai.reason || `${session.user.firstName || "A customer"} needs human support.`,
+          type: "support_ai_escalation",
+          actionUrl: `/admin/crm?ticket=${ticketId}`,
+          metadata: { ticketId, userId: session.user.id, messageId: created?.id, category: ai.category, model: ai.model },
+          sourceEventId: `support_ai_escalation:${created?.id || ticketId}`,
+        }).catch((error) => console.error("[SUPPORT][MESSAGES][AI_ESCALATE]", error));
+      }
+
+      if (ai?.shouldResolve) {
+        const resolvedAt = new Date().toISOString();
+        await supabaseAdmin
+          .from("support_tickets")
+          .update({
+            status: "resolved",
+            resolved_at: resolvedAt,
+            resolution_requested_at: resolvedAt,
+            resolution_note: ai.reason || "Dapo marked this case resolved after customer confirmation.",
+            updated_at: resolvedAt,
+          })
+          .eq("id", ticketId);
+      }
     }
 
     return NextResponse.json({ message: created }, { status: 201 });

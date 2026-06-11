@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useSession } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState, useRef } from "react"
 import { DashboardLoader } from "./dashboard-loader"
@@ -14,6 +14,7 @@ interface ProtectedRouteProps {
 }
 
 let hasCompletedInitialAuthGate = false
+const ADMIN_IDLE_TIMEOUT_MS = 10 * 60 * 1000
 
 export function ProtectedRoute({ children, allowedRoles, loginPath = "/auth/login" }: ProtectedRouteProps) {
   const { data: session, status } = useSession()
@@ -21,6 +22,7 @@ export function ProtectedRoute({ children, allowedRoles, loginPath = "/auth/logi
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [showLoader, setShowLoader] = useState(!hasCompletedInitialAuthGate)
   const initialLoadRef = useRef(!hasCompletedInitialAuthGate)
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -67,6 +69,35 @@ export function ProtectedRoute({ children, allowedRoles, loginPath = "/auth/logi
       }
     }
   }, [session, status, allowedRoles, router, loginPath])
+
+  useEffect(() => {
+    const userRole = (session?.user as any)?.role
+    const isAdminRoute =
+      typeof window !== "undefined" &&
+      window.location.pathname.startsWith("/admin")
+    const isAdminSession = userRole === "admin" || userRole === "super_admin"
+
+    if (status !== "authenticated" || !isAdminSession || !isAdminRoute) return
+
+    const resetTimer = () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+      idleTimerRef.current = setTimeout(() => {
+        signOut({
+          callbackUrl: `${loginPath}?reason=inactive`,
+          redirect: true,
+        })
+      }, ADMIN_IDLE_TIMEOUT_MS)
+    }
+
+    const events = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "visibilitychange"]
+    events.forEach((event) => window.addEventListener(event, resetTimer, { passive: true }))
+    resetTimer()
+
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+      events.forEach((event) => window.removeEventListener(event, resetTimer))
+    }
+  }, [session, status, loginPath])
 
   if (status === "loading" || showLoader) {
     return <DashboardLoader />
