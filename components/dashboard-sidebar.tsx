@@ -36,7 +36,8 @@ import {
   Radar,
   Siren,
   Sun,
-  Moon
+  Moon,
+  BadgeDollarSign
 } from "lucide-react"
 
 interface NavItem {
@@ -70,6 +71,7 @@ const driverNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <Home className="h-5 w-5" /> },
   { label: "Operations", href: "/admin/operations", icon: <Radar className="h-5 w-5" /> },
+  { label: "Pricing", href: "/admin/operations/pricing", icon: <BadgeDollarSign className="h-5 w-5" /> },
   { label: "Demand Map", href: "/admin/locations", icon: <Map className="h-5 w-5" /> },
   { label: "Driver Intel", href: "/admin/driver-intelligence", icon: <LineChart className="h-5 w-5" /> },
   { label: "Mobile Traffic", href: "/admin/mobile-traffic", icon: <Activity className="h-5 w-5" /> },
@@ -116,7 +118,7 @@ function canAccessAdminItem(user: any, href: string) {
   if (href === "/admin/admins" || href === "/admin/hr" || href.startsWith("/admin/hr/")) return canManageAdmins(user)
   if (href === "/admin/sos") return canAccessCrm(user) || canManageAdmins(user) || hasDepartment(user, ["safety", "trust_safety", "operations"])
   if (href === "/admin/drivers" || href === "/admin/driver-intelligence") return hasDepartment(user, ["hr", "human_resources", "operations", "driver_management"])
-  if (href === "/admin/rides" || href === "/admin/operations" || href === "/admin/locations" || href === "/admin/mobile-traffic") return hasDepartment(user, ["operations"])
+  if (href === "/admin/rides" || href === "/admin/operations" || href === "/admin/operations/pricing" || href === "/admin/locations" || href === "/admin/mobile-traffic") return hasDepartment(user, ["operations", "ops"])
   if (href === "/admin/payments") return hasDepartment(user, ["finance", "billing"])
   if (href === "/admin/users") return hasDepartment(user, ["support", "customer_support", "general", "hr", "human_resources"])
   if (href === "/admin/moderation") return hasDepartment(user, ["support", "customer_support", "safety", "trust_safety"])
