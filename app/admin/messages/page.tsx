@@ -45,6 +45,9 @@ type TicketMessage = {
   sender_id: string
   message: string
   created_at: string
+  sender_type?: "user" | "assistant" | "support" | "admin" | "system" | string | null
+  sender_label?: string | null
+  department_key?: string | null
   attachment_url?: string | null
   attachment_name?: string | null
   attachment_mime_type?: string | null
@@ -67,6 +70,24 @@ function statusVariant(status: TicketStatus) {
 function isImageAttachment(url?: string | null, mimeType?: string | null) {
   if (mimeType?.startsWith("image/")) return true
   return /\.(png|jpe?g|gif|webp|avif)$/i.test(String(url || "").split("?")[0])
+}
+
+function displayName(person?: { first_name?: string | null; last_name?: string | null }) {
+  return `${person?.first_name || ""} ${person?.last_name || ""}`.trim()
+}
+
+function getMessagePresentation(msg: TicketMessage) {
+  const role = String(msg.users?.role || "").toLowerCase()
+  const senderType = String(msg.sender_type || "").toLowerCase()
+  const isAssistant = senderType === "assistant"
+  const isAdmin = senderType === "admin" || senderType === "support" || role === "admin" || role === "super_admin"
+  const isCustomer = !isAssistant && !isAdmin
+  const senderName =
+    msg.sender_label ||
+    (isAssistant ? "Dapo - Charter Keke assistant" : displayName(msg.users)) ||
+    (isAdmin ? "Charter Keke support" : "Customer")
+
+  return { isAssistant, isAdmin, isCustomer, senderName }
 }
 
 function AdminMessagesContent() {
@@ -356,11 +377,18 @@ function AdminMessagesContent() {
                           <p className="text-sm text-muted-foreground">No messages yet.</p>
                         ) : (
                           messages.map((msg) => {
-                            const isAdminMessage = msg.users?.role === "admin" || msg.users?.role === "super_admin"
-                            const senderName = `${msg.users?.first_name || ""} ${msg.users?.last_name || ""}`.trim() || "Unknown"
+                            const { isAssistant, isAdmin, isCustomer, senderName } = getMessagePresentation(msg)
                             return (
-                              <div key={msg.id} className={`flex ${isAdminMessage ? "justify-end" : "justify-start"}`}>
-                                <div className={`max-w-[80%] rounded-md border px-3 py-2 ${isAdminMessage ? "bg-primary text-primary-foreground" : "bg-card"}`}>
+                              <div key={msg.id} className={`flex ${isCustomer ? "justify-start" : "justify-end"}`}>
+                                <div
+                                  className={`max-w-[80%] rounded-md border px-3 py-2 ${
+                                    isAssistant
+                                      ? "border-amber-300 bg-amber-50 text-amber-950"
+                                      : isAdmin
+                                        ? "bg-primary text-primary-foreground"
+                                        : "bg-card"
+                                  }`}
+                                >
                                   <p className="text-xs opacity-80 mb-1">{senderName}</p>
                                   <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                                   {msg.attachment_url ? (
