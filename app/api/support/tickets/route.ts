@@ -291,11 +291,11 @@ export async function POST(request: NextRequest) {
         await notifyAdmins({
           allAdmins: true,
           department: ai.department || "support",
-          title: "AI escalated support ticket",
+          title: "Dapo escalated support ticket",
           body: ai.reason || `${session.user.firstName || "A customer"} needs human support.`,
           type: "support_ai_escalation",
           actionUrl: `/admin/crm?ticket=${ticket.id}`,
-          metadata: { ticketId: ticket.id, userId: session.user.id, category: ai.category, model: ai.model },
+          metadata: { ticketId: ticket.id, userId: session.user.id, category: ai.category, model: ai.model, actorName: "Dapo" },
           sourceEventId: `support_ai_escalation:${ticket.id}:${ai.category || "other"}`,
         }).catch((error) => console.error("[SUPPORT][TICKETS][AI_ESCALATE]", error));
       }

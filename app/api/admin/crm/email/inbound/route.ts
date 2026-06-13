@@ -253,7 +253,7 @@ export async function POST(request: NextRequest) {
         ticket_id: ticketId,
         direction: "outbound",
         from_email: recipientEmail || emailAccount?.email_address || "support@charterkeke.com",
-        from_name: "Charter Keke Support",
+        from_name: "Dapo-Charter Keke",
         to_emails: fromEmail ? [fromEmail] : [],
         subject: `Ticket Received - ${ticketId}`,
         body_text: `Hello ${fromName || "there"}, your message has been received and assigned ticket ${ticketId}.`,
@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
         processing_status: "queued",
         processing_reason: "Queued acknowledgment for outbound delivery",
         raw_headers: {},
-        raw_payload: { ticketId, type: "acknowledgment" },
+        raw_payload: { ticketId, type: "acknowledgment", automation: "dapo" },
         received_at: new Date().toISOString(),
       })
       .select("id")

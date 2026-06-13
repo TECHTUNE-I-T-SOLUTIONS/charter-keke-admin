@@ -64,6 +64,8 @@ export async function GET(request: NextRequest) {
           message,
           is_internal,
           message_type,
+          sender_type,
+          sender_label,
           created_at,
           users:sender_id (first_name, last_name, email, role)
         `)
@@ -158,12 +160,18 @@ export async function GET(request: NextRequest) {
         entityId: message.id,
         ticketId: message.ticket_id,
         summary: compact(message.message).slice(0, 220),
-        details: { isInternal: message.is_internal, messageType: message.message_type },
-        actor: message.users ? {
-          name: compact(`${message.users.first_name || ""} ${message.users.last_name || ""}`, "User"),
-          email: message.users.email,
-          role: message.users.role,
-        } : null,
+        details: { isInternal: message.is_internal, messageType: message.message_type, senderType: message.sender_type },
+        actor: message.sender_type === "assistant"
+          ? {
+              name: message.sender_label || "Dapo - Charter Keke assistant",
+              email: null,
+              role: "assistant",
+            }
+          : message.users ? {
+              name: compact(`${message.users.first_name || ""} ${message.users.last_name || ""}`, "User"),
+              email: message.users.email,
+              role: message.users.role,
+            } : null,
         actionUrl: `/admin/crm?ticket=${message.ticket_id}`,
         createdAt: message.created_at,
         source: "ticket_message",

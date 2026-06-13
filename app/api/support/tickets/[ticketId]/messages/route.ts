@@ -195,7 +195,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
       const { data: recentMessages } = await supabaseAdmin
         .from("ticket_messages")
-        .select("message, sender_id, users:sender_id(role)")
+        .select("message, sender_id, sender_type, users:sender_id(role)")
         .eq("ticket_id", targetTicketId)
         .eq("is_internal", false)
         .order("created_at", { ascending: false })
@@ -206,7 +206,9 @@ export async function POST(request: NextRequest, { params }: Params) {
         .map((item: any) => {
           const user = Array.isArray(item.users) ? item.users[0] : item.users;
           const role: "customer" | "assistant" | "admin" =
-            user?.role === "admin" || user?.role === "super_admin"
+            item.sender_type === "assistant"
+              ? "assistant"
+              : user?.role === "admin" || user?.role === "super_admin"
               ? "admin"
               : item.sender_id === session.user.id
                 ? "customer"
@@ -246,11 +248,11 @@ export async function POST(request: NextRequest, { params }: Params) {
         await notifyAdmins({
           allAdmins: true,
           department: ai.department || "support",
-          title: "AI escalated support reply",
+          title: "Dapo escalated support reply",
           body: ai.reason || `${session.user.firstName || "A customer"} needs human support.`,
           type: "support_ai_escalation",
           actionUrl: `/admin/crm?ticket=${targetTicketId}`,
-          metadata: { ticketId: targetTicketId, conversationId: ticket.conversation_id, userId: session.user.id, messageId: created?.id, category: ai.category, model: ai.model },
+          metadata: { ticketId: targetTicketId, conversationId: ticket.conversation_id, userId: session.user.id, messageId: created?.id, category: ai.category, model: ai.model, actorName: "Dapo" },
           sourceEventId: `support_ai_escalation:${created?.id || targetTicketId}`,
         }).catch((error) => console.error("[SUPPORT][MESSAGES][AI_ESCALATE]", error));
       }

@@ -70,6 +70,9 @@ type CrmMessage = {
   message: string
   created_at: string
   is_internal?: boolean
+  sender_type?: string | null
+  sender_label?: string | null
+  department_key?: string | null
   message_type?: string
   attachment_url?: string | null
   attachment_name?: string | null
@@ -118,6 +121,14 @@ function displayName(person?: { first_name?: string | null; last_name?: string |
   const firstName = person?.first_name || ""
   const lastName = person?.last_name || ""
   return `${firstName} ${lastName}`.trim() || "Unknown"
+}
+
+function displayMessageSender(message: CrmMessage) {
+  if (message.sender_type === "assistant") {
+    return message.sender_label || "Dapo - Charter Keke assistant"
+  }
+
+  return message.sender_label || displayName(message.users)
 }
 
 function departmentLabel(departmentKey?: string | null) {
@@ -727,8 +738,9 @@ export default function AdminCrmPage() {
                               <p className="text-sm text-muted-foreground">No messages yet.</p>
                             ) : (
                               detail.messages.map((message) => {
-                                const isAdmin = message.users?.role === "admin" || message.users?.role === "super_admin" || !!message.is_internal
-                                const senderName = displayName(message.users)
+                                const isAssistant = message.sender_type === "assistant"
+                                const isAdmin = !isAssistant && (message.users?.role === "admin" || message.users?.role === "super_admin" || !!message.is_internal)
+                                const senderName = displayMessageSender(message)
                                 return (
                                   <div
                                     key={message.id}
@@ -736,11 +748,13 @@ export default function AdminCrmPage() {
                                       "flex max-w-[92%] flex-col rounded-2xl border px-4 py-3 shadow-md transition-all duration-200 sm:max-w-[80%]",
                                       isAdmin
                                         ? "self-end bg-amber-500/10 border-amber-500/25 text-foreground rounded-tr-none"
+                                        : isAssistant
+                                          ? "self-end bg-sky-500/10 border-sky-500/25 text-foreground rounded-tr-none"
                                         : "self-start bg-slate-900/50 border-border/50 text-foreground rounded-tl-none"
                                     )}
                                   >
                                     <div className="flex items-center justify-between gap-6 mb-1.5 border-b border-primary/5 pb-1">
-                                      <span className={cn("font-bold text-xs", isAdmin ? "text-amber-400" : "text-sky-400")}>
+                                      <span className={cn("font-bold text-xs", isAdmin ? "text-amber-400" : isAssistant ? "text-sky-400" : "text-sky-400")}>
                                         {senderName}
                                       </span>
                                       <span className="text-[10px] text-muted-foreground/60 font-mono">
