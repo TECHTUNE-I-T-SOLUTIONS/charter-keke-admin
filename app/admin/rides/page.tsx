@@ -191,16 +191,16 @@ function RidesContent() {
             <div className="hidden lg:block">
               <Card className="bg-card/50 backdrop-blur border-primary/10">
                 <CardContent className="p-0">
-                  <Table>
+                  <Table className="table-fixed">
                     <TableHeader>
                       <TableRow className="border-primary/10">
-                        <TableHead>Ride ID</TableHead>
-                        <TableHead>Passenger</TableHead>
-                        <TableHead>Driver</TableHead>
-                        <TableHead>Route</TableHead>
-                        <TableHead>Fare</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead className="w-[96px]">Ride ID</TableHead>
+                        <TableHead className="w-[180px]">Passenger</TableHead>
+                        <TableHead className="w-[180px]">Driver</TableHead>
+                        <TableHead className="w-[420px]">Route</TableHead>
+                        <TableHead className="w-[120px]">Fare</TableHead>
+                        <TableHead className="w-[110px]">Status</TableHead>
+                        <TableHead className="w-[120px]">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -237,9 +237,11 @@ function RidesContent() {
                               {ride.driver_first_name} {ride.driver_last_name}
                             </TableCell>
                             <TableCell className="text-sm">
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3 text-muted-foreground" />
-                                {ride.pickup_zone} → {ride.destination_zone}
+                              <div className="flex min-w-0 items-start gap-1 overflow-hidden whitespace-normal">
+                                <MapPin className="h-3 w-3 shrink-0 text-muted-foreground" />
+                                <span className="min-w-0 break-words whitespace-normal leading-5">
+                                  {ride.pickup_zone} to {ride.destination_zone}
+                                </span>
                               </div>
                             </TableCell>
                             <TableCell className="text-sm font-medium">
@@ -402,3 +404,4 @@ function RidesContent() {
 export default function RidesPage() {
   return <RidesContent />
 }
+

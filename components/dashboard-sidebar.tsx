@@ -71,6 +71,7 @@ const driverNavItems: NavItem[] = [
 const adminNavItems: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: <Home className="h-5 w-5" /> },
   { label: "Operations", href: "/admin/operations", icon: <Radar className="h-5 w-5" /> },
+  { label: "Notifications", href: "/admin/notifications", icon: <Bell className="h-5 w-5" /> },
   { label: "Pricing", href: "/admin/operations/pricing", icon: <BadgeDollarSign className="h-5 w-5" /> },
   { label: "Demand Map", href: "/admin/locations", icon: <Map className="h-5 w-5" /> },
   { label: "Driver Intel", href: "/admin/driver-intelligence", icon: <LineChart className="h-5 w-5" /> },
@@ -258,6 +259,11 @@ const SidebarContent = memo(({ user, pathname, setIsMobileOpen, onLogout }: { us
               {item.href === "/admin/sos" && openSosCount > 0 ? (
                 <span className="ml-auto min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-[11px] font-black text-white">
                   {openSosCount > 99 ? "99+" : openSosCount}
+                </span>
+              ) : null}
+              {item.href === "/admin/notifications" && adminUnreadCount > 0 ? (
+                <span className="ml-auto min-w-5 rounded-full bg-destructive px-1.5 py-0.5 text-center text-[11px] font-black text-destructive-foreground">
+                  {adminUnreadCount > 99 ? "99+" : adminUnreadCount}
                 </span>
               ) : null}
             </Link>
