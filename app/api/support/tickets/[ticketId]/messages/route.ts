@@ -72,37 +72,35 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     const now = new Date().toISOString();
     let targetTicketId = ticketId;
+    let reopenedSameTicket = false;
 
     if (!isAdmin && (ticket.status === "resolved" || ticket.status === "closed")) {
-      const caseNumber = await getNextCaseNumber(ticket.conversation_id || null);
-      const { data: nextTicket, error: nextTicketError } = await supabaseAdmin
+      const { data: reopenedTicket, error: reopenError } = await supabaseAdmin
         .from("support_tickets")
-        .insert({
-          user_id: session.user.id,
-          conversation_id: ticket.conversation_id || null,
-          case_number: caseNumber,
-          case_source: "ai",
-          subject: `Support case #${caseNumber}`,
-          description: text || "New support case",
-          category: ticket.category || "support",
-          priority: ticket.priority || "normal",
+        .update({
           status: "open",
-          source_channel: "in_app",
-          user_last_read_at: now,
+          resolution_confirmed_at: null,
+          resolved_at: null,
+          resolution_requested_at: null,
+          closed_by_user: false,
+          updated_at: now,
           last_message_at: now,
-          crm_metadata: {
-            source: "mobile_app",
-            channel: "in_app",
-            parentTicketId: ticket.id,
-          },
+          user_last_read_at: now,
         })
+        .eq("id", ticket.id)
         .select("id, user_id, status, subject, category, priority, conversation_id")
         .single();
 
-      if (!nextTicketError && nextTicket?.id) {
-        ticket = nextTicket;
-        targetTicketId = nextTicket.id;
+      if (reopenError || !reopenedTicket) {
+        return NextResponse.json(
+          { error: "Failed to reopen support ticket", details: reopenError?.message || "Unknown error" },
+          { status: 500 }
+        );
       }
+
+      ticket = reopenedTicket;
+      targetTicketId = reopenedTicket.id;
+      reopenedSameTicket = true;
     }
 
     const payload = {
@@ -195,7 +193,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
       const { data: recentMessages } = await supabaseAdmin
         .from("ticket_messages")
-        .select("message, sender_id, sender_type, users:sender_id(role)")
+        .select("message, sender_id, users:sender_id(role)")
         .eq("ticket_id", targetTicketId)
         .eq("is_internal", false)
         .order("created_at", { ascending: false })
@@ -206,9 +204,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         .map((item: any) => {
           const user = Array.isArray(item.users) ? item.users[0] : item.users;
           const role: "customer" | "assistant" | "admin" =
-            item.sender_type === "assistant"
-              ? "assistant"
-              : user?.role === "admin" || user?.role === "super_admin"
+            user?.role === "admin" || user?.role === "super_admin"
               ? "admin"
               : item.sender_id === session.user.id
                 ? "customer"
@@ -248,11 +244,11 @@ export async function POST(request: NextRequest, { params }: Params) {
         await notifyAdmins({
           allAdmins: true,
           department: ai.department || "support",
-          title: "Dapo escalated support reply",
+          title: "AI escalated support reply",
           body: ai.reason || `${session.user.firstName || "A customer"} needs human support.`,
           type: "support_ai_escalation",
           actionUrl: `/admin/crm?ticket=${targetTicketId}`,
-          metadata: { ticketId: targetTicketId, conversationId: ticket.conversation_id, userId: session.user.id, messageId: created?.id, category: ai.category, model: ai.model, actorName: "Dapo" },
+          metadata: { ticketId: targetTicketId, conversationId: ticket.conversation_id, userId: session.user.id, messageId: created?.id, category: ai.category, model: ai.model },
           sourceEventId: `support_ai_escalation:${created?.id || targetTicketId}`,
         }).catch((error) => console.error("[SUPPORT][MESSAGES][AI_ESCALATE]", error));
       }
@@ -272,7 +268,11 @@ export async function POST(request: NextRequest, { params }: Params) {
       }
     }
 
-    return NextResponse.json({ message: created }, { status: 201 });
+    return NextResponse.json({
+      message: created,
+      ticketId: targetTicketId,
+      reopened: reopenedSameTicket,
+    }, { status: 201 });
   } catch (error) {
     console.error("[SUPPORT][MESSAGES][POST]", error);
     return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
