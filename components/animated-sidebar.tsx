@@ -37,6 +37,7 @@ import {
   Moon,
   Sun,
   BadgeDollarSign,
+  Megaphone,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 
@@ -86,6 +87,7 @@ const adminNavItems: NavItem[] = [
   { label: "Messages", href: "/admin/messages", icon: <MessageSquare className="h-5 w-5" /> },
   { label: "CRM", href: "/admin/crm", icon: <ClipboardList className="h-5 w-5" /> },
   { label: "Security", href: "/admin/security", icon: <Shield className="h-5 w-5" /> },
+  { label: "Announcements", href: "/admin/announcements", icon: <Megaphone className="h-5 w-5" /> },
   { label: "Settings", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ]
 
@@ -129,6 +131,7 @@ function canAccessAdminItem(user: SidebarUser, href: string) {
   if (href === "/admin/users") return hasDepartment(user, ["support", "customer_support", "general", "hr", "human_resources"])
   if (href === "/admin/moderation") return hasDepartment(user, ["support", "customer_support", "safety", "trust_safety"])
   if (href === "/admin/monitor" || href === "/admin/analytics") return hasDepartment(user, ["operations", "finance", "billing", "engineering"])
+  if (href === "/admin/announcements") return hasDepartment(user, ["product", "general"])
   if (href === "/admin/security") return false
   return false
 }

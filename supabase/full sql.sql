@@ -28,7 +28,6 @@ CREATE TABLE public.drivers (
   vehicle_type character varying,
   plate_number character varying UNIQUE,
   operating_zones ARRAY DEFAULT ARRAY[]::text[],
-  union_name character varying,
   availability_status character varying DEFAULT 'offline'::character varying CHECK (availability_status::text = ANY (ARRAY['online'::character varying, 'offline'::character varying, 'busy'::character varying]::text[])),
   bank_name character varying,
   bank_account_number character varying,
@@ -42,6 +41,21 @@ CREATE TABLE public.drivers (
   created_at timestamp without time zone DEFAULT now(),
   updated_at timestamp without time zone DEFAULT now(),
   account_name character varying,
+  guarantor_name text,
+  guarantor_phone text,
+  guarantor_address text,
+  bank_code text,
+  nin_number text,
+  identity_type text NOT NULL DEFAULT 'nin'::text CHECK (identity_type = 'nin'::text),
+  identity_last4 text,
+  identity_document_url text,
+  identity_verified boolean NOT NULL DEFAULT false,
+  identity_verification_status text NOT NULL DEFAULT 'not_started'::text CHECK (identity_verification_status = ANY (ARRAY['not_started'::text, 'pending_details'::text, 'pending'::text, 'verified'::text, 'failed'::text])),
+  identity_verification_provider text,
+  identity_verification_reference text,
+  identity_verification_reason text,
+  identity_verification_payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+  identity_verified_at timestamp with time zone,
   CONSTRAINT drivers_pkey PRIMARY KEY (id),
   CONSTRAINT drivers_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
@@ -111,6 +125,7 @@ CREATE TABLE public.rides (
   remitted boolean NOT NULL DEFAULT false,
   remitted_at timestamp without time zone,
   remitted_by_payment_id uuid,
+  eta_minutes integer,
   CONSTRAINT rides_pkey PRIMARY KEY (id),
   CONSTRAINT rides_rider_id_fkey FOREIGN KEY (rider_id) REFERENCES public.users(id),
   CONSTRAINT rides_driver_id_fkey FOREIGN KEY (driver_id) REFERENCES public.drivers(id),
@@ -227,11 +242,15 @@ CREATE TABLE public.support_tickets (
   routing_reason text,
   routing_confidence numeric NOT NULL DEFAULT 0,
   crm_metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  conversation_id uuid,
+  case_number integer,
+  case_source character varying NOT NULL DEFAULT 'manual'::character varying CHECK (case_source::text = ANY (ARRAY['manual'::character varying, 'ai'::character varying, 'email'::character varying, 'admin'::character varying]::text[])),
   CONSTRAINT support_tickets_pkey PRIMARY KEY (id),
   CONSTRAINT support_tickets_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES public.admins(id),
   CONSTRAINT support_tickets_related_ride_id_fkey FOREIGN KEY (related_ride_id) REFERENCES public.rides(id),
   CONSTRAINT support_tickets_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
-  CONSTRAINT support_tickets_department_id_fkey FOREIGN KEY (department_id) REFERENCES public.crm_departments(id)
+  CONSTRAINT support_tickets_department_id_fkey FOREIGN KEY (department_id) REFERENCES public.crm_departments(id),
+  CONSTRAINT support_tickets_conversation_id_fkey FOREIGN KEY (conversation_id) REFERENCES public.support_conversations(id)
 );
 CREATE TABLE public.ticket_messages (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -247,6 +266,10 @@ CREATE TABLE public.ticket_messages (
   attachment_size bigint,
   is_internal boolean DEFAULT false,
   updated_at timestamp without time zone DEFAULT now(),
+  sender_type character varying NOT NULL DEFAULT 'user'::character varying CHECK (sender_type::text = ANY (ARRAY['user'::character varying, 'assistant'::character varying, 'support'::character varying, 'admin'::character varying, 'system'::character varying]::text[])),
+  sender_label text,
+  department_key character varying,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
   CONSTRAINT ticket_messages_pkey PRIMARY KEY (id),
   CONSTRAINT ticket_messages_ticket_id_fkey FOREIGN KEY (ticket_id) REFERENCES public.support_tickets(id),
   CONSTRAINT ticket_messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.users(id)
@@ -654,4 +677,80 @@ CREATE TABLE public.sos_alerts (
   CONSTRAINT sos_alerts_driver_user_id_fkey FOREIGN KEY (driver_user_id) REFERENCES public.users(id),
   CONSTRAINT sos_alerts_acknowledged_by_fkey FOREIGN KEY (acknowledged_by) REFERENCES public.users(id),
   CONSTRAINT sos_alerts_resolved_by_fkey FOREIGN KEY (resolved_by) REFERENCES public.users(id)
+);
+CREATE TABLE public.support_conversations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid,
+  source_channel character varying NOT NULL DEFAULT 'in_app'::character varying CHECK (source_channel::text = ANY (ARRAY['in_app'::character varying, 'email'::character varying]::text[])),
+  source_email text,
+  source_name text,
+  external_thread_id character varying,
+  subject text,
+  status character varying NOT NULL DEFAULT 'open'::character varying CHECK (status::text = ANY (ARRAY['open'::character varying, 'in_progress'::character varying, 'resolved'::character varying, 'closed'::character varying]::text[])),
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  last_message_at timestamp without time zone DEFAULT now(),
+  created_at timestamp without time zone DEFAULT now(),
+  updated_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT support_conversations_pkey PRIMARY KEY (id),
+  CONSTRAINT support_conversations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.pricing_settings (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL DEFAULT 'RAIL v1'::text,
+  base_fare numeric NOT NULL DEFAULT 800 CHECK (base_fare >= 0::numeric),
+  minimum_fare numeric NOT NULL DEFAULT 1500 CHECK (minimum_fare >= 0::numeric),
+  per_minute numeric NOT NULL DEFAULT 15 CHECK (per_minute >= 0::numeric),
+  platform_fee_rate numeric NOT NULL DEFAULT 0.15 CHECK (platform_fee_rate >= 0::numeric AND platform_fee_rate <= 1::numeric),
+  eta_low_traffic_min_per_km numeric NOT NULL DEFAULT 4 CHECK (eta_low_traffic_min_per_km > 0::numeric),
+  eta_normal_traffic_min_per_km numeric NOT NULL DEFAULT 6 CHECK (eta_normal_traffic_min_per_km > 0::numeric),
+  eta_heavy_traffic_min_per_km numeric NOT NULL DEFAULT 8 CHECK (eta_heavy_traffic_min_per_km > 0::numeric),
+  learning_weight numeric NOT NULL DEFAULT 0.1 CHECK (learning_weight >= 0::numeric AND learning_weight <= 1::numeric),
+  is_active boolean NOT NULL DEFAULT true,
+  notes text,
+  created_by uuid,
+  updated_by uuid,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT pricing_settings_pkey PRIMARY KEY (id),
+  CONSTRAINT pricing_settings_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id),
+  CONSTRAINT pricing_settings_updated_by_fkey FOREIGN KEY (updated_by) REFERENCES public.users(id)
+);
+CREATE TABLE public.distance_bands (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  pricing_setting_id uuid NOT NULL,
+  max_km numeric CHECK (max_km IS NULL OR max_km > 0::numeric),
+  rate numeric NOT NULL CHECK (rate >= 0::numeric),
+  sort_order integer NOT NULL DEFAULT 0,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT distance_bands_pkey PRIMARY KEY (id),
+  CONSTRAINT distance_bands_pricing_setting_id_fkey FOREIGN KEY (pricing_setting_id) REFERENCES public.pricing_settings(id)
+);
+CREATE TABLE public.route_metrics (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  route_key text NOT NULL UNIQUE,
+  pickup_label text,
+  destination_label text,
+  ride_count integer NOT NULL DEFAULT 0 CHECK (ride_count >= 0),
+  avg_minutes_per_km numeric NOT NULL DEFAULT 6 CHECK (avg_minutes_per_km > 0::numeric),
+  morning_avg numeric,
+  afternoon_avg numeric,
+  evening_avg numeric,
+  last_estimated_minutes numeric,
+  last_actual_minutes numeric,
+  last_distance_km numeric,
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT route_metrics_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.ride_pricing_audit (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  pricing_setting_id uuid,
+  admin_user_id uuid,
+  action text NOT NULL CHECK (action = ANY (ARRAY['created'::text, 'updated'::text, 'activated'::text])),
+  previous_values jsonb NOT NULL DEFAULT '{}'::jsonb,
+  next_values jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT ride_pricing_audit_pkey PRIMARY KEY (id),
+  CONSTRAINT ride_pricing_audit_pricing_setting_id_fkey FOREIGN KEY (pricing_setting_id) REFERENCES public.pricing_settings(id),
+  CONSTRAINT ride_pricing_audit_admin_user_id_fkey FOREIGN KEY (admin_user_id) REFERENCES public.users(id)
 );
