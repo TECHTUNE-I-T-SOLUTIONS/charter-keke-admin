@@ -87,7 +87,6 @@ export async function POST(request: NextRequest) {
         })
         .eq("id", notificationId)
         .eq("user_id", userId)
-        .catch(() => undefined)
     }
 
     return NextResponse.json({ success: true })

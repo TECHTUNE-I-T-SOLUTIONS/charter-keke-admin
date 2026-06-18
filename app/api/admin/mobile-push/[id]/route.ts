@@ -15,14 +15,14 @@ async function assertAccess(request: NextRequest) {
   return { authorized: false as const, access }
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     if (!supabaseAdmin) {
       return NextResponse.json({ error: "Supabase admin client unavailable" }, { status: 503 })
     }
     const { authorized } = await assertAccess(request)
     if (!authorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    const { id } = params
+    const { id } = await context.params
     const { data, error } = await supabaseAdmin
       .from("mobile_push_campaigns")
       .select("*, recipients:mobile_push_campaign_recipients(*, users:user_id(id, first_name, last_name, email, phone_number, role))")
@@ -37,14 +37,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     if (!supabaseAdmin) {
       return NextResponse.json({ error: "Supabase admin client unavailable" }, { status: 503 })
     }
     const { authorized } = await assertAccess(request)
     if (!authorized) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    const { id } = params
+    const { id } = await context.params
     const body = await request.json().catch(() => ({}))
     const force = body?.force === true
     const failedOnly = body?.failedOnly === true

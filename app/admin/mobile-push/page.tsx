@@ -44,6 +44,24 @@ type UserRow = {
   role?: string
 }
 
+const DEFAULT_IMAGE_OPTIONS = [
+  { value: "default", label: "Use website logo", url: "/charter keke.png" },
+  { value: "none", label: "No image", url: "" },
+] as const
+
+type ImageMode = "default" | "none" | "custom" | "upload"
+
+const CATEGORY_OPTIONS = [
+  { value: "mobile_campaign", label: "Mobile campaign" },
+  { value: "ride_update", label: "Ride update" },
+  { value: "ride_request", label: "Ride request" },
+  { value: "ride_accepted", label: "Ride accepted" },
+  { value: "ride_completed", label: "Ride completed" },
+  { value: "support_message", label: "Support message" },
+  { value: "payment_received", label: "Payment received" },
+  { value: "remittance_reminder", label: "Remittance reminder" },
+] as const
+
 const TARGETS = [
   { value: "all", label: "Everyone" },
   { value: "riders", label: "Riders" },
@@ -74,15 +92,36 @@ export default function MobilePushPage() {
   const [customUrl, setCustomUrl] = useState("")
   const [screenKey, setScreenKey] = useState("")
   const [ctaLabel, setCtaLabel] = useState("Open")
-  const [categoryId, setCategoryId] = useState("mobile_campaign")
+  const [categoryId, setCategoryId] = useState<(typeof CATEGORY_OPTIONS)[number]["value"]>("mobile_campaign")
   const [actionType, setActionType] = useState<(typeof ACTION_TYPES)[number]["value"]>("campaign")
   const [badgeText, setBadgeText] = useState("")
+  const [imageMode, setImageMode] = useState<ImageMode>("default")
   const [recipientSearch, setRecipientSearch] = useState("")
   const [recipientResults, setRecipientResults] = useState<UserRow[]>([])
   const [selectedUsers, setSelectedUsers] = useState<UserRow[]>([])
 
   const selectedUserIds = useMemo(() => selectedUsers.map((user) => user.id), [selectedUsers])
   const screenOptions = useMemo(() => Object.entries(screens), [screens])
+  const defaultImageUrl = useMemo(() => {
+    if (imageMode === "default") return "/charter keke.png"
+    if (imageMode === "none") return ""
+    return imageUrl
+  }, [imageMode, imageUrl])
+
+  const handleImageUpload = async (file?: File | null) => {
+    if (!file) return
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file")
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      setImageMode("custom")
+      setImageUrl(String(reader.result || ""))
+    }
+    reader.readAsDataURL(file)
+  }
 
   const loadData = async () => {
     try {
@@ -153,17 +192,17 @@ export default function MobilePushPage() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          message,
+          body: JSON.stringify({
+            title,
+            message,
           target: selectedTarget,
           selectedUserIds,
           screenKey,
           customUrl,
-          imageUrl,
-          ctaLabel,
-          categoryId,
-          actionType,
+            imageUrl: defaultImageUrl,
+            ctaLabel,
+            categoryId,
+            actionType,
           badgeText,
           sendNow: true,
         }),
@@ -174,6 +213,7 @@ export default function MobilePushPage() {
       setTitle("")
       setMessage("")
       setImageUrl("")
+      setImageMode("default")
       setCustomUrl("")
       setScreenKey("")
       setCtaLabel("Open")
@@ -191,7 +231,7 @@ export default function MobilePushPage() {
   const destinationPreview = customUrl || (screenKey ? screens[screenKey] : "/rider/booking")
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 p-4 md:p-6 mt-16 mb-16">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div className="space-y-2">
@@ -265,11 +305,38 @@ export default function MobilePushPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Image URL</Label>
-                  <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
+                  <Select value={imageMode} onValueChange={(value: any) => setImageMode(value)}>
+                    <SelectTrigger><SelectValue placeholder="Choose an image source" /></SelectTrigger>
+                    <SelectContent>
+                      {DEFAULT_IMAGE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      ))}
+                      <SelectItem value="custom">Custom image URL</SelectItem>
+                      <SelectItem value="upload">Upload image</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {imageMode === "custom" ? (
+                    <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." className="mt-2" />
+                  ) : null}
+                  {imageMode === "upload" ? (
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => void handleImageUpload(e.target.files?.[0])}
+                      className="mt-2"
+                    />
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label>Category ID</Label>
-                  <Input value={categoryId} onChange={(e) => setCategoryId(e.target.value)} placeholder="mobile_campaign" />
+                  <Select value={categoryId} onValueChange={(value: any) => setCategoryId(value)}>
+                    <SelectTrigger><SelectValue placeholder="Choose a category" /></SelectTrigger>
+                    <SelectContent>
+                      {CATEGORY_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>Badge text</Label>
@@ -332,8 +399,8 @@ export default function MobilePushPage() {
               <div className="grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
                 <div className="rounded-2xl border p-4">
                   <div className="mb-3 flex items-center gap-2 text-sm font-semibold"><ImageIcon className="h-4 w-4" /> Image preview</div>
-                  {imageUrl ? (
-                    <img src={imageUrl} alt="Notification preview" className="h-44 w-full rounded-xl object-cover" />
+                  {defaultImageUrl ? (
+                    <img src={defaultImageUrl} alt="Notification preview" className="h-44 w-full rounded-xl object-cover" />
                   ) : (
                     <div className="flex h-44 items-center justify-center rounded-xl border border-dashed text-sm text-muted-foreground">
                       No image attached yet
@@ -349,6 +416,13 @@ export default function MobilePushPage() {
                     </div>
                     <div className="text-base font-semibold">{title || "Notification title"}</div>
                     <div className="mt-2 text-sm text-white/80">{message || "Your notification message will appear here."}</div>
+                    {defaultImageUrl ? (
+                      <img
+                        src={defaultImageUrl}
+                        alt="Notification preview"
+                        className="mt-4 h-36 w-full rounded-2xl object-cover"
+                      />
+                    ) : null}
                     {ctaLabel ? <div className="mt-4 inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">{ctaLabel}</div> : null}
                   </div>
                 </div>
