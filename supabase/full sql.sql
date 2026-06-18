@@ -754,3 +754,62 @@ CREATE TABLE public.ride_pricing_audit (
   CONSTRAINT ride_pricing_audit_pricing_setting_id_fkey FOREIGN KEY (pricing_setting_id) REFERENCES public.pricing_settings(id),
   CONSTRAINT ride_pricing_audit_admin_user_id_fkey FOREIGN KEY (admin_user_id) REFERENCES public.users(id)
 );
+CREATE TABLE public.status_updates (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  title character varying NOT NULL,
+  content text NOT NULL,
+  category character varying NOT NULL CHECK (category::text = ANY (ARRAY['service_update'::character varying, 'traffic_alert'::character varying, 'milestone'::character varying, 'notice'::character varying]::text[])),
+  severity character varying NOT NULL DEFAULT 'info'::character varying CHECK (severity::text = ANY (ARRAY['info'::character varying, 'warning'::character varying, 'critical'::character varying, 'success'::character varying]::text[])),
+  affected_zones ARRAY DEFAULT ARRAY[]::text[],
+  created_by uuid,
+  is_pinned boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT status_updates_pkey PRIMARY KEY (id),
+  CONSTRAINT status_updates_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id)
+);
+CREATE TABLE public.support_ai_memory (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  memory_type text NOT NULL DEFAULT 'knowledge'::text CHECK (memory_type = ANY (ARRAY['knowledge'::text, 'correction'::text, 'policy'::text, 'route'::text, 'faq'::text, 'escalation'::text])),
+  title text NOT NULL,
+  content text NOT NULL,
+  category text,
+  audience text NOT NULL DEFAULT 'all'::text CHECK (audience = ANY (ARRAY['all'::text, 'rider'::text, 'driver'::text, 'support'::text, 'admin'::text])),
+  route text,
+  tags ARRAY NOT NULL DEFAULT '{}'::text[],
+  source text NOT NULL DEFAULT 'manual'::text,
+  source_entity_type text,
+  source_entity_id uuid,
+  confidence numeric NOT NULL DEFAULT 0.800 CHECK (confidence >= 0::numeric AND confidence <= 1::numeric),
+  usefulness_score integer NOT NULL DEFAULT 0,
+  is_active boolean NOT NULL DEFAULT true,
+  created_by uuid,
+  reviewed_by uuid,
+  reviewed_at timestamp with time zone,
+  expires_at timestamp with time zone,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT support_ai_memory_pkey PRIMARY KEY (id),
+  CONSTRAINT support_ai_memory_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id),
+  CONSTRAINT support_ai_memory_reviewed_by_fkey FOREIGN KEY (reviewed_by) REFERENCES public.users(id)
+);
+CREATE TABLE public.support_ai_feedback (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  ticket_id uuid,
+  message_id uuid,
+  user_id uuid,
+  role text NOT NULL CHECK (role = ANY (ARRAY['rider'::text, 'driver'::text, 'support'::text, 'admin'::text, 'system'::text])),
+  feedback_type text NOT NULL CHECK (feedback_type = ANY (ARRAY['corrected_answer'::text, 'wrong_role'::text, 'wrong_route'::text, 'too_many_questions'::text, 'helpful'::text, 'unhelpful'::text, 'escalate'::text])),
+  original_reply text,
+  corrected_reply text,
+  correction_note text,
+  route text,
+  tags ARRAY NOT NULL DEFAULT '{}'::text[],
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT support_ai_feedback_pkey PRIMARY KEY (id),
+  CONSTRAINT support_ai_feedback_ticket_id_fkey FOREIGN KEY (ticket_id) REFERENCES public.support_tickets(id),
+  CONSTRAINT support_ai_feedback_message_id_fkey FOREIGN KEY (message_id) REFERENCES public.ticket_messages(id),
+  CONSTRAINT support_ai_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);

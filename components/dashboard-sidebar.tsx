@@ -91,6 +91,7 @@ const adminNavItems: NavItem[] = [
   { label: "SOS", href: "/admin/sos", icon: <Siren className="h-5 w-5" /> },
   { label: "Security", href: "/admin/security", icon: <Shield className="h-5 w-5" /> },
   { label: "Announcements", href: "/admin/announcements", icon: <Megaphone className="h-5 w-5" /> },
+  { label: "Mobile Push", href: "/admin/mobile-push", icon: <Megaphone className="h-5 w-5" /> },
   { label: "Settings", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ]
 
@@ -127,6 +128,7 @@ function canAccessAdminItem(user: any, href: string) {
   if (href === "/admin/moderation") return hasDepartment(user, ["support", "customer_support", "safety", "trust_safety"])
   if (href === "/admin/monitor") return hasDepartment(user, ["operations", "finance", "billing", "engineering"])
   if (href === "/admin/announcements") return hasDepartment(user, ["product", "general"])
+  if (href === "/admin/mobile-push") return canAccessCrm(user) || hasDepartment(user, ["product", "riders", "general", "support"]) || isSuperAdmin(user)
   if (href === "/admin/security") return false
   return false
 }

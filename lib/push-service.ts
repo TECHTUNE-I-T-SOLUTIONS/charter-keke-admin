@@ -158,6 +158,7 @@ export const sendPushNotification = async (
     body: string;
     data?: Record<string, any>;
     categoryId?: string;
+    imageUrl?: string;
     type: 'ride_request' | 'ride_accepted' | 'ride_update' | 'ride_cancelled' | 'support_message' | 'payment_received' | 'security_alert' | 'remittance_due' | 'remittance_reminder';
   }
 ) => {
@@ -239,6 +240,7 @@ export const sendPushNotification = async (
             body: payload.body,
             data: {
               type: payload.type,
+              recipientUserId: userId,
               deeplink: payload.data?.deeplink,
               timestamp: new Date().toISOString(),
               ...payload.data,
@@ -250,6 +252,7 @@ export const sendPushNotification = async (
             await sendExpoNotification(pushToken, {
               ...notificationPayload,
               categoryId: payload.categoryId,
+              imageUrl: payload.imageUrl,
             });
           }
           // For web
@@ -294,6 +297,7 @@ const sendExpoNotification = async (
     body: string;
     data: Record<string, any>;
     categoryId?: string;
+    imageUrl?: string;
   }
 ) => {
   try {
@@ -305,6 +309,7 @@ const sendExpoNotification = async (
       data: payload.data,
       badge: 1,
       categoryId: payload.categoryId,
+      image: payload.imageUrl,
     };
 
     const response = await fetch('https://exp.host/--/api/v2/push/send', {
