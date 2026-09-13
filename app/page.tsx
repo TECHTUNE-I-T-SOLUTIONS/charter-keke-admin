@@ -11,10 +11,12 @@ export default function HomePage() {
   return (
     <main className="relative min-h-screen">
       <Particles />
+
       <Navbar />
       <HeroSection />
       <HowItWorks />
       <PricingSection />
+      
       <AboutSection />
       <CTASection />
       <Footer />
