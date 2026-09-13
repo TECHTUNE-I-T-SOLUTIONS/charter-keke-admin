@@ -74,6 +74,7 @@ const adminNavItems: NavItem[] = [
   { label: "Operations", href: "/admin/operations", icon: <Radar className="h-5 w-5" /> },
   { label: "Notifications", href: "/admin/notifications", icon: <Bell className="h-5 w-5" /> },
   { label: "Pricing", href: "/admin/operations/pricing", icon: <BadgeDollarSign className="h-5 w-5" /> },
+  { label: "Cashback", href: "/admin/operations/cashback", icon: <Gift className="h-5 w-5" /> },
   { label: "Demand Map", href: "/admin/locations", icon: <Map className="h-5 w-5" /> },
   { label: "Driver Intel", href: "/admin/driver-intelligence", icon: <LineChart className="h-5 w-5" /> },
   { label: "Mobile Traffic", href: "/admin/mobile-traffic", icon: <Activity className="h-5 w-5" /> },
@@ -123,6 +124,7 @@ function canAccessAdminItem(user: any, href: string) {
   if (href === "/admin/sos") return canAccessCrm(user) || canManageAdmins(user) || hasDepartment(user, ["safety", "trust_safety", "operations"])
   if (href === "/admin/drivers" || href === "/admin/driver-intelligence") return hasDepartment(user, ["hr", "human_resources", "operations", "driver_management"])
   if (href === "/admin/rides" || href === "/admin/operations" || href === "/admin/operations/pricing" || href === "/admin/locations" || href === "/admin/mobile-traffic") return hasDepartment(user, ["operations", "ops"])
+  if (href === "/admin/operations/cashback") return isSuperAdmin(user) // Only super admins can access cashback management
   if (href === "/admin/payments") return hasDepartment(user, ["finance", "billing"])
   if (href === "/admin/users") return hasDepartment(user, ["support", "customer_support", "general", "hr", "human_resources"])
   if (href === "/admin/moderation") return hasDepartment(user, ["support", "customer_support", "safety", "trust_safety"])

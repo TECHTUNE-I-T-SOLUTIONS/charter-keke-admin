@@ -333,13 +333,13 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      console.log("[RideDispatch] Online drivers SMS dispatch summary", {
-        rideId: ride.id,
-        attempted: smsTasks.length,
-        successful: smsSuccessCount,
-        failed: smsFailureCount,
-        totalOnlineDrivers: drivers.length,
-      })
+      // console.log("[RideDispatch] Online drivers SMS dispatch summary", {
+      //   rideId: ride.id,
+      //   attempted: smsTasks.length,
+      //   successful: smsSuccessCount,
+      //   failed: smsFailureCount,
+      //   totalOnlineDrivers: drivers.length,
+      // })
 
       await supabaseAdmin
         .from("rides")

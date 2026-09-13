@@ -99,6 +99,7 @@ export default function MobilePushPage() {
   const [recipientSearch, setRecipientSearch] = useState("")
   const [recipientResults, setRecipientResults] = useState<UserRow[]>([])
   const [selectedUsers, setSelectedUsers] = useState<UserRow[]>([])
+  const [enableActionButtons, setEnableActionButtons] = useState(false)
 
   const selectedUserIds = useMemo(() => selectedUsers.map((user) => user.id), [selectedUsers])
   const screenOptions = useMemo(() => Object.entries(screens), [screens])
@@ -200,10 +201,11 @@ export default function MobilePushPage() {
           screenKey,
           customUrl,
             imageUrl: defaultImageUrl,
-            ctaLabel,
+            ctaLabel: enableActionButtons ? ctaLabel : null,
             categoryId,
             actionType,
           badgeText,
+          enableActionButtons,
           sendNow: true,
         }),
       })
@@ -342,6 +344,21 @@ export default function MobilePushPage() {
                   <Label>Badge text</Label>
                   <Input value={badgeText} onChange={(e) => setBadgeText(e.target.value)} placeholder="New" />
                 </div>
+                <div className="space-y-2">
+                  <Label>Enable action buttons</Label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="enableActionButtons"
+                      checked={enableActionButtons}
+                      onChange={(e) => setEnableActionButtons(e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="enableActionButtons" className="text-sm">
+                      Add action button (uses CTA label and destination)
+                    </label>
+                  </div>
+                </div>
               </div>
 
               <div className="rounded-2xl border border-dashed p-4">
@@ -423,7 +440,18 @@ export default function MobilePushPage() {
                         className="mt-4 h-36 w-full rounded-2xl object-cover"
                       />
                     ) : null}
-                    {ctaLabel ? <div className="mt-4 inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">{ctaLabel}</div> : null}
+                    {enableActionButtons && ctaLabel ? (
+                      <div className="mt-4 flex gap-2">
+                        <div className="inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">{ctaLabel}</div>
+                      </div>
+                    ) : ctaLabel ? (
+                      <div className="mt-4 inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold">{ctaLabel}</div>
+                    ) : null}
+                    <div className="mt-4 flex items-center gap-2 text-[10px] text-white/40">
+                      <span>Category: {categoryId}</span>
+                      <span>•</span>
+                      <span>Type: {actionType}</span>
+                    </div>
                   </div>
                 </div>
               </div>

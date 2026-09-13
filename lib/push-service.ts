@@ -150,6 +150,7 @@ export const getUserActiveSubscriptions = (userId: string): PushSubscription[] =
 /**
  * Send push notification to specific users
  * Only sends to users with valid (non-placeholder) tokens
+ * Enhanced to support rich notifications with images and action buttons
  */
 export const sendPushNotification = async (
   userIds: string[],
@@ -159,7 +160,8 @@ export const sendPushNotification = async (
     data?: Record<string, any>;
     categoryId?: string;
     imageUrl?: string;
-    type: 'ride_request' | 'ride_accepted' | 'ride_update' | 'ride_cancelled' | 'support_message' | 'payment_received' | 'security_alert' | 'remittance_due' | 'remittance_reminder';
+    actions?: Array<{ id: string; title: string; action: string }>;
+    type: 'ride_request' | 'ride_accepted' | 'ride_update' | 'ride_cancelled' | 'support_message' | 'payment_received' | 'security_alert' | 'remittance_due' | 'remittance_reminder' | 'mobile_campaign';
   }
 ) => {
   const results: Array<{ userId: string; success: boolean; error?: string }> = [];
@@ -289,6 +291,7 @@ export const sendPushNotification = async (
 /**
  * Send Expo notification (for mobile app)
  * Handles errors gracefully and logs detailed information
+ * Enhanced to support rich notifications with images and action buttons
  */
 const sendExpoNotification = async (
   expoPushToken: string,
@@ -298,10 +301,11 @@ const sendExpoNotification = async (
     data: Record<string, any>;
     categoryId?: string;
     imageUrl?: string;
+    actions?: Array<{ id: string; title: string; action: string }>;
   }
 ) => {
   try {
-    const message = {
+    const message: any = {
       to: expoPushToken,
       sound: 'default',
       title: payload.title,
@@ -309,8 +313,26 @@ const sendExpoNotification = async (
       data: payload.data,
       badge: 1,
       categoryId: payload.categoryId,
-      image: payload.imageUrl,
     };
+
+    // Add image if provided
+    if (payload.imageUrl) {
+      message.image = payload.imageUrl;
+    }
+
+    // Add action buttons if provided
+    if (payload.actions && payload.actions.length > 0) {
+      message.data = {
+        ...payload.data,
+        actions: payload.actions,
+      };
+    }
+
+    // Add priority for time-sensitive notifications
+    if (payload.categoryId === 'ride_request' || payload.categoryId === 'ride_accepted') {
+      message.priority = 'high';
+      message.ttl = 30000; // 30 seconds TTL for ride requests
+    }
 
     const response = await fetch('https://exp.host/--/api/v2/push/send', {
       method: 'POST',
@@ -334,7 +356,11 @@ const sendExpoNotification = async (
       throw new Error(`Expo API returned ${response.status}: ${data.message || 'Unknown error'}`);
     }
 
-    console.log('✅ [PUSH] Expo notification sent successfully to token:', expoPushToken.substring(0, 20) + '...');
+    console.log('✅ [PUSH] Expo notification sent successfully to token:', expoPushToken.substring(0, 20) + '...', {
+      hasImage: !!payload.imageUrl,
+      hasActions: !!payload.actions?.length,
+      categoryId: payload.categoryId,
+    });
     return data;
   } catch (error: any) {
     const errorMessage = error?.message || String(error);

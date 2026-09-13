@@ -20,9 +20,9 @@ async function loadPricing() {
     .maybeSingle()
 
   if (error) throw error
-  if (!setting) return { setting: null, bands: [], metrics: [], audit: [] }
+  if (!setting) return { setting: null, bands: [], metrics: [], audit: [], allSettings: [] }
 
-  const [bands, metrics, audit] = await Promise.all([
+  const [bands, metrics, audit, allSettings] = await Promise.all([
     supabaseAdmin
       .from("distance_bands")
       .select("*")
@@ -39,17 +39,23 @@ async function loadPricing() {
       .eq("pricing_setting_id", setting.id)
       .order("created_at", { ascending: false })
       .limit(20),
+    supabaseAdmin
+      .from("pricing_settings")
+      .select("*")
+      .order("updated_at", { ascending: false }),
   ])
 
   if (bands.error) throw bands.error
   if (metrics.error) throw metrics.error
   if (audit.error) throw audit.error
+  if (allSettings.error) throw allSettings.error
 
   return {
     setting,
     bands: bands.data || [],
     metrics: metrics.data || [],
     audit: audit.data || [],
+    allSettings: allSettings.data || [],
   }
 }
 
@@ -96,6 +102,9 @@ export async function PUT(request: NextRequest) {
       eta_normal_traffic_min_per_km: Number(body.etaPerKm?.normalTraffic),
       eta_heavy_traffic_min_per_km: Number(body.etaPerKm?.heavyTraffic),
       learning_weight: Number(body.learningWeight ?? setting.learning_weight ?? 0.1),
+      currency: body.currency || setting.currency || 'NGN',
+      effective_from: body.effectiveFrom || setting.effective_from,
+      effective_until: body.effectiveUntil || setting.effective_until,
       notes: typeof body.notes === "string" ? body.notes : setting.notes,
       updated_by: access.session?.user?.id,
     }
@@ -145,5 +154,148 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error("[AdminPricing] update failed:", error)
     return NextResponse.json({ error: "Failed to update pricing settings" }, { status: 500 })
+  }
+}
+
+// POST - Create new pricing setting (for super admins)
+export async function POST(request: NextRequest) {
+  const access = await requireAdminSession(request)
+  if (!canManagePricing(access)) {
+    return NextResponse.json({ error: "Operations access is required" }, { status: 403 })
+  }
+
+  try {
+    const body = await request.json()
+    const {
+      name,
+      baseFare,
+      minimumFare,
+      perMinute,
+      platformFeeRate,
+      etaLowTrafficMinPerKm,
+      etaNormalTrafficMinPerKm,
+      etaHeavyTrafficMinPerKm,
+      learningWeight,
+      distanceBands,
+      currency = 'NGN',
+      effectiveFrom,
+      effectiveUntil,
+      notes
+    } = body
+
+    // Deactivate existing active settings
+    await supabaseAdmin
+      .from("pricing_settings")
+      .update({ is_active: false })
+      .eq("is_active", true)
+
+    // Create new pricing setting
+    const { data: setting, error: settingError } = await supabaseAdmin
+      .from("pricing_settings")
+      .insert({
+        name,
+        base_fare: baseFare,
+        minimum_fare: minimumFare,
+        per_minute: perMinute,
+        platform_fee_rate: platformFeeRate,
+        eta_low_traffic_min_per_km: etaLowTrafficMinPerKm,
+        eta_normal_traffic_min_per_km: etaNormalTrafficMinPerKm,
+        eta_heavy_traffic_min_per_km: etaHeavyTrafficMinPerKm,
+        learning_weight: learningWeight,
+        currency,
+        effective_from: effectiveFrom,
+        effective_until: effectiveUntil,
+        notes,
+        is_active: true,
+        created_by: access.session?.user?.id,
+        updated_by: access.session?.user?.id
+      })
+      .select()
+      .single()
+
+    if (settingError) throw settingError
+
+    // Create distance bands
+    if (distanceBands && Array.isArray(distanceBands)) {
+      const bandsToInsert = distanceBands.map((band: any, index: number) => ({
+        pricing_setting_id: setting.id,
+        max_km: band.maxKm,
+        rate: band.rate,
+        sort_order: band.sortOrder || index
+      }))
+
+      const { error: bandsError } = await supabaseAdmin
+        .from("distance_bands")
+        .insert(bandsToInsert)
+
+      if (bandsError) throw bandsError
+    }
+
+    // Log the change in audit
+    await supabaseAdmin
+      .from("ride_pricing_audit")
+      .insert({
+        pricing_setting_id: setting.id,
+        admin_user_id: access.session?.user?.id,
+        action: "created",
+        previous_values: {},
+        next_values: body
+      })
+
+    return NextResponse.json(await loadPricing())
+  } catch (error) {
+    console.error("[AdminPricing] POST error:", error)
+    return NextResponse.json({ error: "Failed to create pricing setting" }, { status: 500 })
+  }
+}
+
+// DELETE - Delete pricing setting (for super admins)
+export async function DELETE(request: NextRequest) {
+  const access = await requireAdminSession(request)
+  if (!canManagePricing(access)) {
+    return NextResponse.json({ error: "Operations access is required" }, { status: 403 })
+  }
+
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get("id")
+
+    if (!id) {
+      return NextResponse.json({ error: "Setting ID required" }, { status: 400 })
+    }
+
+    // Don't allow deletion of active settings
+    const { data: setting, error: fetchError } = await supabaseAdmin
+      .from("pricing_settings")
+      .select("is_active")
+      .eq("id", id)
+      .single()
+
+    if (fetchError || !setting) {
+      return NextResponse.json({ error: "Setting not found" }, { status: 404 })
+    }
+
+    if (setting.is_active) {
+      return NextResponse.json({ error: "Cannot delete active pricing setting" }, { status: 400 })
+    }
+
+    // Delete distance bands first
+    await supabaseAdmin
+      .from("distance_bands")
+      .delete()
+      .eq("pricing_setting_id", id)
+
+    // Delete setting
+    const { error: deleteError } = await supabaseAdmin
+      .from("pricing_settings")
+      .delete()
+      .eq("id", id)
+
+    if (deleteError) throw deleteError
+
+    return NextResponse.json(await loadPricing())
+  } catch (error) {
+    console.error("[AdminPricing] DELETE error:", error)
+    return NextResponse.json({ error: "Failed to delete pricing setting" }, { status: 500 })
   }
 }

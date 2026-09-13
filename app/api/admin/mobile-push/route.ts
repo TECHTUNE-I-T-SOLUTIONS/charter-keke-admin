@@ -35,6 +35,17 @@ function normalizeUrl(value: unknown) {
   return url.startsWith("/") ? url : `/${url}`
 }
 
+function isValidUrl(value: string) {
+  if (!value) return true
+  try {
+    if (value.startsWith('/')) return true
+    new URL(value)
+    return true
+  } catch {
+    return false
+  }
+}
+
 function buildActionUrl(screenKey?: string, customUrl?: string) {
   const screen = screenKey ? (SCREEN_ROUTES as Record<string, string>)[screenKey] : ""
   return normalizeUrl(customUrl) || screen || "/rider/booking"
@@ -137,9 +148,20 @@ export async function POST(request: NextRequest) {
     const ctaLabel = String(body?.ctaLabel || "").trim() || null
     const actionType = String(body?.actionType || "campaign").trim() || "campaign"
     const sendNow = body?.sendNow !== false
+    const enableActionButtons = body?.enableActionButtons === true
 
     if (!title || !message) {
       return NextResponse.json({ error: "title and message are required" }, { status: 400 })
+    }
+
+    // Validate image URL if provided
+    if (imageUrl && !isValidUrl(imageUrl)) {
+      return NextResponse.json({ error: "Invalid image URL format" }, { status: 400 })
+    }
+
+    // Validate custom URL if provided
+    if (customUrl && !isValidUrl(customUrl) && !customUrl.startsWith('/')) {
+      return NextResponse.json({ error: "Invalid custom URL format" }, { status: 400 })
     }
 
     const recipientIds = await resolveRecipientIds(target, selectedUserIds)
@@ -193,9 +215,14 @@ export async function POST(request: NextRequest) {
       body: message,
       type: actionType === "ride_update" || actionType === "ride_request" || actionType === "ride_accepted"
         ? (actionType as any)
-        : "ride_update",
+        : "mobile_campaign",
       categoryId,
       imageUrl: imageUrl || undefined,
+      actions: enableActionButtons && ctaLabel ? [{
+        id: "open_action",
+        title: ctaLabel,
+        action: actionUrl
+      }] : undefined,
       data: {
         campaignId: campaign.id,
         actionUrl,
